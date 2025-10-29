@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhà hàng Ẩm thực Phương Nam Vĩnh Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/modern-style.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920') center/cover;
+            min-height: 600px;
+        }
+
+        .badge-discount {
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);
+        }
+
+        .cart-badge {
+            top: -8px;
+            right: -8px;
+            min-width: 20px;
+            height: 20px;
+        }
+
+        /* ===== Hero Banner Style ===== */
+        .banner {
+            height: 90vh;
+            background-image: url('images/nen2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        /* Hiệu ứng overlay tối nhẹ */
+        .banner::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 0;
+        }
+
+        .banner>.container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Animation nhẹ nhàng */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .animate-fade-in-down {
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 640px) {
+            .swiper-slide img {
+                max-height: 60vh !important;
+                object-position: center;
+            }
+
+            .swiper-pagination {
+                bottom: 10px !important;
+            }
+
+            .hero-content-mobile {
+                padding-top: 80px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .swiper-slide img {
+                max-height: 70vh !important;
+            }
+        }
+
+        /* Ensure text is readable on mobile */
+        @media (max-width: 640px) {
+            .hero-title-mobile {
+                font-size: 1.75rem !important;
+                line-height: 2rem !important;
+            }
+
+            .hero-description-mobile {
+                font-size: 0.875rem !important;
+                line-height: 1.5rem !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Thêm vào <head> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <!-- Hero Banner Slider -->
+    <section class="relative w-full overflow-hidden bg-gray-900">
+        <!-- Swiper Container -->
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                <!-- Slide 1 -->
+                <div class="swiper-slide relative w-full bg-black">
+                    <!-- Ảnh nền full, giữ tỉ lệ -->
+                    <img src="images/nen2.jpg" class="w-full h-auto max-h-[100vh] min-h-[400px] object-cover"
+                        alt="Ảnh Banner 1" />
+
+                    <!-- Lớp phủ tối -->
+                    <div class="absolute inset-0 bg-black/50"></div>
+
+                    <!-- Nội dung căn trái, tránh nav -->
+                    <div
+                        class="hero-content-mobile absolute inset-0 flex items-center justify-start px-4 sm:px-8 md:px-16 pt-24 sm:pt-28 md:pt-32">
+                        <div class="max-w-xl text-left">
+                            <h1 class="hero-title-mobile text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-dancing mb-3 sm:mb-4 text-white animate-fade-in-down font-bold"
+                                style="text-shadow: 3px 3px 10px rgba(0,0,0,0.9);">
+                                Hương Vị Phương Nam
+                            </h1>
+                            <p class="hero-description-mobile text-sm sm:text-base md:text-lg lg:text-xl mb-4 sm:mb-6 text-white leading-relaxed animate-fade-in-up"
+                                style="text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">
+                                Đắm chìm trong không gian ẩm thực truyền thống Nam Bộ với những món ăn độc đáo,
+                                hương vị đậm đà không thể nào quên.
+                            </p>
+                            <a href="dat-ban.html"
+                                class="inline-block bg-red-600 hover:bg-red-700 text-white py-2.5 px-6 sm:py-3 sm:px-8 rounded-lg transition-all transform hover:scale-105 shadow-xl text-sm sm:text-base font-semibold">
+                                <i class="fas fa-calendar-check mr-2"></i>Đặt Bàn Ngay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Navigation buttons - Ẩn trên mobile -->
+            <div class="swiper-button-prev text-white hidden md:flex"></div>
+            <div class="swiper-button-next text-white hidden md:flex"></div>
+
+            <!-- Pagination dots -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper(".mySwiper", {
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            effect: "fade",
+            fadeEffect: { crossFade: true },
+            speed: 1000,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+        });
+    </script>
+
+    <!-- Advertisement Banner Section -->
+    <section class="py-6 sm:py-8 md:py-10 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <!-- Large Banner Ad with Video -->
+            <div class="relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300">
+                <!-- Banner Video - Ultra High Quality Settings -->
+                <img src="images/banner.png" alt="Ảnh banner quảng cáo" class="w-full h-auto rounded-lg object-cover" />
+
+
+                <!-- Optional: Ad Label -->
+                <div class="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded z-10">
+                    Quảng cáo
+                </div>
+
+                <!-- Optional: Click overlay to make video clickable -->
+                <a href="#" target="_blank" class="absolute inset-0 z-20"></a>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Ultra High Quality Video Rendering */
+        .ad-video-hq {
+            /* Prevent any image smoothing/anti-aliasing */
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+
+            /* Hardware acceleration */
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translateZ(0) scale(1.0);
+            transform: translateZ(0) scale(1.0);
+            -webkit-perspective: 1000;
+            perspective: 1000;
+
+            /* Prevent blur */
+            -webkit-filter: none;
+            filter: none;
+            -webkit-font-smoothing: subpixel-antialiased;
+
+            /* Force GPU rendering */
+            will-change: transform;
+            transform-style: preserve-3d;
+
+            /* Prevent compression */
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+
+
+    <!-- About Section -->
+    <section
+        class="relative py-10 sm:py-16 md:py-20 bg-[url('https://images.unsplash.com/photo-1542367597-01cdb60a6068?w=1920')] bg-cover bg-center">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/90 via-white/95 to-white"></div>
+        <div class="relative container mx-auto px-4 sm:px-6 md:px-12 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h2
+                    class="font-dancing text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
+                    Về Chúng Tôi
+                </h2>
+
+                <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-orange-700 mb-2 sm:mb-3 text-center">
+                    Ẩm thực Phương Nam – Ngon như mẹ nấu
+                </h3>
+
+                <p
+                    class="text-sm sm:text-base md:text-lg text-center font-semibold text-gray-700 uppercase tracking-wide mb-4 sm:mb-6 md:mb-8">
+                    Nhà hàng cơm Việt, quán cơm gia đình ngon tại Vĩnh Long
+                </p>
+
+                <div class="text-gray-700 leading-relaxed space-y-3 sm:space-y-4 text-sm sm:text-base text-justify">
+                    <p>
+                        Tại <span class="font-semibold text-orange-700">Phương Nam</span>, triết lý của chúng tôi rất
+                        đơn
+                        giản:
+                        chia sẻ hương vị và văn hóa thưởng thức cơm Việt tới tất cả mọi người.
+                        Chúng tôi làm điều này bằng việc sử dụng nguồn nguyên liệu tươi sạch nhất,
+                        và chế biến chúng qua đôi tay của những người đầu bếp tận tâm.
+                    </p>
+
+                    <p>
+                        Không gian tại nhà hàng cơm <span class="font-semibold text-orange-700">Phương Nam</span> được
+                        lấy
+                        cảm hứng từ
+                        những giá trị truyền thống của Việt Nam, kết hợp với những yếu tố hiện đại để tạo nên
+                        một cảm giác xưa cũ mà vẫn đầy mới mẻ.
+                    </p>
+
+                    <p>
+                        Với chủ đạo là gỗ, cây xanh và ánh sáng tự nhiên, chúng tôi mang lại một không gian ấm cúng,
+                        gần gũi – nơi mỗi bữa ăn đều là một trải nghiệm đáng nhớ, trọn vị và đậm tình quê hương.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Dishes -->
+    <section class="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-orange-50 to-white">
+        <div class="container mx-auto px-4">
+
+            <!-- Tiêu đề trung tâm có nền nhẹ -->
+            <div class="text-center mb-6 sm:mb-8 md:mb-12">
+                <h2
+                    class="inline-block bg-gradient-to-r from-orange-200 via-orange-100 to-orange-200 text-orange-700 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full font-dancing text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold shadow-sm">
+                    Món Ăn Nổi Bật
+                </h2>
+                <div class="mt-3 sm:mt-4">
+                    <a href="thuc-don.html"
+                        class="text-orange-600 hover:text-orange-700 font-medium inline-flex items-center transition text-sm sm:text-base">
+                        Xem tất cả <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Danh sách món ăn -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+
+                <!-- Dish Card 1 -->
+                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                    <div class="relative bg-gray-50">
+                        <img src="images/mau1.jpg" alt="Cá lóc nướng trui"
+                            class="w-full h-48 sm:h-56 md:h-64 object-contain">
+                        <span
+                            class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-orange-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium">-20%</span>
+                        <button
+                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
+                            <i class="far fa-heart text-sm sm:text-base"></i>
+                        </button>
+                    </div>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Trái cây Hoa quả sơn</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="text-yellow-400 text-xs sm:text-sm">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(128)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-orange-600 font-bold text-lg sm:text-xl">200.000đ</span>
+                                <span class="text-gray-400 line-through text-xs sm:text-sm ml-1 sm:ml-2">250.000đ</span>
+                            </div>
+                            <button onclick="addToCart(1)"
+                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
+                                <i class="fas fa-plus text-sm sm:text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dish Card 2 -->
+                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                    <div class="relative bg-gray-50">
+                        <img src="images/mau2.jpg" alt="Lẩu mắm" class="w-full h-48 sm:h-56 md:h-64 object-contain">
+                        <button
+                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
+                            <i class="far fa-heart text-sm sm:text-base"></i>
+                        </button>
+                    </div>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Cà nướng Tây Bắc</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="text-yellow-400 text-xs sm:text-sm">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(95)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-orange-600 font-bold text-lg sm:text-xl">350.000đ</span>
+                            </div>
+                            <button onclick="addToCart(2)"
+                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
+                                <i class="fas fa-plus text-sm sm:text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dish Card 3 -->
+                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                    <div class="relative bg-gray-50">
+                        <img src="images/mau3.jpg" alt="Gỏi cuốn" class="w-full h-48 sm:h-56 md:h-64 object-contain">
+                        <span
+                            class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-orange-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium">-15%</span>
+                        <button
+                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
+                            <i class="far fa-heart text-sm sm:text-base"></i>
+                        </button>
+                    </div>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Cơm chiên cá mặn</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="text-yellow-400 text-xs sm:text-sm">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(67)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-orange-600 font-bold text-lg sm:text-xl">85.000đ</span>
+                                <span class="text-gray-400 line-through text-xs sm:text-sm ml-1 sm:ml-2">100.000đ</span>
+                            </div>
+                            <button onclick="addToCart(3)"
+                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
+                                <i class="fas fa-plus text-sm sm:text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dish Card 4 -->
+                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                    <div class="relative bg-gray-50">
+                        <img src="images/mau4.jpg" alt="Bánh xèo" class="w-full h-48 sm:h-56 md:h-64 object-contain">
+                        <button
+                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
+                            <i class="far fa-heart text-sm sm:text-base"></i>
+                        </button>
+                    </div>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Mâm đồ nguội miền Tây</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="text-yellow-400 text-xs sm:text-sm">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(145)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-orange-600 font-bold text-lg sm:text-xl">120.000đ</span>
+                            </div>
+                            <button onclick="addToCart(4)"
+                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
+                                <i class="fas fa-plus text-sm sm:text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Features Section -->
+    <section class="py-10 sm:py-12 md:py-16 bg-orange-50">
+        <div class="container mx-auto px-4">
+            <!-- Tiêu đề -->
+            <div class="text-center mb-8 sm:mb-10 md:mb-12">
+                <h2 class="font-dancing text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">Uy Tín & Chất Lượng
+                </h2>
+                <p class="text-gray-600 mt-2 text-xs sm:text-sm">Cam kết mang đến trải nghiệm tốt nhất cho khách hàng
+                </p>
+            </div>
+
+            <!-- Các tính năng -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+                <div class="text-center bg-white rounded-xl shadow-sm p-4 sm:p-5 md:p-6 hover:shadow-md transition">
+                    <div
+                        class="bg-orange-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-shipping-fast text-2xl sm:text-2xl md:text-3xl text-orange-600"></i>
+                    </div>
+                    <h3 class="font-medium text-sm sm:text-base md:text-lg mb-1 sm:mb-2">Giao hàng nhanh</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm">Miễn phí trong 5km</p>
+                </div>
+
+                <div class="text-center bg-white rounded-xl shadow-sm p-4 sm:p-5 md:p-6 hover:shadow-md transition">
+                    <div
+                        class="bg-orange-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-award text-2xl sm:text-2xl md:text-3xl text-orange-600"></i>
+                    </div>
+                    <h3 class="font-medium text-sm sm:text-base md:text-lg mb-1 sm:mb-2">Chất lượng đảm bảo</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm">100% tươi ngon</p>
+                </div>
+
+                <div class="text-center bg-white rounded-xl shadow-sm p-4 sm:p-5 md:p-6 hover:shadow-md transition">
+                    <div
+                        class="bg-orange-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-headset text-2xl sm:text-2xl md:text-3xl text-orange-600"></i>
+                    </div>
+                    <h3 class="font-medium text-sm sm:text-base md:text-lg mb-1 sm:mb-2">Hỗ trợ 24/7</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm">Tư vấn nhiệt tình</p>
+                </div>
+
+                <div class="text-center bg-white rounded-xl shadow-sm p-4 sm:p-5 md:p-6 hover:shadow-md transition">
+                    <div
+                        class="bg-orange-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-undo text-2xl sm:text-2xl md:text-3xl text-orange-600"></i>
+                    </div>
+                    <h3 class="font-medium text-sm sm:text-base md:text-lg mb-1 sm:mb-2">Hoàn tiền dễ dàng</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm">Trong vòng 24h</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ẩm Thực Section -->
+    <section class="py-12 sm:py-16 md:py-20 relative overflow-hidden"
+        style="background: linear-gradient(to bottom, #f5e6d3 0%, #e8d4ba 100%);">
+        <!-- Decorative Elements -->
+        <div
+            class="absolute top-0 left-0 w-64 h-64 bg-orange-200 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2">
+        </div>
+        <div
+            class="absolute bottom-0 right-0 w-96 h-96 bg-red-200 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2">
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <!-- Title -->
+            <div class="text-center mb-10 sm:mb-12 md:mb-16">
+                <h2 class="font-dancing text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4"
+                    style="color: #8B4513; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                    ẨM THỰC
+                </h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-orange-600 to-transparent mx-auto"></div>
+            </div>
+
+            <!-- Food Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 max-w-6xl mx-auto">
+
+                <!-- Card 1: Cá Bông Chiên Giòn -->
+                <div class="group">
+                    <div class="relative">
+                        <!-- Decorative Frame -->
+                        <div class="absolute -top-3 -left-3 w-full h-full border-4 border-orange-800 rounded-3xl transform group-hover:scale-105 transition-transform duration-300"
+                            style="border-style: double;"></div>
+
+                        <!-- Image Container -->
+                        <div
+                            class="relative bg-white rounded-3xl overflow-hidden shadow-xl transform group-hover:-translate-y-2 transition-all duration-300">
+                            <div class="w-full h-64 sm:h-72 md:h-80 bg-gray-50 flex items-center justify-center p-3">
+                                <img src="images/mon1.jpg" alt="Cá Bông Chiên Giòn"
+                                    class="w-full h-full object-contain">
+                            </div>
+
+                            <!-- Content Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end">
+                                <div class="p-6 text-white w-full">
+                                    <h3 class="font-dancing text-2xl sm:text-3xl font-bold mb-2"
+                                        style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                                        TÔM SỐT CHANH DÂY
+                                    </h3>
+                                    <p class="text-sm sm:text-base leading-relaxed"
+                                        style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                        Cần chính ổn nhiệt độ dầu sôi vừa phải, từng miếng tôm được ướp vừa vặn,
+                                        tẩm minh đến khi cho ra được màu vàng đẹp mắt nhất.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Thịt Rang Chay Canh -->
+                <div class="group">
+                    <div class="relative">
+                        <div class="absolute -top-3 -left-3 w-full h-full border-4 border-orange-800 rounded-3xl transform group-hover:scale-105 transition-transform duration-300"
+                            style="border-style: double;"></div>
+
+                        <div
+                            class="relative bg-white rounded-3xl overflow-hidden shadow-xl transform group-hover:-translate-y-2 transition-all duration-300">
+                            <div class="w-full h-64 sm:h-72 md:h-80 bg-gray-50 flex items-center justify-center p-3">
+                                <img src="IMAGES/mon4.jpg" alt="Thịt Rang Chay Canh"
+                                    class="w-full h-full object-contain">
+                            </div>
+
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end">
+                                <div class="p-6 text-white w-full">
+                                    <h3 class="font-dancing text-2xl sm:text-3xl font-bold mb-2"
+                                        style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                                        BÁNH PHU THÊ
+                                    </h3>
+                                    <p class="text-sm sm:text-base leading-relaxed"
+                                        style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                        Bánh phu thê (còn gọi là bánh xu xê) xuất phát từ vùng Bắc Ninh – Kinh Bắc, mảnh
+                                        đất của quan họ, nơi cái đẹp gắn với tình duyên.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Thịt Kho Trứng Cút -->
+                <div class="group">
+                    <div class="relative">
+                        <div class="absolute -top-3 -left-3 w-full h-full border-4 border-orange-800 rounded-3xl transform group-hover:scale-105 transition-transform duration-300"
+                            style="border-style: double;"></div>
+
+                        <div
+                            class="relative bg-white rounded-3xl overflow-hidden shadow-xl transform group-hover:-translate-y-2 transition-all duration-300">
+                            <div class="w-full h-64 sm:h-72 md:h-80 bg-gray-50 flex items-center justify-center p-3">
+                                <img src="images/mon2.jpg" alt="Thịt Kho Trứng Cút"
+                                    class="w-full h-full object-contain">
+                            </div>
+
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end">
+                                <div class="p-6 text-white w-full">
+                                    <h3 class="font-dancing text-2xl sm:text-3xl font-bold mb-2"
+                                        style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                                        LẨU THÁC LÁC KHỔ QUA
+                                    </h3>
+                                    <p class="text-sm sm:text-base leading-relaxed"
+                                        style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                        Từng miếng chả được chọn lọc, tẩm ướp theo đúng hướng vị chuẩn miền Nam
+                                        cùng nước hàng đặc trưng sẽ làm bạn lưu luyến món cơm nhà đậm đà đầy thương nhớ.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Canh Cua Mùng Tơi -->
+                <div class="group">
+                    <div class="relative">
+                        <div class="absolute -top-3 -left-3 w-full h-full border-4 border-orange-800 rounded-3xl transform group-hover:scale-105 transition-transform duration-300"
+                            style="border-style: double;"></div>
+
+                        <div
+                            class="relative bg-white rounded-3xl overflow-hidden shadow-xl transform group-hover:-translate-y-2 transition-all duration-300">
+                            <div class="w-full h-64 sm:h-72 md:h-80 bg-gray-50 flex items-center justify-center p-3">
+                                <img src="images/mon3.jpg" alt="Canh Cua Mùng Tơi" class="w-full h-full object-contain">
+                            </div>
+
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end">
+                                <div class="p-6 text-white w-full">
+                                    <h3 class="font-dancing text-2xl sm:text-3xl font-bold mb-2"
+                                        style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                                        ĐỒ NGUỘI BỐN MÙA
+                                    </h3>
+                                    <p class="text-sm sm:text-base leading-relaxed"
+                                        style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                        Mâm đồ nguội hấp dẫn, với người dân vùng quê đem lại một cảm giác đồng quê quen
+                                        thuộc, cảm giác của hương vị quê hương.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- View More Button -->
+            <div class="text-center mt-10 sm:mt-12 md:mt-16">
+                <a href="thuc-don.html"
+                    class="inline-flex items-center px-8 py-3 sm:px-10 sm:py-4 bg-gradient-to-r from-orange-700 to-orange-600 text-white font-bold text-base sm:text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                    style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+                    <i class="fas fa-book-open mr-2"></i>
+                    Xem Thực Đơn Đầy Đủ
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Không Gian Nhà Hàng Section -->
+    <section class="py-12 sm:py-16 md:py-20 relative overflow-hidden"
+        style="background: linear-gradient(to bottom, #f5e6d3 0%, #e8d4ba 100%);">
+        <!-- Decorative Elements -->
+        <div
+            class="absolute top-0 left-0 w-64 h-64 bg-orange-200 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2">
+        </div>
+        <div
+            class="absolute bottom-0 right-0 w-96 h-96 bg-red-200 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2">
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <!-- Title -->
+            <div class="text-center mb-10 sm:mb-12 md:mb-16">
+                <h2 class="font-dancing text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4"
+                    style="color: #8B4513; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                    KHÔNG GIAN NHÀ HÀNG
+                </h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-orange-600 to-transparent mx-auto"></div>
+            </div>
+
+            <!-- Image Gallery Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10 max-w-7xl mx-auto mb-10 sm:mb-12">
+
+                <!-- Image 1 -->
+                <div class="group relative">
+                    <div
+                        class="absolute -inset-2 bg-gradient-to-br from-orange-400 to-red-400 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+                    </div>
+                    <div class="relative bg-white rounded-3xl overflow-hidden shadow-2xl transform group-hover:scale-105 transition-all duration-300"
+                        style="border: 8px solid #8B4513; border-style: double;">
+                        <div class="aspect-[3/4] overflow-hidden">
+                            <img src="images/kg1.jpg" alt="Không gian nhà hàng 1"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 2 -->
+                <div class="group relative">
+                    <div
+                        class="absolute -inset-2 bg-gradient-to-br from-orange-400 to-red-400 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+                    </div>
+                    <div class="relative bg-white rounded-3xl overflow-hidden shadow-2xl transform group-hover:scale-105 transition-all duration-300"
+                        style="border: 8px solid #8B4513; border-style: double;">
+                        <div class="aspect-[3/4] overflow-hidden">
+                            <img src="images/kg2.jpg" alt="Không gian nhà hàng 2"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 3 -->
+                <div class="group relative">
+                    <div
+                        class="absolute -inset-2 bg-gradient-to-br from-orange-400 to-red-400 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+                    </div>
+                    <div class="relative bg-white rounded-3xl overflow-hidden shadow-2xl transform group-hover:scale-105 transition-all duration-300"
+                        style="border: 8px solid #8B4513; border-style: double;">
+                        <div class="aspect-[3/4] overflow-hidden">
+                            <img src="images/kh3.jpg" alt="Không gian nhà hàng 3"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- View More Button -->
+            <div class="text-center">
+                <a href="album.html"
+                    class="inline-flex items-center px-8 py-3 sm:px-10 sm:py-4 bg-gradient-to-r from-orange-700 to-orange-600 text-white font-bold text-base sm:text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                    style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3); border: 3px solid #8B4513;">
+                    <i class="fas fa-images mr-2"></i>
+                    XEM THÊM
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Truyền Thông Section -->
+    <section class="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-orange-50 to-white">
+        <div class="container mx-auto px-4">
+            <!-- Title -->
+            <div class="text-center mb-10 sm:mb-12 md:mb-16">
+                <h2 class="font-dancing text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4"
+                    style="color: #8B4513; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                    TRUYỀN THÔNG
+                </h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-orange-600 to-transparent mx-auto"></div>
+            </div>
+
+            <!-- Video Card -->
+            <div class="max-w-4xl mx-auto">
+                <div class="relative group">
+                    <!-- Decorative background -->
+                    <div
+                        class="absolute -inset-4 bg-gradient-to-br from-orange-200 to-red-200 rounded-3xl opacity-30 group-hover:opacity-40 transition-opacity duration-300">
+                    </div>
+
+                    <!-- Main Card -->
+                    <div
+                        class="relative bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl overflow-hidden shadow-2xl">
+                        <!-- VIAN Badge -->
+                        <div class="absolute top-0 left-0 z-20">
+                            <div class="relative">
+                                <svg width="120" height="120" viewBox="0 0 120 120" class="drop-shadow-lg">
+                                    <path d="M 0 0 L 120 0 L 0 120 Z" fill="#8B4513" />
+                                </svg>
+                                <div class="absolute top-4 left-4 text-white font-bold text-lg transform -rotate-45"
+                                    style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                                    COMVIET
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video Container -->
+                        <div class="relative aspect-video bg-gray-900">
+                            <img src="images/TruyenThong.jpg" alt="Phụ nữ Việt yêu cơm Việt"
+                                class="w-full h-full object-cover">
+
+                            <!-- Play Button Overlay -->
+                            <div
+                                class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors duration-300">
+                                <button
+                                    class="w-20 h-20 sm:w-24 sm:h-24 bg-white/90 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                                    <i class="fas fa-play text-orange-600 text-2xl sm:text-3xl ml-1"></i>
+                                </button>
+                            </div>
+
+                            <!-- Video Info Overlay -->
+                            <div
+                                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                                <h3 class="text-white font-dancing text-2xl sm:text-3xl md:text-4xl font-bold mb-2"
+                                    style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                                    Ngon như Mẹ nấu
+                                </h3>
+                                <p class="text-white/90 text-sm sm:text-base"
+                                    style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                    📅 14.10-20.10.2023
+                                </p>
+                                <p class="text-white/80 text-xs sm:text-sm mt-1"
+                                    style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                    VINHLONG Food Review
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Info Bar -->
+                        <div class="bg-white/80 backdrop-blur-sm px-6 py-4 flex items-center justify-between">
+                            <div class="flex items-center gap-4 text-gray-700">
+                                <span class="flex items-center gap-2">
+                                    <i class="fas fa-eye text-orange-600"></i>
+                                    <span class="text-sm font-medium">12.5K lượt xem</span>
+                                </span>
+                                <span class="flex items-center gap-2">
+                                    <i class="fas fa-heart text-red-500"></i>
+                                    <span class="text-sm font-medium">2.3K</span>
+                                </span>
+                            </div>
+                            <a href="#"
+                                class="text-orange-600 hover:text-orange-700 font-medium text-sm flex items-center gap-2 transition-colors">
+                                Xem chi tiết
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="text-center mt-8">
+                    <p class="text-gray-600 text-sm sm:text-base mb-4">
+                        Được đánh giá cao bởi các chuyên trang ẩm thực hàng đầu
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4 items-center">
+                        <span class="px-4 py-2 bg-white rounded-full shadow-sm text-sm font-medium text-gray-700">
+                            <i class="fas fa-star text-yellow-500 mr-1"></i>
+                            Hanoi Food Review
+                        </span>
+                        <span class="px-4 py-2 bg-white rounded-full shadow-sm text-sm font-medium text-gray-700">
+                            <i class="fas fa-star text-yellow-500 mr-1"></i>
+                            Foody.vn
+                        </span>
+                        <span class="px-4 py-2 bg-white rounded-full shadow-sm text-sm font-medium text-gray-700">
+                            <i class="fas fa-star text-yellow-500 mr-1"></i>
+                            VnExpress
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cảm Nhận Khách Hàng Section -->
+    <section class="py-12 sm:py-16 md:py-20 relative overflow-hidden"
+        style="background: linear-gradient(to bottom, #f5e6d3 0%, #e8d4ba 100%);">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920'); background-size: cover; background-position: center;">
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <!-- Title -->
+            <div class="text-center mb-10 sm:mb-12 md:mb-16">
+                <h2 class="font-dancing text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4"
+                    style="color: #8B4513; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                    CẢM NHẬN KHÁCH HÀNG
+                </h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-orange-600 to-transparent mx-auto"></div>
+            </div>
+
+            <!-- Testimonials Slider -->
+            <div class="max-w-4xl mx-auto">
+                <div class="swiper testimonialSwiper">
+                    <div class="swiper-wrapper">
+
+                        <!-- Testimonial 1 -->
+                        <div class="swiper-slide">
+                            <div
+                                class="bg-white/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 md:p-12 shadow-2xl text-center">
+                                <!-- Avatar -->
+                                <div class="mb-6">
+                                    <img src="https://ui-avatars.com/api/?name=Chi+Trang&size=120&background=ea580c&color=fff&bold=true"
+                                        alt="Chi Trang"
+                                        class="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto border-4 border-orange-200 shadow-lg">
+                                </div>
+
+                                <!-- Quote Icon -->
+                                <div class="text-orange-300 text-4xl sm:text-5xl mb-4">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+
+                                <!-- Review Text -->
+                                <p class="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 italic">
+                                    "Quán cơm mà không gian view hồ cũ phải gọi là xịn. Đồ ăn ngon, nên trải nghiệm sốt
+                                    trùng menu nhé"
+                                </p>
+
+                                <!-- Customer Name -->
+                                <h4 class="font-bold text-lg sm:text-xl mb-2"
+                                    style="color: #8B4513; letter-spacing: 2px;">
+                                    CHI TRANG
+                                </h4>
+
+                                <!-- Stars -->
+                                <div class="text-yellow-500 text-lg">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Testimonial 2 -->
+                        <div class="swiper-slide">
+                            <div
+                                class="bg-white/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 md:p-12 shadow-2xl text-center">
+                                <div class="mb-6">
+                                    <img src="https://ui-avatars.com/api/?name=Minh+Anh&size=120&background=ea580c&color=fff&bold=true"
+                                        alt="Minh Anh"
+                                        class="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto border-4 border-orange-200 shadow-lg">
+                                </div>
+                                <div class="text-orange-300 text-4xl sm:text-5xl mb-4">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+                                <p class="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 italic">
+                                    "Món ăn rất ngon, đậm đà hương vị truyền thống. Không gian ấm cúng, phục vụ nhiệt
+                                    tình. Sẽ quay lại nhiều lần nữa!"
+                                </p>
+                                <h4 class="font-bold text-lg sm:text-xl mb-2"
+                                    style="color: #8B4513; letter-spacing: 2px;">
+                                    MINH ANH
+                                </h4>
+                                <div class="text-yellow-500 text-lg">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Testimonial 3 -->
+                        <div class="swiper-slide">
+                            <div
+                                class="bg-white/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 md:p-12 shadow-2xl text-center">
+                                <div class="mb-6">
+                                    <img src="https://ui-avatars.com/api/?name=Hoang+Nam&size=120&background=ea580c&color=fff&bold=true"
+                                        alt="Hoàng Nam"
+                                        class="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto border-4 border-orange-200 shadow-lg">
+                                </div>
+                                <div class="text-orange-300 text-4xl sm:text-5xl mb-4">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+                                <p class="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 italic">
+                                    "Chất lượng món ăn tuyệt vời, giá cả hợp lý. Đặc biệt là các món đặc sản miền Tây
+                                    rất đúng vị. Highly recommended!"
+                                </p>
+                                <h4 class="font-bold text-lg sm:text-xl mb-2"
+                                    style="color: #8B4513; letter-spacing: 2px;">
+                                    HOÀNG NAM
+                                </h4>
+                                <div class="text-yellow-500 text-lg">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Pagination Dots -->
+                    <div class="swiper-pagination !relative !bottom-0 mt-8"></div>
+                </div>
+
+                <!-- Navigation Arrows (Hidden on mobile) -->
+                <div class="hidden md:block">
+                    <div
+                        class="swiper-button-prev-testimonial absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-orange-600 hover:text-white transition-all z-10">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div
+                        class="swiper-button-next-testimonial absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-orange-600 hover:text-white transition-all z-10">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mt-12 sm:mt-16">
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold mb-2" style="color: #8B4513;">
+                        500+
+                    </div>
+                    <p class="text-gray-700 text-xs sm:text-sm md:text-base font-medium">Đánh giá 5 sao</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold mb-2" style="color: #8B4513;">
+                        98%
+                    </div>
+                    <p class="text-gray-700 text-xs sm:text-sm md:text-base font-medium">Khách hài lòng</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold mb-2" style="color: #8B4513;">
+                        10K+
+                    </div>
+                    <p class="text-gray-700 text-xs sm:text-sm md:text-base font-medium">Lượt đánh giá</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Swiper Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const testimonialSwiper = new Swiper(".testimonialSwiper", {
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                effect: "fade",
+                fadeEffect: { crossFade: true },
+                speed: 800,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next-testimonial',
+                    prevEl: '.swiper-button-prev-testimonial',
+                },
+            });
+        });
+    </script>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <!-- Chatbot Container -->
+    <div id="chatbot-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/load-components.js"></script>
+
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/gsap-animations.js"></script>
+</body>
+
+</html>

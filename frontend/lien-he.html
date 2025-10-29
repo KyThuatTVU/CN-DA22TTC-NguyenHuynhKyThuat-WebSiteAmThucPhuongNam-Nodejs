@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liên Hệ - Nhà hàng Phương Nam Vĩnh Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            padding-top: 80px; /* Space for fixed navbar */
+        }
+        
+        .font-playfair { 
+            font-family: 'Montserrat', sans-serif; 
+        }
+        
+        .font-dancing {
+            font-family: 'Quicksand', sans-serif;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Custom Gradient */
+        .gradient-bg {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 50%, #feca57 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Input Focus Effect */
+        .input-modern {
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .input-modern:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Card Hover Effect */
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.2);
+        }
+        
+        /* Button Ripple Effect */
+        .btn-modern {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-modern:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-modern:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Icon Bounce */
+        .icon-bounce:hover {
+            animation: pulse 0.6s ease-in-out;
+        }
+        
+        /* Map Shadow */
+        .map-container {
+            position: relative;
+        }
+        
+        .map-container:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            border-radius: 16px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Hero Section with Particles -->
+    <section class="relative pt-32 pb-20 overflow-hidden">
+        <div class="absolute inset-0 gradient-bg opacity-10"></div>
+        <div class="absolute top-10 left-10 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style="animation-delay: 1s;"></div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center max-w-3xl mx-auto animate-fadeInUp">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full mb-6 shadow-xl">
+                    <i class="fas fa-envelope-open-text text-3xl text-white"></i>
+                </div>
+                <h1 class="font-dancing text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent">
+                    Liên Hệ Với Chúng Tôi
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-700 leading-relaxed">
+                    Hãy chia sẻ suy nghĩ của bạn. Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn!
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-16 relative">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-7xl mx-auto">
+                <!-- Contact Form - Takes 3 columns -->
+                <div class="lg:col-span-3">
+                    <div class="glass-effect rounded-3xl shadow-2xl p-8 md:p-12 card-hover">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-comment-dots text-white text-xl"></i>
+                            </div>
+                            <h2 class="font-dancing text-3xl md:text-4xl font-bold text-gray-800">Gửi Tin Nhắn</h2>
+                        </div>
+                        
+                        <form id="contact-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                        <i class="fas fa-user mr-2 text-orange-500"></i>Họ và tên
+                                    </label>
+                                    <input type="text" required class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white" placeholder="Nhập họ và tên của bạn">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                        <i class="fas fa-phone mr-2 text-orange-500"></i>Số điện thoại
+                                    </label>
+                                    <input type="tel" required class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white" placeholder="0123 456 789">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                    <i class="fas fa-envelope mr-2 text-orange-500"></i>Email
+                                </label>
+                                <input type="email" required class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white" placeholder="example@email.com">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                    <i class="fas fa-tag mr-2 text-orange-500"></i>Chủ đề
+                                </label>
+                                <select class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white cursor-pointer">
+                                    <option>Câu hỏi chung</option>
+                                    <option>Đặt bàn</option>
+                                    <option>Đặt tiệc</option>
+                                    <option>Góp ý & Phản hồi</option>
+                                    <option>Hợp tác kinh doanh</option>
+                                    <option>Khác</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                    <i class="fas fa-edit mr-2 text-orange-500"></i>Nội dung tin nhắn
+                                </label>
+                                <textarea required rows="6" class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white resize-none" placeholder="Hãy cho chúng tôi biết suy nghĩ của bạn..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-modern w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-5 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-paper-plane mr-2"></i> Gửi Tin Nhắn Ngay
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Contact Info - Takes 2 columns -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Info Cards -->
+                    <div class="glass-effect rounded-3xl shadow-xl p-8 card-hover">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-info-circle text-white text-xl"></i>
+                            </div>
+                            <h3 class="font-dancing text-2xl font-bold text-gray-800">Thông Tin</h3>
+                        </div>
+                        
+                        <div class="space-y-5">
+                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-map-marker-alt text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-base mb-1 text-gray-800">Địa chỉ</h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">123 Đường ABC, Phường 1<br>TP. Vĩnh Long, Việt Nam</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-phone text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-base mb-1 text-gray-800">Điện thoại</h4>
+                                    <p class="text-gray-600 text-sm">0123 456 789</p>
+                                    <p class="text-gray-600 text-sm">0987 654 321</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-envelope text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-base mb-1 text-gray-800">Email</h4>
+                                    <p class="text-gray-600 text-sm">info@phuongnam.vn</p>
+                                    <p class="text-gray-600 text-sm">support@phuongnam.vn</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-clock text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-base mb-1 text-gray-800">Giờ mở cửa</h4>
+                                    <p class="text-gray-600 text-sm">T2 - CN: 10:00 - 22:00</p>
+                                    <p class="text-gray-600 text-sm">Tết: 09:00 - 23:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Media -->
+                    <div class="glass-effect rounded-3xl shadow-xl p-8 card-hover">
+                        <h3 class="font-bold text-xl mb-5 text-gray-800">
+                            <i class="fas fa-share-alt mr-2 text-orange-500"></i>Kết Nối
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-facebook text-2xl"></i>
+                                <span class="font-semibold">Facebook</span>
+                            </a>
+                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-instagram text-2xl"></i>
+                                <span class="font-semibold">Instagram</span>
+                            </a>
+                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-red-500 to-red-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-youtube text-2xl"></i>
+                                <span class="font-semibold">YouTube</span>
+                            </a>
+                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-gray-800 to-gray-900 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-tiktok text-2xl"></i>
+                                <span class="font-semibold">TikTok</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="font-dancing text-4xl md:text-5xl font-bold mb-4 text-gray-800">Tìm Đường Đến Với Chúng Tôi</h2>
+                <p class="text-gray-600 text-lg">Chúng tôi ở ngay trung tâm thành phố, dễ dàng tìm thấy</p>
+            </div>
+            <div class="max-w-6xl mx-auto map-container rounded-3xl overflow-hidden shadow-2xl">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.4948!2d105.9574!3d10.2397!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDE0JzIzLjAiTiAxMDXCsDU3JzI2LjYiRQ!5e0!3m2!1sen!2s!4v1234567890" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-20 gradient-bg relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
+        </div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="font-dancing text-4xl md:text-5xl font-bold text-white mb-6">Ghé Thăm Chúng Tôi Ngay Hôm Nay!</h2>
+                <p class="text-white text-xl mb-8 leading-relaxed">Trải nghiệm hương vị đặc sắc của ẩm thực miền Tây Nam Bộ</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="dat-ban.html" class="bg-white text-orange-700 px-10 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:bg-orange-50 border-2 border-orange-600">
+                        <i class="fas fa-calendar-check mr-2"></i>Đặt Bàn Ngay
+                    </a>
+                    <a href="thuc-don.html" class="bg-transparent border-2 border-white text-white px-10 py-4 rounded-full font-bold text-lg shadow-xl hover:bg-white hover:text-orange-700 transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-book-open mr-2"></i>Xem Thực Đơn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+    
+    <!-- Chatbot Container -->
+    <div id="chatbot-container"></div>
+    
+    <script>
+        // Form submission with animation
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Create success notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-8 right-8 z-50 bg-white rounded-2xl shadow-2xl p-6 max-w-sm transform translate-x-0 transition-all duration-500';
+            notification.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-gray-800 mb-1">Gửi thành công!</h4>
+                        <p class="text-gray-600 text-sm">Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất có thể.</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 500);
+            }, 5000);
+            
+            // Reset form
+            this.reset();
+        });
+        
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all cards
+        document.querySelectorAll('.card-hover').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s ease-out';
+            observer.observe(el);
+        });
+    </script>
+    
+    <script src="js/main.js"></script>
+    <script src="js/load-components.js"></script>
+    
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/gsap-lien-he.js"></script>
+</body>
+</html>

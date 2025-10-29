@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thực Đơn - Nhà hàng Phương Nam Vĩnh Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/modern-style.css">
+    <style>
+        .cart-badge { top: -8px; right: -8px; min-width: 20px; height: 20px; }
+        .filter-active { background: #ea580c; color: white; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
+   <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+    <!-- Page Header -->
+    <section class="bg-gradient-to-r from-orange-600 to-red-600 text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="font-dancing text-5xl font-bold mb-4">Thực Đơn</h1>
+            <p class="text-xl">Khám phá hương vị ẩm thực miền Tây đặc sắc</p>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar Filters -->
+                <div class="lg:w-1/4">
+                    <div class="bg-white rounded-xl p-6 shadow-sm sticky top-24">
+                        <h3 class="font-bold text-xl mb-4">Bộ lọc</h3>
+                        
+                        <!-- Category Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium mb-3">Danh mục</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Tất cả</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Canh & Súp</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Hải sản</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Thịt</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Rau</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Cơm</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-gray-700">Đồ uống</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium mb-3">Khoảng giá</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="price" class="w-4 h-4 text-orange-600">
+                                    <span class="ml-2 text-gray-700">Dưới 100.000đ</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="price" class="w-4 h-4 text-orange-600">
+                                    <span class="ml-2 text-gray-700">100.000đ - 200.000đ</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="price" class="w-4 h-4 text-orange-600">
+                                    <span class="ml-2 text-gray-700">200.000đ - 500.000đ</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="price" class="w-4 h-4 text-orange-600">
+                                    <span class="ml-2 text-gray-700">Trên 500.000đ</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium mb-3">Đánh giá</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-yellow-400">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
+                                    <span class="ml-2 text-yellow-400">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition">
+                            Áp dụng bộ lọc
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="lg:w-3/4">
+                    <!-- Sort Bar -->
+                    <div class="bg-white rounded-xl p-4 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700">Sắp xếp:</span>
+                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                                Phổ biến
+                            </button>
+                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                                Mới nhất
+                            </button>
+                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                                Giá tăng
+                            </button>
+                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                                Giá giảm
+                            </button>
+                        </div>
+                        <span class="text-gray-600">Tìm thấy <strong>24</strong> món ăn</span>
+                    </div>
+
+                    <!-- Products -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="menu-products">
+                        <!-- Product items will be rendered here by JavaScript -->
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-center mt-8 space-x-2">
+                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="px-4 py-2 border rounded-lg bg-orange-600 text-white">1</button>
+                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">2</button>
+                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">3</button>
+                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="font-dancing text-2xl font-bold mb-4">Phương Nam</h3>
+                    <p class="text-gray-400 mb-4">Ẩm thực Vĩnh Long chính gốc</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-lg mb-4">Liên kết</h4>
+                    <ul class="space-y-2">
+                        <li><a href="gioi-thieu.html" class="text-gray-400 hover:text-white transition">Giới thiệu</a></li>
+                        <li><a href="thuc-don.html" class="text-gray-400 hover:text-white transition">Thực đơn</a></li>
+                        <li><a href="tin-tuc.html" class="text-gray-400 hover:text-white transition">Tin tức</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Nhà hàng Phương Nam Vĩnh Long. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <!-- Chatbot Container -->
+    <div id="chatbot-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/load-components.js"></script>
+    
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/gsap-thuc-don.js"></script>
+</body>
+</html>

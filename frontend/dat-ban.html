@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Bàn - Nhà hàng Phương Nam Vĩnh Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/modern-style.css">
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+
+    <!-- Page Header -->
+    <section class="bg-gradient-to-r from-orange-600 to-red-600 text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="font-dancing text-5xl font-bold mb-4">Đặt Bàn</h1>
+            <p class="text-xl">Đặt chỗ trước để đảm bảo có bàn cho bạn</p>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Booking Form -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-6">Thông tin đặt bàn</h2>
+                        <form id="booking-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Họ và tên *</label>
+                                <input type="text" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Nguyễn Văn A">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Số điện thoại *</label>
+                                    <input type="tel" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="0123456789">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Email</label>
+                                    <input type="email" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="email@example.com">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Ngày đặt *</label>
+                                    <input type="date" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Giờ đặt *</label>
+                                    <input type="time" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Số lượng khách *</label>
+                                <select required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                    <option value="">Chọn số lượng khách</option>
+                                    <option value="1">1 người</option>
+                                    <option value="2">2 người</option>
+                                    <option value="3">3 người</option>
+                                    <option value="4">4 người</option>
+                                    <option value="5">5 người</option>
+                                    <option value="6">6 người</option>
+                                    <option value="7">7-10 người</option>
+                                    <option value="8">Trên 10 người</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Khu vực</label>
+                                <select class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                    <option value="">Chọn khu vực (tùy chọn)</option>
+                                    <option value="indoor">Khu vực trong nhà</option>
+                                    <option value="outdoor">Khu vực sân vườn</option>
+                                    <option value="vip">Phòng VIP</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Ghi chú</label>
+                                <textarea rows="3" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Yêu cầu đặc biệt, dị ứng thực phẩm..."></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-lg font-medium text-lg hover:opacity-90 transition">
+                                <i class="fas fa-calendar-check mr-2"></i> Xác nhận đặt bàn
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Restaurant Info -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-lg p-8">
+                            <h3 class="text-xl font-bold mb-4">Thông tin nhà hàng</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-map-marker-alt text-orange-600 text-xl mr-3 mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Địa chỉ</p>
+                                        <p class="text-gray-600">123 Đường ABC, Phường 1, TP. Vĩnh Long</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-phone text-orange-600 text-xl mr-3 mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Điện thoại</p>
+                                        <p class="text-gray-600">0123 456 789</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-clock text-orange-600 text-xl mr-3 mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Giờ mở cửa</p>
+                                        <p class="text-gray-600">Thứ 2 - Chủ nhật: 10:00 - 22:00</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-envelope text-orange-600 text-xl mr-3 mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Email</p>
+                                        <p class="text-gray-600">info@phuongnam.vn</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-50 rounded-xl p-6">
+                            <h4 class="font-bold text-lg mb-3">Lưu ý khi đặt bàn</h4>
+                            <ul class="space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-orange-600 mr-2 mt-1"></i>
+                                    <span>Vui lòng đặt bàn trước ít nhất 2 giờ</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-orange-600 mr-2 mt-1"></i>
+                                    <span>Bàn sẽ được giữ trong vòng 15 phút kể từ giờ đặt</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-orange-600 mr-2 mt-1"></i>
+                                    <span>Liên hệ với chúng tôi nếu cần hủy hoặc thay đổi</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+    <!-- Chatbot Container -->
+    <div id="chatbot-container"></div>
+    <script src="js/main.js"></script>
+    <script src="js/load-components.js"></script>
+    
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/gsap-dat-ban.js"></script>
+</body>
+</html>

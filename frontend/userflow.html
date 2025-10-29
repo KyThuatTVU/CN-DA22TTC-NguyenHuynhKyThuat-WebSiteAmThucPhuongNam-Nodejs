@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Flow - Ứng dụng Học Tiếng Việt</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      padding: 30px;
+      overflow: auto;
+    }
+
+    .legend {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .legend-shape {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .legend-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid #4CAF50;
+      color: #4CAF50;
+    }
+
+    .legend-rect {
+      width: 80px;
+      height: 50px;
+      border: 3px solid #FF9800;
+      border-radius: 8px;
+      color: #FF9800;
+    }
+
+    .legend-diamond {
+      width: 50px;
+      height: 50px;
+      border: 3px solid #2196F3;
+      transform: rotate(45deg);
+      color: #2196F3;
+    }
+
+    .legend-diamond span {
+      transform: rotate(-45deg);
+      display: block;
+    }
+
+    .legend-arrow {
+      width: 60px;
+      height: 3px;
+      background: #666;
+      position: relative;
+    }
+
+    .legend-arrow::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid #666;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 26px;
+    }
+
+    .canvas {
+      position: relative;
+      min-width: 2000px;
+      min-height: 1000px;
+      background: white;
+      border-radius: 15px;
+      padding: 50px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Action - Circle */
+    .action {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #4CAF50;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s;
+    }
+
+    .action:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .action .label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4CAF50;
+      text-align: center;
+      padding: 0 10px;
+      line-height: 1.3;
+    }
+
+    /* Screen - Rectangle */
+    .screen {
+      position: absolute;
+      min-width: 140px;
+      padding: 15px 20px;
+      border: 3px solid #FF9800;
+      border-radius: 10px;
+      background: white;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s;
+    }
+
+    .screen:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+    }
+
+    .screen .label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #FF9800;
+      text-align: center;
+    }
+
+    .screen .desc {
+      font-size: 10px;
+      color: #666;
+      text-align: center;
+      margin-top: 3px;
+    }
+
+    /* Decision - Diamond */
+    .decision {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border: 3px solid #2196F3;
+      background: white;
+      transform: rotate(45deg);
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s;
+    }
+
+    .decision:hover {
+      box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    }
+
+    .decision-content {
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .decision .label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2196F3;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Positions */
+    #start {
+      top: 80px;
+      left: 100px;
+    }
+
+    #menu-main {
+      top: 80px;
+      left: 350px;
+    }
+
+    #choose-mode {
+      top: 80px;
+      left: 600px;
+    }
+
+    /* Học ngôn ngữ branch */
+    #hoc-ngon-ngu {
+      top: 250px;
+      left: 450px;
+    }
+
+    #chu-cai {
+      top: 250px;
+      left: 750px;
+    }
+
+    #danh-van {
+      top: 250px;
+      left: 950px;
+    }
+
+    #viet-tay {
+      top: 250px;
+      left: 1150px;
+    }
+
+    #thanh-am {
+      top: 250px;
+      left: 1350px;
+    }
+
+    #dau-cau {
+      top: 420px;
+      left: 750px;
+    }
+
+    #luyen-doc {
+      top: 420px;
+      left: 950px;
+    }
+
+    #do-vui {
+      top: 420px;
+      left: 1150px;
+    }
+
+    #tien-do {
+      top: 420px;
+      left: 1350px;
+    }
+
+    #hoan-thanh {
+      top: 420px;
+      left: 1550px;
+    }
+
+    /* Trợ lý AI - accessible from all screens */
+    #chup-anh {
+      top: 600px;
+      left: 550px;
+    }
+
+    #ai-doc {
+      top: 600px;
+      left: 750px;
+    }
+
+    #ket-qua-doc {
+      top: 600px;
+      left: 950px;
+    }
+
+    #lich-su {
+      top: 600px;
+      left: 1200px;
+    }
+
+    /* Lỗi */
+    #loi-mang {
+      top: 800px;
+      left: 950px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-shape legend-circle">Action</div>
+      <span><strong>Action:</strong> Hành động người dùng</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-shape legend-rect">Screen</div>
+      <span><strong>Screen:</strong> Màn hình hiển thị</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-shape legend-diamond"><span>?</span></div>
+      <span><strong>Decision:</strong> Điểm quyết định</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-shape legend-arrow"></div>
+      <span><strong>Arrow:</strong> Luồng di chuyển</span>
+    </div>
+  </div>
+
+  <h1>User Flow – Ứng dụng Học Tiếng Việt Cho Người Lớn Tuổi</h1>
+
+  <div class="canvas">
+    <svg>
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <polygon points="0 0, 10 3, 0 6" fill="#666" />
+        </marker>
+      </defs>
+
+      <!-- Start to Menu -->
+      <line x1="220" y1="140" x2="350" y2="140" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Menu to Choose Mode -->
+      <line x1="490" y1="140" x2="600" y2="140" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Choose Mode to Học ngôn ngữ -->
+      <path d="M 650 180 L 650 250 L 500 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+
+      <!-- Học ngôn ngữ to screens -->
+      <line x1="550" y1="300" x2="750" y2="300" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="550" y1="310" x2="950" y2="310" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="550" y1="320" x2="1150" y2="320" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="550" y1="330" x2="1350" y2="330" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Screens to row 2 -->
+      <line x1="810" y1="360" x2="810" y2="420" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="1010" y1="360" x2="1010" y2="420" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="1210" y1="360" x2="1210" y2="420" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="1410" y1="360" x2="1410" y2="420" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Row 2 to Hoàn thành -->
+      <line x1="890" y1="470" x2="1550" y2="470" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="1090" y1="470" x2="1550" y2="470" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="1290" y1="470" x2="1550" y2="470" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="1490" y1="470" x2="1550" y2="470" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Trợ lý AI - accessible from all screens -->
+      <!-- From row 1 screens to AI -->
+      <path d="M 810 360 L 810 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+      <path d="M 1010 360 L 1010 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+      <path d="M 1210 360 L 1210 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+      <path d="M 1410 360 L 1410 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+
+      <!-- From row 2 screens to AI -->
+      <path d="M 810 530 L 810 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+      <path d="M 1010 530 L 1010 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+      <path d="M 1210 530 L 1210 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+      <path d="M 1410 530 L 1410 600 L 610 600" stroke="#9C27B0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+        stroke-dasharray="3,3" />
+
+      <!-- Chụp ảnh -> AI đọc -> Kết quả -->
+      <line x1="670" y1="650" x2="750" y2="650" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="870" y1="650" x2="950" y2="650" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Kết quả to Lịch sử -->
+      <line x1="1070" y1="650" x2="1200" y2="650" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+      <!-- Lịch sử back to screens -->
+      <path d="M 1260 700 L 1260 750 L 1410 750 L 1410 530" stroke="#666" stroke-width="2" fill="none"
+        marker-end="url(#arrow)" stroke-dasharray="5,5" />
+
+      <!-- Lỗi mạng -->
+      <line x1="1010" y1="700" x2="1010" y2="800" stroke="#ff0000" stroke-width="2" marker-end="url(#arrow)"
+        stroke-dasharray="5,5" />
+    </svg>
+
+    <!-- Actions (Circles) -->
+    <div id="start" class="action">
+      <div class="label">Bắt đầu</div>
+    </div>
+
+    <div id="chup-anh" class="action">
+      <div class="label">Chụp ảnh<br>văn bản</div>
+    </div>
+
+    <!-- Screens (Rectangles) -->
+    <div id="menu-main" class="screen">
+      <div class="label">Menu chính</div>
+      <div class="desc">Giao diện chính</div>
+    </div>
+
+    <div id="chu-cai" class="screen">
+      <div class="label">Học chữ cái</div>
+      <div class="desc">A-Z, a-z</div>
+    </div>
+
+    <div id="danh-van" class="screen">
+      <div class="label">Đánh vần</div>
+      <div class="desc">Ghép âm tiết</div>
+    </div>
+
+    <div id="viet-tay" class="screen">
+      <div class="label">Chữ viết tay</div>
+      <div class="desc">Luyện viết</div>
+    </div>
+
+    <div id="thanh-am" class="screen">
+      <div class="label">Thanh âm</div>
+      <div class="desc">6 thanh điệu</div>
+    </div>
+
+    <div id="dau-cau" class="screen">
+      <div class="label">Dấu câu</div>
+      <div class="desc">Dấu hỏi, ngã...</div>
+    </div>
+
+    <div id="luyen-doc" class="screen">
+      <div class="label">Luyện đọc</div>
+      <div class="desc">Đọc mẫu câu</div>
+    </div>
+
+    <div id="do-vui" class="screen">
+      <div class="label">Đố vui</div>
+      <div class="desc">Trò chơi</div>
+    </div>
+
+    <div id="tien-do" class="screen">
+      <div class="label">Thời gian học</div>
+      <div class="desc">Tiến độ</div>
+    </div>
+
+    <div id="ai-doc" class="screen">
+      <div class="label">AI đọc</div>
+      <div class="desc">Đọc văn bản</div>
+    </div>
+
+    <div id="ket-qua-doc" class="screen">
+      <div class="label">Kết quả</div>
+      <div class="desc">Văn bản đã đọc</div>
+    </div>
+
+    <div id="lich-su" class="screen">
+      <div class="label">Lịch sử</div>
+      <div class="desc">Xem lại bài học</div>
+    </div>
+
+    <div id="loi-mang" class="screen" style="border-color: #f44336;">
+      <div class="label" style="color: #f44336;">Lỗi mạng</div>
+      <div class="desc">Không kết nối</div>
+    </div>
+
+    <!-- Decisions (Diamonds) -->
+    <div id="choose-mode" class="decision">
+      <div class="decision-content">
+        <div class="label">Chọn<br>chế độ?</div>
+      </div>
+    </div>
+
+    <div id="hoc-ngon-ngu" class="decision">
+      <div class="decision-content">
+        <div class="label">Học<br>ngôn ngữ</div>
+      </div>
+    </div>
+
+    <div id="hoan-thanh" class="decision">
+      <div class="decision-content">
+        <div class="label">Hoàn<br>thành</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

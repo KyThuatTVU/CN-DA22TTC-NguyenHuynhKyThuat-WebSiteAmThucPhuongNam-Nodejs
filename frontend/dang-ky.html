@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký - Nhà hàng Phương Nam Vĩnh Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/modern-style.css">
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full">
+            <div class="text-center mb-8">
+                <a href="index.html" class="inline-flex items-center space-x-3">
+                    <i class="fas fa-utensils text-5xl text-orange-600"></i>
+                    <div class="text-left">
+                        <h1 class="font-dancing text-3xl font-bold text-gray-800">Phương Nam</h1>
+                        <p class="text-sm text-gray-600">Vĩnh Long</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-3xl font-bold text-center mb-2">Đăng Ký</h2>
+                <p class="text-gray-600 text-center mb-8">Tạo tài khoản mới</p>
+
+                <form id="register-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Họ và tên đệm</label>
+                            <input type="text" required class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="Nguyễn Văn">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Tên</label>
+                            <input type="text" required class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="A">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" required class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="email@example.com">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Số điện thoại</label>
+                        <input type="tel" required class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="0123456789">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Mật khẩu</label>
+                        <input type="password" required class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="Tối thiểu 8 ký tự">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Xác nhận mật khẩu</label>
+                        <input type="password" required class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="Nhập lại mật khẩu">
+                    </div>
+
+                    <label class="flex items-start">
+                        <input type="checkbox" required class="w-4 h-4 text-orange-600 rounded mt-1">
+                        <span class="ml-2 text-sm text-gray-600">
+                            Tôi đồng ý với <a href="#" class="text-orange-600 hover:text-orange-700">Điều khoản dịch vụ</a> và 
+                            <a href="#" class="text-orange-600 hover:text-orange-700">Chính sách bảo mật</a>
+                        </span>
+                    </label>
+
+                    <button type="submit" class="w-full auth-bg text-white py-3 rounded-lg font-medium text-lg hover:opacity-90 transition">
+                        <i class="fas fa-user-plus mr-2"></i> Đăng ký
+                    </button>
+
+                    <p class="text-center text-gray-600 mt-6">
+                        Đã có tài khoản? 
+                        <a href="dang-nhap.html" class="text-orange-600 hover:text-orange-700 font-medium">Đăng nhập</a>
+                    </p>
+                </form>
+            </div>
+
+            <div class="text-center mt-6">
+                <a href="index.html" class="text-gray-600 hover:text-gray-800 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Quay lại trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Đăng ký thành công!');
+            window.location.href = 'dang-nhap.html';
+        });
+    </script>
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+    <!-- Chatbot Container -->
+    <div id="chatbot-container"></div>
+    <script src="js/load-components.js"></script>
+    
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/gsap-auth.js"></script>
+</body>
+</html>
