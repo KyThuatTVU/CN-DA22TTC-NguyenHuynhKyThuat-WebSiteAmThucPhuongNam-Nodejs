@@ -1,59 +1,160 @@
-// Sample menu data
-const menuProducts = [
-    { id: 1, name: 'Cá Lóc Nướng Trui', price: 200000, oldPrice: 250000, image: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=400', rating: 5, reviews: 128, discount: 20 },
-    { id: 2, name: 'Lẩu Mắm Miền Tây', price: 350000, oldPrice: null, image: 'https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?w=400', rating: 4.5, reviews: 95 },
-    { id: 3, name: 'Gỏi Cuốn Tôm Thịt', price: 85000, oldPrice: 100000, image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400', rating: 4, reviews: 67, discount: 15 },
-    { id: 4, name: 'Bánh Xèo Miền Tây', price: 120000, oldPrice: null, image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400', rating: 5, reviews: 145 },
-    { id: 5, name: 'Hủ Tiếu Nam Vang', price: 65000, oldPrice: null, image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', rating: 4.5, reviews: 89 },
-    { id: 6, name: 'Bánh Tằm Bì', price: 55000, oldPrice: 70000, image: 'https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=400', rating: 4, reviews: 56, discount: 21 },
-    { id: 7, name: 'Canh Chua Cá Lóc', price: 180000, oldPrice: null, image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=400', rating: 5, reviews: 112 },
-    { id: 8, name: 'Gà Nướng Mật Ong', price: 280000, oldPrice: null, image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400', rating: 4.5, reviews: 98 },
-    { id: 9, name: 'Tôm Sú Nướng', price: 450000, oldPrice: 500000, image: 'https://images.unsplash.com/photo-1633504581786-316c8002b1b9?w=400', rating: 5, reviews: 134, discount: 10 },
-    { id: 10, name: 'Cơm Chiên Dương Châu', price: 75000, oldPrice: null, image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400', rating: 4, reviews: 78 },
-    { id: 11, name: 'Mì Xào Hải Sản', price: 95000, oldPrice: null, image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400', rating: 4.5, reviews: 65 },
-    { id: 12, name: 'Cá Kho Tộ', price: 160000, oldPrice: 180000, image: 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=400', rating: 5, reviews: 103, discount: 11 },
-    { id: 13, name: 'Bò Lúc Lắc', price: 220000, oldPrice: null, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400', rating: 4.5, reviews: 91 },
-    { id: 14, name: 'Rau Muống Xào Tỏi', price: 45000, oldPrice: null, image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400', rating: 4, reviews: 45 },
-    { id: 15, name: 'Ốc Hương Xào Bơ', price: 180000, oldPrice: 200000, image: 'https://images.unsplash.com/photo-1599421258361-ca2f5e2f03c7?w=400', rating: 5, reviews: 87, discount: 10 },
-    { id: 16, name: 'Chả Giò Rế', price: 80000, oldPrice: null, image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400', rating: 4.5, reviews: 72 },
-    { id: 17, name: 'Nước Dừa Tươi', price: 25000, oldPrice: null, image: 'https://images.unsplash.com/photo-1585217732046-e5f69f92a046?w=400', rating: 5, reviews: 156 },
-    { id: 18, name: 'Trà Đá Chanh', price: 15000, oldPrice: null, image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400', rating: 4, reviews: 89 }
-];
+// API Configuration
+const API_URL = 'http://localhost:3000/api';
+
+// State
+let menuProducts = [];
+let categories = [];
+let selectedCategory = null;
+
+// Fetch categories from API
+async function fetchCategories() {
+    try {
+        const response = await fetch(`${API_URL}/categories`);
+        const result = await response.json();
+        if (result.success) {
+            categories = result.data;
+            renderCategoryFilters();
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải danh mục:', error);
+    }
+}
+
+// Fetch menu products from API
+async function fetchMenuProducts(categoryId = null) {
+    try {
+        const url = categoryId 
+            ? `${API_URL}/menu/category/${categoryId}`
+            : `${API_URL}/menu`;
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success) {
+            menuProducts = result.data;
+            renderMenuProducts();
+            updateProductCount();
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải món ăn:', error);
+        showError();
+    }
+}
+
+// Render category filters
+function renderCategoryFilters() {
+    const categoryContainer = document.querySelector('.space-y-2');
+    if (!categoryContainer) return;
+
+    const categoryHTML = `
+        <label class="flex items-center cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 text-orange-600 rounded category-filter" 
+                   data-category="all" ${!selectedCategory ? 'checked' : ''}>
+            <span class="ml-2 text-gray-700">Tất cả</span>
+        </label>
+        ${categories.map(cat => `
+            <label class="flex items-center cursor-pointer">
+                <input type="checkbox" class="w-4 h-4 text-orange-600 rounded category-filter" 
+                       data-category="${cat.ma_danh_muc}" 
+                       ${selectedCategory === cat.ma_danh_muc ? 'checked' : ''}>
+                <span class="ml-2 text-gray-700">${cat.ten_danh_muc}</span>
+            </label>
+        `).join('')}
+    `;
+    
+    categoryContainer.innerHTML = categoryHTML;
+
+    // Add event listeners
+    document.querySelectorAll('.category-filter').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Uncheck all others
+            document.querySelectorAll('.category-filter').forEach(cb => {
+                if (cb !== this) cb.checked = false;
+            });
+            
+            const category = this.dataset.category;
+            selectedCategory = category === 'all' ? null : parseInt(category);
+            fetchMenuProducts(selectedCategory);
+        });
+    });
+}
 
 // Render products
 function renderMenuProducts() {
     const container = document.getElementById('menu-products');
     if (!container) return;
 
+    if (menuProducts.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-utensils text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Không tìm thấy món ăn nào</p>
+            </div>
+        `;
+        return;
+    }
+
     container.innerHTML = menuProducts.map(product => `
         <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm">
-            <div class="relative">
-                <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
-                ${product.discount ? `<span class="absolute top-3 left-3 badge-discount text-white px-3 py-1 rounded-full text-sm font-medium">-${product.discount}%</span>` : ''}
+            <div class="relative bg-gray-50">
+                <img src="http://localhost:3000${product.anh_mon || '/images/placeholder.jpg'}" 
+                     alt="${product.ten_mon}" 
+                     class="w-full h-48 object-contain"
+                     onerror="this.onerror=null; this.src='images/placeholder.jpg'">
+                ${product.trang_thai === 0 ? `<span class="absolute top-3 left-3 bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-medium">Hết hàng</span>` : ''}
                 <button class="absolute top-3 right-3 bg-white w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
                     <i class="far fa-heart"></i>
                 </button>
             </div>
             <div class="p-4">
-                <h3 class="font-medium text-lg mb-2 text-gray-800">${product.name}</h3>
+                <h3 class="font-medium text-lg mb-2 text-gray-800">${product.ten_mon}</h3>
+                <p class="text-gray-500 text-sm mb-2 line-clamp-2">${product.mo_ta_chi_tiet || ''}</p>
                 <div class="flex items-center mb-2">
                     <div class="text-yellow-400 text-sm">
-                        ${generateStars(product.rating)}
+                        ${generateStars(4.5)}
                     </div>
-                    <span class="text-gray-500 text-sm ml-2">(${product.reviews})</span>
+                    <span class="text-gray-500 text-sm ml-2">(${Math.floor(Math.random() * 100) + 20})</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div>
-                        <span class="text-orange-600 font-bold text-xl">${formatPrice(product.price)}</span>
-                        ${product.oldPrice ? `<span class="text-gray-400 line-through text-sm ml-2">${formatPrice(product.oldPrice)}</span>` : ''}
+                        <span class="text-orange-600 font-bold text-xl">${formatPrice(parseFloat(product.gia_tien))}</span>
+                        <div class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-box"></i> ${product.so_luong_ton} ${product.don_vi_tinh}
+                        </div>
                     </div>
-                    <button onclick="addToCart(${product.id})" class="bg-orange-600 text-white w-10 h-10 rounded-full hover:bg-orange-700 transition">
+                    <button onclick="addToCart(${product.ma_mon})" 
+                            ${product.trang_thai === 0 || product.so_luong_ton === 0 ? 'disabled' : ''}
+                            class="bg-orange-600 text-white w-10 h-10 rounded-full hover:bg-orange-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
             </div>
         </div>
     `).join('');
+}
+
+// Show error message
+function showError() {
+    const container = document.getElementById('menu-products');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
+            <button onclick="fetchMenuProducts()" class="mt-4 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700">
+                Thử lại
+            </button>
+        </div>
+    `;
+}
+
+// Update product count
+function updateProductCount() {
+    const countElement = document.querySelector('.text-gray-600 strong');
+    if (countElement) {
+        countElement.textContent = menuProducts.length;
+    }
 }
 
 // Generate stars
@@ -84,4 +185,7 @@ function formatPrice(price) {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', renderMenuProducts);
+document.addEventListener('DOMContentLoaded', () => {
+    fetchCategories();
+    fetchMenuProducts();
+});
