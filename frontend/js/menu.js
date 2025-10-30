@@ -108,7 +108,8 @@ function renderMenuProducts() {
     container.innerHTML = menuProducts.map(product => `
         <div class="dish-card bg-white rounded-2xl overflow-hidden shadow-md">
             <!-- Image Container -->
-            <div class="dish-image-container">
+            <a href="chitietmonan.html?id=${product.ma_mon}" class="block">
+                <div class="dish-image-container">
                 <img src="http://localhost:3000${product.anh_mon || '/images/placeholder.jpg'}" 
                      alt="${product.ten_mon}" 
                      class="dish-image"
@@ -141,13 +142,16 @@ function renderMenuProducts() {
                     <i class="far fa-heart text-lg"></i>
                 </button>
             </div>
+            </a>
             
             <!-- Content -->
             <div class="p-5">
                 <!-- Title -->
-                <h3 class="font-bold text-lg mb-2 text-gray-800 line-clamp-1 hover:text-orange-600 transition cursor-pointer">
-                    ${product.ten_mon}
-                </h3>
+                <a href="chitietmonan.html?id=${product.ma_mon}" class="block">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800 line-clamp-1 hover:text-orange-600 transition cursor-pointer">
+                        ${product.ten_mon}
+                    </h3>
+                </a>
                 
                 <!-- Description -->
                 <p class="text-gray-500 text-sm mb-3 line-clamp-2 leading-relaxed">

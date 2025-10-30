@@ -33,10 +33,13 @@ router.get('/category/:id', async (req, res) => {
 // Lấy chi tiết món ăn
 router.get('/:id', async (req, res) => {
   try {
-    const [rows] = await db.query(
-      'SELECT * FROM mon_an WHERE ma_mon = ?',
-      [req.params.id]
-    );
+    const [rows] = await db.query(`
+      SELECT m.*, d.ten_danh_muc 
+      FROM mon_an m 
+      LEFT JOIN danh_muc d ON m.ma_danh_muc = d.ma_danh_muc
+      WHERE m.ma_mon = ?
+    `, [req.params.id]);
+    
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
     }

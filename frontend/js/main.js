@@ -72,26 +72,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Navbar scroll effect
     const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('navbar-scrolled');
-        } else {
-            navbar.classList.remove('navbar-scrolled');
-        }
-    });
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+        });
+    }
 
     // Chatbot toggle
     const chatbotBtn = document.getElementById('chatbot-btn');
     const chatbotWindow = document.getElementById('chatbot-window');
     const closeChatbot = document.getElementById('close-chatbot');
     
-    if (chatbotBtn) {
+    if (chatbotBtn && chatbotWindow) {
         chatbotBtn.addEventListener('click', () => {
             chatbotWindow.classList.toggle('hidden');
         });
     }
     
-    if (closeChatbot) {
+    if (closeChatbot && chatbotWindow) {
         closeChatbot.addEventListener('click', () => {
             chatbotWindow.classList.add('hidden');
         });
