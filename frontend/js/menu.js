@@ -23,6 +23,8 @@ async function fetchCategories() {
 // Fetch menu products from API
 async function fetchMenuProducts(categoryId = null) {
     try {
+        showLoading();
+        
         const url = categoryId 
             ? `${API_URL}/menu/category/${categoryId}`
             : `${API_URL}/menu`;
@@ -32,8 +34,12 @@ async function fetchMenuProducts(categoryId = null) {
         
         if (result.success) {
             menuProducts = result.data;
-            renderMenuProducts();
-            updateProductCount();
+            
+            // Simulate loading for smooth transition
+            setTimeout(() => {
+                renderMenuProducts();
+                updateProductCount();
+            }, 300);
         }
     } catch (error) {
         console.error('Lỗi khi tải món ăn:', error);
@@ -75,6 +81,11 @@ function renderCategoryFilters() {
             const category = this.dataset.category;
             selectedCategory = category === 'all' ? null : parseInt(category);
             fetchMenuProducts(selectedCategory);
+            
+            // Smooth scroll to products
+            if (typeof window.smoothScrollToProducts === 'function') {
+                window.smoothScrollToProducts();
+            }
         });
     });
 }
@@ -95,42 +106,108 @@ function renderMenuProducts() {
     }
 
     container.innerHTML = menuProducts.map(product => `
-        <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm">
-            <div class="relative bg-gray-50">
+        <div class="dish-card bg-white rounded-2xl overflow-hidden shadow-md">
+            <!-- Image Container -->
+            <div class="dish-image-container">
                 <img src="http://localhost:3000${product.anh_mon || '/images/placeholder.jpg'}" 
                      alt="${product.ten_mon}" 
-                     class="w-full h-48 object-contain"
-                     onerror="this.onerror=null; this.src='images/placeholder.jpg'">
-                ${product.trang_thai === 0 ? `<span class="absolute top-3 left-3 bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-medium">Hết hàng</span>` : ''}
-                <button class="absolute top-3 right-3 bg-white w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
-                    <i class="far fa-heart"></i>
+                     class="dish-image"
+                     loading="lazy"
+                     onerror="this.onerror=null; this.src='images/placeholder.svg'; this.style.objectFit='contain';">
+                
+                <!-- Overlay -->
+                <div class="image-overlay"></div>
+                
+                <!-- Badges -->
+                <div class="absolute top-3 left-3 flex flex-col gap-2">
+                    ${product.trang_thai === 0 || product.so_luong_ton === 0 
+                        ? `<span class="badge-status text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+                            <i class="fas fa-times-circle mr-1"></i>Hết hàng
+                           </span>` 
+                        : product.so_luong_ton < 10 
+                        ? `<span class="badge-status bg-yellow-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>Sắp hết
+                           </span>`
+                        : ''}
+                    ${product.ten_danh_muc 
+                        ? `<span class="category-badge text-orange-600 px-3 py-1.5 rounded-full text-xs font-semibold">
+                            <i class="fas fa-tag mr-1"></i>${product.ten_danh_muc}
+                           </span>`
+                        : ''}
+                </div>
+                
+                <!-- Favorite Button -->
+                <button class="favorite-btn absolute top-3 right-3 bg-white w-11 h-11 rounded-full flex items-center justify-center text-gray-600 shadow-lg hover:shadow-xl">
+                    <i class="far fa-heart text-lg"></i>
                 </button>
             </div>
-            <div class="p-4">
-                <h3 class="font-medium text-lg mb-2 text-gray-800">${product.ten_mon}</h3>
-                <p class="text-gray-500 text-sm mb-2 line-clamp-2">${product.mo_ta_chi_tiet || ''}</p>
-                <div class="flex items-center mb-2">
+            
+            <!-- Content -->
+            <div class="p-5">
+                <!-- Title -->
+                <h3 class="font-bold text-lg mb-2 text-gray-800 line-clamp-1 hover:text-orange-600 transition cursor-pointer">
+                    ${product.ten_mon}
+                </h3>
+                
+                <!-- Description -->
+                <p class="text-gray-500 text-sm mb-3 line-clamp-2 leading-relaxed">
+                    ${product.mo_ta_chi_tiet || 'Món ăn đặc sắc, hương vị đậm đà'}
+                </p>
+                
+                <!-- Rating -->
+                <div class="flex items-center mb-3">
                     <div class="text-yellow-400 text-sm">
                         ${generateStars(4.5)}
                     </div>
-                    <span class="text-gray-500 text-sm ml-2">(${Math.floor(Math.random() * 100) + 20})</span>
+                    <span class="text-gray-500 text-sm ml-2 font-medium">(${Math.floor(Math.random() * 100) + 20})</span>
+                    <span class="text-gray-300 mx-2">•</span>
+                    <span class="text-gray-500 text-xs">
+                        <i class="fas fa-box-open mr-1"></i>${product.so_luong_ton} ${product.don_vi_tinh}
+                    </span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <span class="text-orange-600 font-bold text-xl">${formatPrice(parseFloat(product.gia_tien))}</span>
-                        <div class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-box"></i> ${product.so_luong_ton} ${product.don_vi_tinh}
-                        </div>
+                
+                <!-- Price & Action -->
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div class="flex flex-col">
+                        <span class="price-tag text-2xl font-bold">
+                            ${formatPrice(parseFloat(product.gia_tien))}
+                        </span>
+                        <span class="text-xs text-gray-400 mt-0.5">
+                            <i class="fas fa-shipping-fast mr-1"></i>Miễn phí ship
+                        </span>
                     </div>
                     <button onclick="addToCart(${product.ma_mon})" 
                             ${product.trang_thai === 0 || product.so_luong_ton === 0 ? 'disabled' : ''}
-                            class="bg-orange-600 text-white w-10 h-10 rounded-full hover:bg-orange-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        <i class="fas fa-plus"></i>
+                            class="add-to-cart-btn bg-gradient-to-r from-orange-500 to-red-500 text-white w-12 h-12 rounded-full hover:from-orange-600 hover:to-red-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-lg"></i>
                     </button>
                 </div>
             </div>
         </div>
     `).join('');
+}
+
+// Show loading skeleton
+function showLoading() {
+    const container = document.getElementById('menu-products');
+    if (!container) return;
+    
+    const skeletonHTML = Array(6).fill(0).map(() => `
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md">
+            <div class="skeleton h-64 w-full"></div>
+            <div class="p-5">
+                <div class="skeleton h-6 w-3/4 mb-3 rounded"></div>
+                <div class="skeleton h-4 w-full mb-2 rounded"></div>
+                <div class="skeleton h-4 w-2/3 mb-4 rounded"></div>
+                <div class="flex justify-between items-center">
+                    <div class="skeleton h-8 w-24 rounded"></div>
+                    <div class="skeleton h-12 w-12 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = skeletonHTML;
 }
 
 // Show error message
@@ -139,12 +216,15 @@ function showError() {
     if (!container) return;
     
     container.innerHTML = `
-        <div class="col-span-full text-center py-12">
-            <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
-            <p class="text-gray-500 text-lg">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
-            <button onclick="fetchMenuProducts()" class="mt-4 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700">
-                Thử lại
-            </button>
+        <div class="col-span-full text-center py-16">
+            <div class="inline-block p-8 bg-red-50 rounded-2xl">
+                <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                <p class="text-gray-700 text-lg font-medium mb-2">Không thể tải dữ liệu</p>
+                <p class="text-gray-500 text-sm mb-4">Vui lòng kiểm tra kết nối và thử lại</p>
+                <button onclick="fetchMenuProducts()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition shadow-lg">
+                    <i class="fas fa-redo mr-2"></i>Thử lại
+                </button>
+            </div>
         </div>
     `;
 }
