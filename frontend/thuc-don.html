@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,184 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/modern-style.css">
     <style>
-        .cart-badge { top: -8px; right: -8px; min-width: 20px; height: 20px; }
-        .filter-active { background: #ea580c; color: white; }
+        .cart-badge {
+            top: -8px;
+            right: -8px;
+            min-width: 20px;
+            height: 20px;
+        }
+
+        .filter-active {
+            background: #ea580c;
+            color: white;
+        }
+
+        /* Card hover effects */
+        .dish-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dish-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Image container */
+        .dish-image-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+        }
+
+        .dish-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .dish-card:hover .dish-image {
+            transform: scale(1.1);
+        }
+
+        /* Image overlay */
+        .image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dish-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        /* Badge styles */
+        .badge-discount {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .badge-status {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Price animation */
+        .price-tag {
+            font-weight: 700;
+            background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Button effects */
+        .add-to-cart-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+        }
+
+        .add-to-cart-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5);
+        }
+
+        .favorite-btn {
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.2);
+            color: #ef4444;
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Category badge */
+        .category-badge {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(234, 88, 12, 0.2);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .dish-image-container {
+                height: 240px;
+            }
+
+            .dish-card {
+                margin-bottom: 1rem;
+            }
+
+            .price-tag {
+                font-size: 1.5rem;
+            }
+
+            .add-to-cart-btn {
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .dish-image-container {
+                height: 200px;
+            }
+        }
+
+        /* Line clamp utility */
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
+
 <body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-   <!-- Navigation Container -->
+    <!-- Navigation Container -->
     <div id="navbar-container"></div>
     <!-- Page Header -->
     <section class="bg-gradient-to-r from-orange-600 to-red-600 text-white py-20">
@@ -31,7 +204,7 @@
                 <div class="lg:w-1/4">
                     <div class="bg-white rounded-xl p-6 shadow-sm sticky top-24">
                         <h3 class="font-bold text-xl mb-4">Bộ lọc</h3>
-                        
+
                         <!-- Category Filter -->
                         <div class="mb-6">
                             <h4 class="font-medium mb-3">Danh mục</h4>
@@ -126,19 +299,24 @@
                 <!-- Products Grid -->
                 <div class="lg:w-3/4">
                     <!-- Sort Bar -->
-                    <div class="bg-white rounded-xl p-4 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div
+                        class="bg-white rounded-xl p-4 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center space-x-4">
                             <span class="text-gray-700">Sắp xếp:</span>
-                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                            <button
+                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
                                 Phổ biến
                             </button>
-                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                            <button
+                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
                                 Mới nhất
                             </button>
-                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                            <button
+                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
                                 Giá tăng
                             </button>
-                            <button class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
+                            <button
+                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
                                 Giá giảm
                             </button>
                         </div>
@@ -146,7 +324,8 @@
                     </div>
 
                     <!-- Products -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="menu-products">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6"
+                        id="menu-products">
                         <!-- Product items will be rendered here by JavaScript -->
                     </div>
 
@@ -156,8 +335,10 @@
                             <i class="fas fa-chevron-left"></i>
                         </button>
                         <button class="px-4 py-2 border rounded-lg bg-orange-600 text-white">1</button>
-                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">2</button>
-                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">3</button>
+                        <button
+                            class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">2</button>
+                        <button
+                            class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">3</button>
                         <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">
                             <i class="fas fa-chevron-right"></i>
                         </button>
@@ -179,10 +360,12 @@
     <script src="js/main.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/load-components.js"></script>
-    
+
     <!-- GSAP Animation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
     <script src="js/gsap-thuc-don.js"></script>
 </body>
+
 </html>
