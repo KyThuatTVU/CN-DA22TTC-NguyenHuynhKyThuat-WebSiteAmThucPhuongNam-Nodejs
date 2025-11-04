@@ -142,10 +142,62 @@
             border: 1px solid rgba(234, 88, 12, 0.2);
         }
 
+        /* Mobile Filter Overlay */
+        #filter-sidebar.mobile-open {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Filter Backdrop */
+        .filter-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
         /* Responsive design */
+        @media (max-width: 1024px) {
+            #filter-sidebar {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
         @media (max-width: 768px) {
             .dish-image-container {
-                height: 240px;
+                height: 220px;
             }
 
             .dish-card {
@@ -153,18 +205,36 @@
             }
 
             .price-tag {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
             }
 
             .add-to-cart-btn {
-                width: 48px;
-                height: 48px;
+                width: 44px;
+                height: 44px;
+            }
+
+            /* Optimize mobile grid */
+            #menu-products {
+                gap: 1rem !important;
             }
         }
 
         @media (max-width: 640px) {
             .dish-image-container {
-                height: 200px;
+                height: 180px;
+            }
+
+            .dish-card {
+                font-size: 0.9rem;
+            }
+
+            .price-tag {
+                font-size: 1.1rem;
+            }
+
+            .add-to-cart-btn {
+                width: 40px;
+                height: 40px;
             }
         }
 
@@ -189,21 +259,70 @@
     <!-- Navigation Container -->
     <div id="navbar-container"></div>
     <!-- Page Header -->
-    <section class="bg-gradient-to-r from-orange-600 to-red-600 text-white py-20">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="font-dancing text-5xl font-bold mb-4">Thực Đơn</h1>
-            <p class="text-xl">Khám phá hương vị ẩm thực miền Tây đặc sắc</p>
+    <section
+        class="relative w-full text-white overflow-hidden h-[250px] sm:h-[320px] md:h-[380px] lg:h-[420px] flex items-center justify-center text-center bg-[#d1b6a1]">
+        <!-- Background Image -->
+        <div class="absolute inset-0 opacity-70" style="background-image: url('images/cau-long-bien.jpg');
+              background-size: cover;
+              background-position: center;
+              filter: sepia(90%) brightness(90%) contrast(85%);">
+        </div>
+
+        <!-- Nền nâu nhẹ phủ -->
+        <div class="absolute inset-0 bg-[#c9a988]/50"></div>
+
+        <!-- Nội dung chữ -->
+        <div class="relative z-10 px-4">
+            <h1
+                class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 drop-shadow-lg text-[#4b2c16]">
+                Thực đơn
+            </h1>
+            <p class="text-base sm:text-lg md:text-xl lg:text-2xl font-light text-[#5b3a1e]">
+                Hương vị từ miền sông nước
+            </p>
         </div>
     </section>
 
+
     <!-- Menu Section -->
-    <section class="py-12">
+    <section class="py-6 sm:py-8 md:py-12">
         <div class="container mx-auto px-4">
+            <!-- Search Bar -->
+            <div class="mb-4 sm:mb-6">
+                <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="Tìm kiếm món ăn..."
+                            class="w-full px-4 sm:px-5 py-2 sm:py-3 pl-10 sm:pl-12 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+                        <i
+                            class="fas fa-search absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
+                        <button id="clear-search"
+                            class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-orange-600 transition hidden">
+                            <i class="fas fa-times text-sm sm:text-base"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Mobile Filter Toggle Button -->
+                <button id="mobile-filter-toggle"
+                    class="lg:hidden w-full bg-white rounded-xl p-4 shadow-sm flex items-center justify-between mb-4">
+                    <span class="font-semibold text-gray-800">
+                        <i class="fas fa-filter mr-2"></i>Bộ lọc & Sắp xếp
+                    </span>
+                    <i class="fas fa-chevron-down transition-transform" id="filter-icon"></i>
+                </button>
+
                 <!-- Sidebar Filters -->
                 <div class="lg:w-1/4">
-                    <div class="bg-white rounded-xl p-6 shadow-sm sticky top-24">
-                        <h3 class="font-bold text-xl mb-4">Bộ lọc</h3>
+                    <div id="filter-sidebar"
+                        class="bg-white rounded-xl p-6 shadow-sm lg:sticky lg:top-24 hidden lg:block">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-xl">Bộ lọc</h3>
+                            <button id="mobile-filter-close" class="lg:hidden text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
 
                         <!-- Category Filter -->
                         <div class="mb-6">
@@ -290,37 +409,69 @@
                             </div>
                         </div>
 
-                        <button class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition">
-                            Áp dụng bộ lọc
-                        </button>
+                        <div class="flex gap-2">
+                            <button
+                                class="flex-1 bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition"
+                                id="apply-filter">
+                                Áp dụng
+                            </button>
+                            <button
+                                class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
+                                id="reset-filter">
+                                Đặt lại
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Products Grid -->
                 <div class="lg:w-3/4">
                     <!-- Sort Bar -->
-                    <div
-                        class="bg-white rounded-xl p-4 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
-                        <div class="flex items-center space-x-4">
-                            <span class="text-gray-700">Sắp xếp:</span>
-                            <button
-                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
-                                Phổ biến
-                            </button>
-                            <button
-                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
-                                Mới nhất
-                            </button>
-                            <button
-                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
-                                Giá tăng
-                            </button>
-                            <button
-                                class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition">
-                                Giá giảm
-                            </button>
+                    <div class="bg-white rounded-xl p-4 mb-6 shadow-sm">
+                        <!-- Desktop Sort -->
+                        <div class="hidden md:flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-gray-700">Sắp xếp:</span>
+                                <button
+                                    class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition"
+                                    data-sort="popular">
+                                    Phổ biến
+                                </button>
+                                <button
+                                    class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition"
+                                    data-sort="newest">
+                                    Mới nhất
+                                </button>
+                                <button
+                                    class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition"
+                                    data-sort="price-asc">
+                                    Giá tăng
+                                </button>
+                                <button
+                                    class="px-4 py-2 rounded-lg border hover:border-orange-600 hover:text-orange-600 transition"
+                                    data-sort="price-desc">
+                                    Giá giảm
+                                </button>
+                            </div>
+                            <span class="text-gray-600">Tìm thấy <strong id="product-count">0</strong> món ăn</span>
                         </div>
-                        <span class="text-gray-600">Tìm thấy <strong>24</strong> món ăn</span>
+
+                        <!-- Mobile Sort -->
+                        <div class="md:hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-gray-700 font-medium">Sắp xếp theo:</span>
+                                <span class="text-gray-600 text-sm">Tìm thấy <strong
+                                        id="product-count-mobile">0</strong> món</span>
+                            </div>
+                            <select id="mobile-sort"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                                <option value="default">Mặc định</option>
+                                <option value="popular">Phổ biến nhất</option>
+                                <option value="newest">Mới nhất</option>
+                                <option value="price-asc">Giá: Thấp đến cao</option>
+                                <option value="price-desc">Giá: Cao đến thấp</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Products -->
@@ -330,18 +481,8 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="flex justify-center mt-8 space-x-2">
-                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button class="px-4 py-2 border rounded-lg bg-orange-600 text-white">1</button>
-                        <button
-                            class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">2</button>
-                        <button
-                            class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">3</button>
-                        <button class="px-4 py-2 border rounded-lg hover:bg-orange-600 hover:text-white transition">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
+                    <div class="flex justify-center mt-8 space-x-1 sm:space-x-2" id="pagination-container">
+                        <!-- Pagination will be rendered by JavaScript -->
                     </div>
                 </div>
             </div>
