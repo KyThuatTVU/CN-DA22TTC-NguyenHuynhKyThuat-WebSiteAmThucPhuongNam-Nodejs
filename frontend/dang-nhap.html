@@ -30,14 +30,16 @@
                 <p class="text-gray-600 text-center mb-8">Chào mừng bạn trở lại!</p>
 
                 <form id="login-form" class="space-y-6">
-                    <!-- Email/Phone -->
+                    <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Email hoặc Số điện thoại</label>
+                        <label class="block text-sm font-medium mb-2">Email</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-user text-gray-400"></i>
+                                <i class="fas fa-envelope text-gray-400"></i>
                             </div>
-                            <input type="text" required class="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="Email hoặc số điện thoại">
+                            <input type="email" id="email" name="email" required 
+                                   class="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" 
+                                   placeholder="email@example.com">
                         </div>
                     </div>
 
@@ -48,7 +50,9 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-lock text-gray-400"></i>
                             </div>
-                            <input type="password" id="password" required class="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:border-orange-600" placeholder="Nhập mật khẩu">
+                            <input type="password" id="password" name="mat_khau" required 
+                                   class="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:border-orange-600" 
+                                   placeholder="Nhập mật khẩu">
                             <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                 <i id="password-icon" class="fas fa-eye text-gray-400"></i>
                             </button>
@@ -111,6 +115,7 @@
         </div>
     </div>
 
+    <script src="js/auth.js"></script>
     <script>
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -127,18 +132,35 @@
             }
         }
 
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Simulate login
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg bg-green-500 text-white';
-            notification.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Đăng nhập thành công!';
-            document.body.appendChild(notification);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonHTML = submitButton.innerHTML;
             
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
+            // Get form data
+            const formData = {
+                email: document.getElementById('email').value.trim(),
+                mat_khau: document.getElementById('password').value
+            };
+            
+            // Validate
+            if (!formData.email || !formData.mat_khau) {
+                showNotification('Vui lòng nhập đầy đủ thông tin', 'error');
+                return;
+            }
+            
+            // Set loading state
+            setLoadingButton(submitButton, true);
+            
+            // Call login API
+            const result = await handleLogin(formData);
+            
+            // Reset button if failed
+            if (!result.success) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonHTML;
+            }
         });
     </script>
     <!-- Footer Container -->

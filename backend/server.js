@@ -51,10 +51,12 @@ app.get('/api/test-db', async (req, res) => {
 const menuRoutes = require('./routes/menu');
 const categoryRoutes = require('./routes/categories');
 const albumRoutes = require('./routes/albums');
+const authRoutes = require('./routes/auth');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/albums', albumRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
