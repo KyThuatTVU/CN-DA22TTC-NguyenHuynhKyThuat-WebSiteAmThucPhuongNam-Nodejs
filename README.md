@@ -93,9 +93,11 @@ Mở trình duyệt và truy cập:
 
 **Frontend:**
 - HTML5
-- TailwindCSS
+- TailwindCSS (CDN cho development, khuyến nghị cài đặt qua PostCSS/CLI cho production)
 - JavaScript (ES6+)
 - Font Awesome Icons
+
+> ⚠️ **Lưu ý về Tailwind CSS**: Hiện tại project sử dụng Tailwind CDN (`cdn.tailwindcss.com`) cho development. Khi deploy production, nên cài đặt Tailwind CSS thông qua PostCSS hoặc Tailwind CLI để tối ưu hiệu suất và loại bỏ cảnh báo trình duyệt. Xem thêm: [Tailwind Installation](https://tailwindcss.com/docs/installation)
 
 ## Database
 

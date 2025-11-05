@@ -199,6 +199,9 @@ window.handleLogout = function() {
     }
 }
 
+// Alias for backward compatibility
+window.updateUserMenu = window.renderUserMenu;
+
 // Auto-initialize after component is rendered
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {

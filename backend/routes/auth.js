@@ -11,6 +11,36 @@ const { sendVerificationEmail, sendWelcomeEmail } = require('../config/email');
 // Secret key cho JWT (nên đặt trong .env)
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
 
+// Validation functions
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+function validatePhone(phone) {
+    if (!phone) return true; // Phone is optional
+    const re = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+    return re.test(phone);
+}
+
+function validatePassword(password) {
+    if (!password || password.length < 6) {
+        return { valid: false, message: 'Mật khẩu phải có ít nhất 6 ký tự' };
+    }
+    if (!/[A-Za-z]/.test(password)) {
+        return { valid: false, message: 'Mật khẩu phải chứa ít nhất 1 chữ cái' };
+    }
+    if (!/[0-9]/.test(password)) {
+        return { valid: false, message: 'Mật khẩu phải chứa ít nhất 1 chữ số' };
+    }
+    return { valid: true };
+}
+
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    return input.trim().replace(/[<>]/g, '');
+}
+
 // Hàm tạo mã xác thực 6 số
 function generateVerificationCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -82,14 +112,58 @@ router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
 // Bước 1: Gửi mã xác thực email
 router.post('/send-verification', async (req, res) => {
     try {
-        const { ten_nguoi_dung, email, so_dien_thoai, mat_khau, dia_chi, gioi_tinh, anh_dai_dien } = req.body;
+        let { ten_nguoi_dung, email, so_dien_thoai, mat_khau, dia_chi, gioi_tinh, anh_dai_dien } = req.body;
 
-        // Validate
+        // Sanitize inputs
+        ten_nguoi_dung = sanitizeInput(ten_nguoi_dung);
+        email = sanitizeInput(email);
+        dia_chi = sanitizeInput(dia_chi);
+
+        // Validate required fields
         if (!ten_nguoi_dung || !email || !mat_khau) {
             return res.status(400).json({
                 success: false,
                 message: 'Vui lòng điền đầy đủ thông tin bắt buộc'
             });
+        }
+
+        // Validate name length
+        if (ten_nguoi_dung.length < 2 || ten_nguoi_dung.length > 150) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tên phải có từ 2 đến 150 ký tự'
+            });
+        }
+
+        // Validate email format
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email không hợp lệ'
+            });
+        }
+
+        // Validate phone format
+        if (so_dien_thoai && !validatePhone(so_dien_thoai)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng 03, 05, 07, 08, 09)'
+            });
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePassword(mat_khau);
+        if (!passwordValidation.valid) {
+            return res.status(400).json({
+                success: false,
+                message: passwordValidation.message
+            });
+        }
+
+        // Validate gender
+        const validGenders = ['khac', 'nam', 'nu'];
+        if (gioi_tinh && !validGenders.includes(gioi_tinh)) {
+            gioi_tinh = 'khac';
         }
 
         // Kiểm tra email đã tồn tại trong bảng nguoi_dung
@@ -439,12 +513,54 @@ router.put('/update', authenticateToken, async (req, res) => {
         const { ten_nguoi_dung, so_dien_thoai, dia_chi, gioi_tinh, anh_dai_dien } = req.body;
         const ma_nguoi_dung = req.user.ma_nguoi_dung;
 
-        await db.query(
-            `UPDATE nguoi_dung 
-             SET ten_nguoi_dung = ?, so_dien_thoai = ?, dia_chi = ?, gioi_tinh = ?, anh_dai_dien = ?
-             WHERE ma_nguoi_dung = ?`,
-            [ten_nguoi_dung, so_dien_thoai, dia_chi, gioi_tinh, anh_dai_dien, ma_nguoi_dung]
-        );
+        console.log('📝 Update request body:', req.body);
+        console.log('🔍 Fields received:', {
+            ten_nguoi_dung: ten_nguoi_dung !== undefined ? 'present' : 'missing',
+            so_dien_thoai: so_dien_thoai !== undefined ? 'present' : 'missing',
+            dia_chi: dia_chi !== undefined ? 'present' : 'missing',
+            gioi_tinh: gioi_tinh !== undefined ? 'present' : 'missing',
+            anh_dai_dien: anh_dai_dien !== undefined ? 'present' : 'missing'
+        });
+
+        // Build dynamic update query based on provided fields
+        const updates = [];
+        const values = [];
+
+        if (ten_nguoi_dung !== undefined && ten_nguoi_dung !== null) {
+            updates.push('ten_nguoi_dung = ?');
+            values.push(ten_nguoi_dung);
+        }
+        if (so_dien_thoai !== undefined && so_dien_thoai !== null) {
+            updates.push('so_dien_thoai = ?');
+            values.push(so_dien_thoai);
+        }
+        if (dia_chi !== undefined && dia_chi !== null) {
+            updates.push('dia_chi = ?');
+            values.push(dia_chi);
+        }
+        if (gioi_tinh !== undefined && gioi_tinh !== null) {
+            updates.push('gioi_tinh = ?');
+            values.push(gioi_tinh);
+        }
+        if (anh_dai_dien !== undefined) {
+            updates.push('anh_dai_dien = ?');
+            values.push(anh_dai_dien);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Không có thông tin để cập nhật'
+            });
+        }
+
+        values.push(ma_nguoi_dung);
+
+        const sql = `UPDATE nguoi_dung SET ${updates.join(', ')} WHERE ma_nguoi_dung = ?`;
+        console.log('📊 SQL Query:', sql);
+        console.log('📊 Values:', values);
+
+        await db.query(sql, values);
 
         res.json({
             success: true,

@@ -55,11 +55,14 @@
         </div>
     </div>
 
+    <script src="js/auth.js"></script>
     <script>
         document.getElementById('forgot-password-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Liên kết đặt lại mật khẩu đã được gửi đến email của bạn!');
-            window.location.href = 'dang-nhap.html';
+            showNotification('Liên kết đặt lại mật khẩu đã được gửi đến email của bạn!', 'success');
+            setTimeout(() => {
+                window.location.href = 'dang-nhap.html';
+            }, 2000);
         });
     </script>
     <!-- Footer Container -->

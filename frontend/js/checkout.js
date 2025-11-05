@@ -81,7 +81,12 @@ function submitOrder() {
     }
 
     if (cart.length === 0) {
-        alert('Giỏ hàng trống!');
+        if (typeof showNotification === 'function') {
+            showNotification('Giỏ hàng trống!', 'error');
+        }
+        setTimeout(() => {
+            window.location.href = 'thuc-don.html';
+        }, 1500);
         return;
     }
 

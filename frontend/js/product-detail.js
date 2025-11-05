@@ -336,7 +336,11 @@ function addToCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // Show notification
-    alert(`Đã thêm ${quantity} ${currentProduct.don_vi_tinh} ${currentProduct.ten_mon} vào giỏ hàng!`);
+    if (typeof showNotification === 'function') {
+        showNotification(`Đã thêm ${quantity} ${currentProduct.don_vi_tinh} ${currentProduct.ten_mon} vào giỏ hàng!`, 'success');
+    } else {
+        console.log(`✅ Đã thêm ${quantity} ${currentProduct.don_vi_tinh} ${currentProduct.ten_mon} vào giỏ hàng!`);
+    }
     
     // Update cart badge if exists
     updateCartBadge();
