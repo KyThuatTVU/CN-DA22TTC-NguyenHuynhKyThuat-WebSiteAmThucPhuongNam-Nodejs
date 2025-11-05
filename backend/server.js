@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,11 +52,13 @@ const menuRoutes = require('./routes/menu');
 const categoryRoutes = require('./routes/categories');
 const albumRoutes = require('./routes/albums');
 const authRoutes = require('./routes/auth');
+const cartRoutes = require('./routes/cart');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/albums', albumRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

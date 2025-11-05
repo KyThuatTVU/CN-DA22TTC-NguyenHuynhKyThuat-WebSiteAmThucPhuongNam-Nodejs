@@ -17,11 +17,15 @@ async function loadComponent(elementId, componentPath) {
 
 // Load all common components
 async function loadAllComponents() {
-    const promises = [
-        loadComponent('navbar-container', 'components/navbar.html'),
-        loadComponent('footer-container', 'components/footer.html'),
-        loadComponent('chatbot-container', 'components/chatbot.html')
-    ];
+    const promises = [];
+    
+    // Only load navbar if it doesn't already exist
+    if (!document.getElementById('navbar')) {
+        promises.push(loadComponent('navbar-container', 'components/navbar.html'));
+    }
+    
+    promises.push(loadComponent('footer-container', 'components/footer.html'));
+    promises.push(loadComponent('chatbot-container', 'components/chatbot.html'));
     
     // Load page header if container exists
     if (document.getElementById('page-header-container')) {
@@ -63,15 +67,33 @@ function initializeComponents() {
 
 // Update cart badge count
 function updateCartBadge() {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const badges = document.querySelectorAll('.cart-badge');
-    badges.forEach(badge => {
-        badge.textContent = totalItems;
-        if (totalItems > 0) {
-            badge.classList.remove('hidden');
+    // Use cartManager if available, otherwise fallback to old method
+    if (typeof cartManager !== 'undefined' && cartManager.updateCartBadge) {
+        cartManager.updateCartBadge();
+    } else {
+        // Fallback for old cart system
+        const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+        let totalItems = 0;
+        
+        // Handle both old array format and new object format
+        if (Array.isArray(cartData)) {
+            // Old format: array of items with quantity property
+            totalItems = cartData.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        } else if (cartData && typeof cartData === 'object' && cartData.so_luong !== undefined) {
+            // New format: object with so_luong property
+            totalItems = cartData.so_luong || 0;
         }
-    });
+        
+        const badges = document.querySelectorAll('.cart-badge');
+        badges.forEach(badge => {
+            badge.textContent = totalItems;
+            if (totalItems > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        });
+    }
 }
 
 // Update user menu based on login status
@@ -221,6 +243,28 @@ if (document.readyState === 'loading') {
 } else {
     loadAllComponents();
 }
+
+// Load cart.js script dynamically
+function loadCartScript() {
+    if (!document.querySelector('script[src="js/cart.js"]')) {
+        const script = document.createElement('script');
+        script.src = 'js/cart.js';
+        script.onload = function() {
+            console.log('✅ Cart script loaded');
+            // Initialize cart after script loads
+            if (typeof cartManager !== 'undefined') {
+                cartManager.loadCart();
+            }
+        };
+        script.onerror = function() {
+            console.error('❌ Failed to load cart.js');
+        };
+        document.head.appendChild(script);
+    }
+}
+
+// Load cart script
+loadCartScript();
 
 // Export for use in other scripts
 window.updateCartBadge = updateCartBadge;

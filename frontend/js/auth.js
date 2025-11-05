@@ -1,5 +1,8 @@
 // API Configuration
-const API_URL = 'http://localhost:3000/api';
+if (typeof window.API_URL === 'undefined') {
+    window.API_URL = 'http://localhost:3000/api';
+}
+const API_URL = window.API_URL;
 
 // Utility functions
 function showNotification(message, type = 'success') {

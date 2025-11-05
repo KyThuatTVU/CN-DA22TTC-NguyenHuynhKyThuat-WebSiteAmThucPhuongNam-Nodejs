@@ -1,5 +1,8 @@
 // API Configuration
-const API_URL = 'http://localhost:3000/api';
+if (typeof window.API_URL === 'undefined') {
+    window.API_URL = 'http://localhost:3000/api';
+}
+const API_URL = window.API_URL;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -311,39 +314,42 @@ function decreaseQuantity() {
 // Add to cart
 function addToCart() {
     const quantity = parseInt(document.getElementById('quantity').value);
-    
-    if (!currentProduct) return;
-    
-    // Get cart from localStorage
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    
-    // Check if product already in cart
-    const existingIndex = cart.findIndex(item => item.ma_mon === currentProduct.ma_mon);
-    
-    if (existingIndex > -1) {
-        cart[existingIndex].quantity += quantity;
-    } else {
-        cart.push({
-            ma_mon: currentProduct.ma_mon,
-            ten_mon: currentProduct.ten_mon,
-            gia_tien: currentProduct.gia_tien,
-            anh_mon: currentProduct.anh_mon,
-            quantity: quantity
-        });
+
+    if (!currentProduct) {
+        console.error('Không có thông tin món ăn');
+        return;
     }
-    
-    // Save to localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Show notification
-    if (typeof showNotification === 'function') {
-        showNotification(`Đã thêm ${quantity} ${currentProduct.don_vi_tinh} ${currentProduct.ten_mon} vào giỏ hàng!`, 'success');
+
+    // Use cartManager if available
+    if (typeof cartManager !== 'undefined') {
+        cartManager.addToCart(currentProduct.ma_mon, quantity);
     } else {
-        console.log(`✅ Đã thêm ${quantity} ${currentProduct.don_vi_tinh} ${currentProduct.ten_mon} vào giỏ hàng!`);
+        console.warn('CartManager not loaded, using fallback');
+        // Fallback to old localStorage method
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        const existingIndex = cart.findIndex(item => item.ma_mon === currentProduct.ma_mon);
+
+        if (existingIndex > -1) {
+            cart[existingIndex].quantity += quantity;
+        } else {
+            cart.push({
+                ma_mon: currentProduct.ma_mon,
+                ten_mon: currentProduct.ten_mon,
+                gia_tien: currentProduct.gia_tien,
+                anh_mon: currentProduct.anh_mon,
+                quantity: quantity
+            });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        if (typeof showNotification === 'function') {
+            showNotification(`Đã thêm ${quantity} ${currentProduct.don_vi_tinh} ${currentProduct.ten_mon} vào giỏ hàng!`, 'success');
+        }
+
+        updateCartBadge();
     }
-    
-    // Update cart badge if exists
-    updateCartBadge();
 }
 
 // Buy now
@@ -354,12 +360,18 @@ function buyNow() {
 
 // Update cart badge
 function updateCartBadge() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    const badge = document.querySelector('.cart-badge');
-    if (badge) {
-        badge.textContent = totalItems;
+    // Use cartManager if available
+    if (typeof cartManager !== 'undefined' && cartManager.updateCartBadge) {
+        cartManager.updateCartBadge();
+    } else {
+        // Fallback to old method
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        const badge = document.querySelector('.cart-badge');
+        if (badge) {
+            badge.textContent = totalItems;
+        }
     }
 }
 

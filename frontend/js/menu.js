@@ -1,5 +1,8 @@
 // API Configuration
-const API_URL = 'http://localhost:3000/api';
+if (typeof window.API_URL === 'undefined') {
+    window.API_URL = 'http://localhost:3000/api';
+}
+const API_URL = window.API_URL;
 
 // State
 let menuProducts = [];
@@ -686,6 +689,17 @@ function setupMobileSort() {
                 }
             });
         });
+    }
+}
+
+// Add to cart function
+function addToCart(ma_mon, so_luong = 1) {
+    if (typeof cartManager !== 'undefined') {
+        cartManager.addToCart(ma_mon, so_luong);
+    } else {
+        console.warn('CartManager not loaded yet');
+        // Fallback notification
+        alert('Giỏ hàng chưa sẵn sàng. Vui lòng thử lại sau.');
     }
 }
 
