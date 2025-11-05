@@ -2,7 +2,6 @@
 if (typeof window.API_URL === 'undefined') {
     window.API_URL = 'http://localhost:3000/api';
 }
-const API_URL = window.API_URL;
 
 // State
 let menuProducts = [];
@@ -19,7 +18,7 @@ let searchQuery = '';
 // Fetch categories from API
 async function fetchCategories() {
     try {
-        const response = await fetch(`${API_URL}/categories`);
+        const response = await fetch(`${window.API_URL}/categories`);
         const result = await response.json();
         if (result.success) {
             categories = result.data;
@@ -36,8 +35,8 @@ async function fetchMenuProducts(categoryId = null) {
         showLoading();
         
         const url = categoryId 
-            ? `${API_URL}/menu/category/${categoryId}`
-            : `${API_URL}/menu`;
+            ? `${window.API_URL}/menu/category/${categoryId}`
+            : `${window.API_URL}/menu`;
         
         const response = await fetch(url);
         const result = await response.json();

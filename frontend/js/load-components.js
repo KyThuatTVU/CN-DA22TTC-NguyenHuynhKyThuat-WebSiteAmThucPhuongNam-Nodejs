@@ -244,28 +244,23 @@ if (document.readyState === 'loading') {
     loadAllComponents();
 }
 
-// Load cart.js script dynamically
-function loadCartScript() {
-    if (!document.querySelector('script[src="js/cart.js"]')) {
-        const script = document.createElement('script');
-        script.src = 'js/cart.js';
-        script.onload = function() {
-            console.log('✅ Cart script loaded');
-            // Initialize cart after script loads
-            if (typeof cartManager !== 'undefined') {
-                cartManager.loadCart();
-            }
-        };
-        script.onerror = function() {
-            console.error('❌ Failed to load cart.js');
-        };
-        document.head.appendChild(script);
-    }
+// Initialize cart after components are loaded (only if cart.js is already loaded)
+function initializeCart() {
+    // Wait for cartManager to be available
+    const checkCartManager = setInterval(() => {
+        if (typeof cartManager !== 'undefined') {
+            clearInterval(checkCartManager);
+            console.log('✅ Initializing cart manager');
+            cartManager.loadCart();
+        }
+    }, 100);
+
+    // Timeout after 5 seconds
+    setTimeout(() => {
+        clearInterval(checkCartManager);
+        console.warn('⚠️ CartManager not found after 5 seconds');
+    }, 5000);
 }
 
-// Load cart script
-loadCartScript();
-
-// Export for use in other scripts
-window.updateCartBadge = updateCartBadge;
-window.updateUserMenu = updateUserMenu;
+// Call initialize cart
+initializeCart();

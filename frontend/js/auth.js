@@ -2,7 +2,6 @@
 if (typeof window.API_URL === 'undefined') {
     window.API_URL = 'http://localhost:3000/api';
 }
-const API_URL = window.API_URL;
 
 // Utility functions
 function showNotification(message, type = 'success') {
@@ -47,15 +46,20 @@ function isLoggedIn() {
 
 // Logout
 function logout() {
+    // Handle cart before logout
+    if (typeof cartManager !== 'undefined') {
+        cartManager.handleUserLogout();
+    }
+    
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    window.location.href = 'dang-nhap.html';
+    window.location.href = 'index.html';
 }
 
 // Register function
 async function handleRegister(formData) {
     try {
-        const response = await fetch(`${API_URL}/auth/register`, {
+        const response = await fetch(`${window.API_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -86,7 +90,7 @@ async function handleRegister(formData) {
 // Login function
 async function handleLogin(formData) {
     try {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${window.API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -99,6 +103,12 @@ async function handleLogin(formData) {
         if (result.success) {
             saveUserData(result.data);
             showNotification('Đăng nhập thành công!', 'success');
+            
+            // Handle cart after login
+            if (typeof cartManager !== 'undefined') {
+                await cartManager.handleUserLogin();
+            }
+            
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1500);
@@ -120,7 +130,7 @@ async function getCurrentUser() {
     if (!token) return null;
 
     try {
-        const response = await fetch(`${API_URL}/auth/me`, {
+        const response = await fetch(`${window.API_URL}/auth/me`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -150,7 +160,7 @@ async function updateUserInfo(formData) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/auth/update`, {
+        const response = await fetch(`${window.API_URL}/auth/update`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -184,7 +194,7 @@ async function changePassword(mat_khau_cu, mat_khau_moi) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/auth/change-password`, {
+        const response = await fetch(`${window.API_URL}/auth/change-password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

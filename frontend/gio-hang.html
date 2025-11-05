@@ -19,8 +19,159 @@
 </head>
 
 <body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-    <!-- Navigation Container -->
-    <div id="navbar-container"></div>
+    <!-- Navigation Bar -->
+    <nav id="navbar" class="fixed w-full top-0 z-50 bg-white shadow-md transition-all duration-300">
+        <div class="container mx-auto px-3 sm:px-4">
+            <div class="flex items-center justify-between h-16 sm:h-18 md:h-20">
+                <!-- Logo - Responsive Design -->
+                <a href="index.html" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 group">
+                    <!-- Logo Image -->
+                    <img src="images/Green Simple Clean Vegan Food Logo.png" alt="Phương Nam Logo"
+                        class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-cover rounded-full border-2 border-orange-500 shadow-md group-hover:scale-110 transition-transform duration-300">
+
+                    <!-- Logo Text -->
+                    <div class="flex flex-col">
+                        <h1
+                            class="font-dancing text-lg sm:text-2xl md:text-3xl font-bold text-gray-800 group-hover:text-orange-600 transition-colors leading-tight">
+                            Phương Nam
+                        </h1>
+                        <p class="text-xs sm:text-sm text-gray-600 tracking-wide hidden xs:block">Hương vị Vĩnh Long</p>
+                    </div>
+                </a>
+
+
+
+                <!-- Desktop Menu -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-home mr-1"></i> Trang chủ
+                    </a>
+                    <a href="gioi-thieu.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-info-circle mr-1"></i> Giới thiệu
+                    </a>
+                    <a href="tin-tuc.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-newspaper mr-1"></i> Tin tức
+                    </a>
+                    <a href="album.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-images mr-1"></i> Album ảnh
+                    </a>
+                    <a href="thuc-don.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-book-open mr-1"></i> Thực đơn
+                    </a>
+                    <a href="dat-ban.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-calendar-check mr-1"></i> Đặt bàn
+                    </a>
+                    <a href="lien-he.html" class="text-gray-800 hover:text-orange-600 transition font-medium">
+                        <i class="fas fa-phone mr-1"></i> Liên hệ
+                    </a>
+                </div>
+
+                <!-- Right Side Actions -->
+                <div class="hidden lg:flex items-center space-x-4">
+                    <!-- Search -->
+                    <button class="text-gray-700 hover:text-orange-600 transition">
+                        <i class="fas fa-search text-xl"></i>
+                    </button>
+
+                    <!-- Cart -->
+                    <a href="gio-hang.html" class="relative text-gray-700 hover:text-orange-600 transition">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-badge"
+                            class="absolute -top-2 -right-2 bg-orange-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                    </a>
+
+                    <!-- User Menu - Dynamic Container -->
+                    <div id="user-menu-container">
+                        <!-- Will be populated by JavaScript -->
+                        <div class="relative group">
+                            <button class="text-gray-700 hover:text-orange-600 transition">
+                                <i class="fas fa-user text-xl"></i>
+                            </button>
+                            <div
+                                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100">
+                                <a href="dang-nhap.html"
+                                    class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                    <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
+                                </a>
+                                <a href="dang-ky.html"
+                                    class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                    <i class="fas fa-user-plus mr-2"></i> Đăng ký
+                                </a>
+                                <a href="admin/index.html"
+                                    class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                    <i class="fas fa-user-shield mr-2"></i> Quản trị
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Actions (Cart + Menu) -->
+                <div class="lg:hidden flex items-center space-x-3 sm:space-x-4">
+                    <!-- Cart Icon for Mobile -->
+                    <a href="gio-hang.html" class="relative text-gray-700 hover:text-orange-600 transition">
+                        <i class="fas fa-shopping-cart text-xl sm:text-2xl"></i>
+                        <span id="cart-badge-mobile"
+                            class="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-orange-600 text-white text-xs w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                    </a>
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn"
+                        class="text-gray-700 text-xl sm:text-2xl p-2 hover:text-orange-600 transition">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 shadow-md rounded-b-lg pb-4">
+                <a href="index.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-home mr-2"></i> Trang chủ
+                </a>
+                <a href="gioi-thieu.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-info-circle mr-2"></i> Giới thiệu
+                </a>
+                <a href="tin-tuc.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-newspaper mr-2"></i> Tin tức
+                </a>
+                <a href="album.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-images mr-2"></i> Album
+                </a>
+                <a href="thuc-don.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-book-open mr-2"></i> Thực đơn
+                </a>
+                <a href="dat-ban.html"
+                    class="block py-3 px-4 text-white bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 transition font-bold rounded-lg my-2 mx-4 text-center shadow-md">
+                    <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
+                </a>
+                <a href="lien-he.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-envelope mr-2"></i> Liên hệ
+                </a>
+                <a href="gio-hang.html"
+                    class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                    <i class="fas fa-shopping-cart mr-2"></i> Giỏ hàng
+                </a>
+                <hr class="my-2">
+                <!-- Mobile User Menu - Dynamic -->
+                <div id="mobile-user-menu">
+                    <a href="dang-nhap.html"
+                        class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
+                    </a>
+                    <a href="dang-ky.html"
+                        class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                        <i class="fas fa-user-plus mr-2"></i> Đăng ký
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
 
     <!-- Page Header -->
@@ -39,11 +190,23 @@
                 <div class="lg:w-2/3">
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold">Sản phẩm trong giỏ (<span id="cart-count">0</span>)</h2>
-                            <button onclick="clearCart()"
-                                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm">
-                                <i class="fas fa-trash mr-2"></i> Xóa toàn bộ
-                            </button>
+                            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-shopping-cart mr-3 text-orange-600"></i>
+                                Giỏ hàng của bạn
+                            </h2>
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center space-x-2 bg-orange-100 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-box text-orange-600"></i>
+                                    <span class="font-semibold text-orange-800">
+                                        <span id="cart-count">0</span> sản phẩm
+                                    </span>
+                                </div>
+                                <button onclick="clearCart()"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm flex items-center shadow-md hover:shadow-lg">
+                                    <i class="fas fa-trash mr-2"></i>
+                                    Xóa toàn bộ
+                                </button>
+                            </div>
                         </div>
                         <div id="cart-items">
                             <!-- Cart items will be rendered here by cartManager -->
@@ -77,32 +240,51 @@
                             </div>
                         </div>
 
-                        <div class="space-y-3 mb-6 border-t pt-4">
-                            <div class="flex justify-between text-gray-600">
-                                <span>Tạm tính</span>
-                                <span id="subtotal">0đ</span>
+                        <div class="space-y-4 mb-6 border-t pt-6">
+                            <div class="flex justify-between items-center py-3">
+                                <span class="text-gray-700 font-medium flex items-center">
+                                    <i class="fas fa-shopping-bag mr-2 text-orange-500"></i>
+                                    Tạm tính
+                                </span>
+                                <span id="subtotal" class="text-gray-800 font-semibold">0đ</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
-                                <span>Phí giao hàng</span>
-                                <span id="shipping">30.000đ</span>
+                            <div class="flex justify-between items-center py-3">
+                                <span class="text-gray-700 font-medium flex items-center">
+                                    <i class="fas fa-truck mr-2 text-blue-500"></i>
+                                    Phí giao hàng
+                                </span>
+                                <span id="shipping" class="text-gray-800">30.000đ</span>
                             </div>
-                            <div class="flex justify-between text-green-600">
-                                <span>Giảm giá</span>
-                                <span id="discount">-0đ</span>
+                            <div class="flex justify-between items-center py-3">
+                                <span class="text-gray-700 font-medium flex items-center">
+                                    <i class="fas fa-tags mr-2 text-green-500"></i>
+                                    Giảm giá
+                                </span>
+                                <span id="discount" class="text-gray-400">-0đ</span>
                             </div>
-                            <div class="border-t pt-3 flex justify-between font-bold text-xl">
-                                <span>Tổng cộng</span>
-                                <span class="text-orange-600" id="total">0đ</span>
+                            <div class="border-t-2 border-orange-200 pt-4 flex justify-between items-center">
+                                <span class="text-lg font-bold text-gray-800 flex items-center">
+                                    <i class="fas fa-calculator mr-2 text-orange-600"></i>
+                                    Tổng cộng
+                                </span>
+                                <div id="total" class="text-right">
+                                    <span class="text-2xl font-bold text-orange-600">0đ</span>
+                                    <div class="text-sm text-gray-500 mt-1">Thanh toán ngay</div>
+                                </div>
                             </div>
                         </div>
 
                         <a href="thanh-toan.html" id="checkout-btn"
-                            class="block w-full bg-orange-600 text-white text-center py-4 rounded-lg font-medium text-lg hover:bg-orange-700 transition mb-3">
-                            <i class="fas fa-credit-card mr-2"></i> Thanh toán
+                            class="block w-full bg-gradient-to-r from-orange-600 to-red-600 text-white text-center py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all duration-300 mb-3 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center">
+                            <i class="fas fa-credit-card mr-3 text-xl"></i>
+                            Tiến hành thanh toán
+                            <i class="fas fa-arrow-right ml-3 text-xl"></i>
                         </a>
                         <a href="thuc-don.html"
-                            class="block w-full bg-gray-100 text-gray-700 text-center py-3 rounded-lg font-medium hover:bg-gray-200 transition">
-                            <i class="fas fa-arrow-left mr-2"></i> Tiếp tục mua sắm
+                            class="block w-full bg-gray-100 text-gray-700 text-center py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center border-2 border-gray-200 hover:border-gray-300">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Tiếp tục mua sắm
+                            <i class="fas fa-utensils ml-2"></i>
                         </a>
 
                         <!-- Trust Badges -->
@@ -154,6 +336,8 @@
     <div id="footer-container"></div>
     <!-- Chatbot Container -->
     <div id="chatbot-container"></div>
+
+    <!-- Scripts -->
     <script src="js/main.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/load-components.js"></script>
@@ -162,51 +346,160 @@
     <script>
         // Initialize cart page
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🛒 Initializing cart page...');
+
             // Wait for cartManager to be available
             const checkCartManager = setInterval(() => {
                 if (typeof cartManager !== 'undefined') {
                     clearInterval(checkCartManager);
+                    console.log('✅ CartManager found, loading cart data...');
 
-                    // Load cart data
-                    cartManager.loadCart().then(() => {
-                        // Render cart items
-                        cartManager.renderCartItems('cart-items');
-
-                        // Update cart count in header
-                        const cartCount = document.getElementById('cart-count');
-                        if (cartCount) {
-                            cartCount.textContent = cartManager.getCart().so_luong || 0;
-                        }
-
-                        // Show/hide empty cart message
-                        const emptyCart = document.getElementById('empty-cart');
-                        const cartItems = document.getElementById('cart-items');
-                        if (emptyCart && cartItems) {
-                            if (cartManager.getCart().items.length === 0) {
-                                emptyCart.classList.remove('hidden');
-                                cartItems.innerHTML = '';
-                            } else {
-                                emptyCart.classList.add('hidden');
-                            }
-                        }
-                    });
+                    // Load cart data and render
+                    loadAndRenderCart();
                 }
             }, 100);
 
             // Set timeout in case cartManager doesn't load
             setTimeout(() => {
                 clearInterval(checkCartManager);
-                console.warn('CartManager not loaded, using fallback');
+                console.warn('⏰ CartManager not loaded within 5 seconds');
             }, 5000);
         });
+
+        // Function to load and render cart
+        async function loadAndRenderCart() {
+            try {
+                // Load cart data
+                await cartManager.loadCart();
+                console.log('📦 Cart data loaded:', cartManager.getCart());
+
+                // Render cart items
+                cartManager.renderCartItems('cart-items');
+                console.log('🎨 Cart items rendered');
+
+                // Update cart count in header
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    cartCount.textContent = cartManager.getCart().so_luong || 0;
+                }
+
+                // Update totals
+                updateCartTotals();
+
+                // Show/hide empty cart message
+                const emptyCart = document.getElementById('empty-cart');
+                const cartItems = document.getElementById('cart-items');
+                if (emptyCart && cartItems) {
+                    const itemCount = cartManager.getCart().items.length;
+                    console.log('📊 Cart has', itemCount, 'items');
+
+                    if (itemCount === 0) {
+                        emptyCart.classList.remove('hidden');
+                        cartItems.innerHTML = '';
+                        console.log('📭 Showing empty cart message');
+                    } else {
+                        emptyCart.classList.add('hidden');
+                        console.log('🛍️ Showing cart items');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error loading cart:', error);
+            }
+        }
+
+        // Function to refresh cart (can be called from other scripts)
+        window.refreshCart = function() {
+            console.log('🔄 Refreshing cart...');
+            loadAndRenderCart();
+        };
+
+        // Refresh cart when page becomes visible (user navigates back to cart page)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('👀 Cart page became visible, refreshing...');
+                loadAndRenderCart();
+            }
+        });
+
+        // Also refresh on focus
+        window.addEventListener('focus', function() {
+            console.log('🎯 Cart page focused, refreshing...');
+            loadAndRenderCart();
+        });
+
+        // Function to update cart totals
+        function updateCartTotals() {
+            const cart = cartManager.getCart();
+            const subtotal = cart.tong_tien || 0;
+            const shipping = subtotal > 200000 ? 0 : 30000; // Free shipping over 200k
+            const discount = 0; // TODO: Implement voucher system
+            const total = subtotal + shipping - discount;
+
+            // Update subtotal with better formatting
+            const subtotalElement = document.getElementById('subtotal');
+            if (subtotalElement) {
+                subtotalElement.innerHTML = `
+                    <span class="text-lg font-semibold text-gray-800">${formatPrice(subtotal)}</span>
+                `;
+            }
+
+            // Update shipping with icon and better styling
+            const shippingElement = document.getElementById('shipping');
+            if (shippingElement) {
+                if (shipping === 0) {
+                    shippingElement.innerHTML = `
+                        <span class="text-green-600 font-semibold flex items-center">
+                            <i class="fas fa-truck mr-1"></i>
+                            Miễn phí giao hàng
+                        </span>
+                    `;
+                } else {
+                    shippingElement.innerHTML = `
+                        <span class="text-gray-700">${formatPrice(shipping)}</span>
+                    `;
+                }
+            }
+
+            // Update discount
+            const discountElement = document.getElementById('discount');
+            if (discountElement) {
+                if (discount === 0) {
+                    discountElement.innerHTML = `
+                        <span class="text-gray-400">-0đ</span>
+                    `;
+                } else {
+                    discountElement.innerHTML = `
+                        <span class="text-green-600 font-semibold">-${formatPrice(discount)}</span>
+                    `;
+                }
+            }
+
+            // Update total with prominent styling
+            const totalElement = document.getElementById('total');
+            if (totalElement) {
+                totalElement.innerHTML = `
+                    <span class="text-2xl font-bold text-orange-600">${formatPrice(total)}</span>
+                    <div class="text-sm text-gray-500 mt-1">Thanh toán ngay</div>
+                `;
+            }
+
+            console.log('💰 Updated cart totals:', { subtotal, shipping, discount, total });
+        }
 
         // Function to clear entire cart
         function clearCart() {
             if (confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')) {
                 if (typeof cartManager !== 'undefined') {
-                    cartManager.clearCart();
+                    cartManager.clearCart().then(() => {
+                        location.reload(); // Reload to update UI
+                    });
                 }
             }
+        }
+
+        // Format price helper
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
         }
     </script>
 

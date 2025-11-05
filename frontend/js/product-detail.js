@@ -2,7 +2,6 @@
 if (typeof window.API_URL === 'undefined') {
     window.API_URL = 'http://localhost:3000/api';
 }
-const API_URL = window.API_URL;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -28,7 +27,7 @@ async function fetchProductDetail() {
         console.log('🔍 Đang tải chi tiết món ăn ID:', productId);
         showLoading();
         
-        const url = `${API_URL}/menu/${productId}`;
+        const url = `${window.API_URL}/menu/${productId}`;
         console.log('📡 API URL:', url);
         
         const response = await fetch(url);
@@ -61,7 +60,7 @@ async function fetchProductImages() {
     try {
         console.log('🔍 Đang tải ảnh món ăn ID:', productId);
         
-        const response = await fetch(`${API_URL}/albums/product/${productId}`);
+        const response = await fetch(`${window.API_URL}/albums/product/${productId}`);
         const result = await response.json();
         
         console.log('📦 Ảnh món ăn:', result);
@@ -85,7 +84,7 @@ async function fetchRelatedProducts(categoryId) {
     try {
         console.log('🔍 Đang tải món ăn liên quan, danh mục:', categoryId);
         
-        const response = await fetch(`${API_URL}/menu/category/${categoryId}`);
+        const response = await fetch(`${window.API_URL}/menu/category/${categoryId}`);
         const result = await response.json();
         
         console.log('📦 Món ăn liên quan:', result);
