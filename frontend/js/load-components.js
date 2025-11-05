@@ -40,8 +40,10 @@ async function loadAllComponents() {
 
 // Initialize component functionality
 function initializeComponents() {
-    // Update cart badge
-    updateCartBadge();
+    // Update cart badge after a short delay to ensure navbar is loaded
+    setTimeout(() => {
+        updateCartBadge();
+    }, 100);
     
     // Update user menu with login status
     updateUserMenu();
@@ -63,6 +65,20 @@ function initializeComponents() {
     
     // Set active nav link
     setActiveNavLink();
+    
+    // Refresh cart when page becomes visible (user returns to tab)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && typeof cartManager !== 'undefined') {
+            console.log('🔄 Page became visible, refreshing cart');
+            cartManager.loadCart().then(() => {
+                setTimeout(() => {
+                    updateCartBadge();
+                }, 200);
+            }).catch((error) => {
+                console.error('❌ Error refreshing cart:', error);
+            });
+        }
+    });
 }
 
 // Update cart badge count
@@ -251,7 +267,20 @@ function initializeCart() {
         if (typeof cartManager !== 'undefined') {
             clearInterval(checkCartManager);
             console.log('✅ Initializing cart manager');
-            cartManager.loadCart();
+            
+            // Load cart and update badge when done
+            cartManager.loadCart().then(() => {
+                // Update cart badge after cart is loaded
+                setTimeout(() => {
+                    updateCartBadge();
+                }, 200);
+            }).catch((error) => {
+                console.error('❌ Error loading cart:', error);
+                // Still update badge even if cart loading fails
+                setTimeout(() => {
+                    updateCartBadge();
+                }, 200);
+            });
         }
     }, 100);
 
