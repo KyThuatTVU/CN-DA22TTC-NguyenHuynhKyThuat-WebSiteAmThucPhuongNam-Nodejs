@@ -1,7 +1,7 @@
 // Kiểm tra xác thực admin bằng session
 async function checkAdminAuth() {
     try {
-        const response = await fetch('http://localhost:3000/api/admin/auth/check-session', {
+        const response = await fetch('http://localhost:3000/api/admin-auth/check-session', {
             method: 'GET',
             credentials: 'include' // Quan trọng: gửi cookie session
         });
@@ -31,7 +31,7 @@ async function logoutAdmin() {
     }
 
     try {
-        const response = await fetch('http://localhost:3000/api/admin/auth/logout', {
+        const response = await fetch('http://localhost:3000/api/admin-auth/logout', {
             method: 'POST',
             credentials: 'include' // Gửi cookie session
         });

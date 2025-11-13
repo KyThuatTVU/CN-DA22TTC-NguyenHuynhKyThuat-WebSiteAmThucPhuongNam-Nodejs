@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Login - Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-3xl font-bold mb-6">🔍 Debug Admin Google Login</h1>
+            
+            <div class="space-y-4 mb-8">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2">Current Page Info:</h3>
+                    <p><strong>URL:</strong> <span id="currentUrl"></span></p>
+                    <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="testNewEndpoint()" 
+                            class="bg-green-500 text-white py-4 px-6 rounded-lg hover:bg-green-600 font-bold">
+                        ✅ Test NEW URL<br>
+                        <span class="text-sm font-normal">/api/admin-auth/google</span>
+                    </button>
+                    
+                    <button onclick="testOldEndpoint()" 
+                            class="bg-red-500 text-white py-4 px-6 rounded-lg hover:bg-red-600 font-bold">
+                        ❌ Test OLD URL<br>
+                        <span class="text-sm font-normal">/api/admin/auth/google</span>
+                    </button>
+                </div>
+                
+                <button onclick="checkBothEndpoints()" 
+                        class="w-full bg-blue-500 text-white py-4 px-6 rounded-lg hover:bg-blue-600 font-bold">
+                    🔍 Check Both Endpoints (Fetch)
+                </button>
+                
+                <button onclick="goToRealLoginPage()" 
+                        class="w-full bg-purple-500 text-white py-4 px-6 rounded-lg hover:bg-purple-600 font-bold">
+                    📄 Go to Real Login Page
+                </button>
+            </div>
+            
+            <div id="results" class="hidden">
+                <h3 class="font-bold text-lg mb-2">Results:</h3>
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <pre id="resultsText" class="text-sm overflow-auto max-h-96"></pre>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400">
+                <h3 class="font-bold mb-2">⚠️ Troubleshooting:</h3>
+                <ul class="list-disc list-inside space-y-1 text-sm">
+                    <li>Clear browser cache (Ctrl+Shift+Delete)</li>
+                    <li>Try incognito/private mode</li>
+                    <li>Check browser console (F12) for errors</li>
+                    <li>Make sure server is running on port 3000</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Display current info
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        
+        function testNewEndpoint() {
+            console.log('🟢 Redirecting to NEW endpoint: /api/admin-auth/google');
+            window.location.href = 'http://localhost:3000/api/admin-auth/google';
+        }
+        
+        function testOldEndpoint() {
+            console.log('🔴 Redirecting to OLD endpoint: /api/admin/auth/google (should fail)');
+            window.location.href = 'http://localhost:3000/api/admin/auth/google';
+        }
+        
+        function goToRealLoginPage() {
+            window.location.href = 'dang-nhap-admin.html';
+        }
+        
+        async function checkBothEndpoints() {
+            const resultsDiv = document.getElementById('results');
+            const resultsText = document.getElementById('resultsText');
+            
+            resultsDiv.classList.remove('hidden');
+            resultsText.textContent = 'Checking endpoints...\n\n';
+            
+            const results = {
+                timestamp: new Date().toISOString(),
+                tests: []
+            };
+            
+            // Test OLD endpoint
+            try {
+                resultsText.textContent += '🔴 Testing OLD: /api/admin/auth/google\n';
+                const oldRes = await fetch('http://localhost:3000/api/admin/auth/google', {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+                
+                results.tests.push({
+                    endpoint: '/api/admin/auth/google',
+                    status: oldRes.status,
+                    statusText: oldRes.statusText,
+                    type: oldRes.type,
+                    redirected: oldRes.redirected
+                });
+                
+                resultsText.textContent += `   Status: ${oldRes.status} ${oldRes.statusText}\n`;
+                resultsText.textContent += `   Type: ${oldRes.type}\n\n`;
+            } catch (error) {
+                results.tests.push({
+                    endpoint: '/api/admin/auth/google',
+                    error: error.message
+                });
+                resultsText.textContent += `   Error: ${error.message}\n\n`;
+            }
+            
+            // Test NEW endpoint
+            try {
+                resultsText.textContent += '🟢 Testing NEW: /api/admin-auth/google\n';
+                const newRes = await fetch('http://localhost:3000/api/admin-auth/google', {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+                
+                results.tests.push({
+                    endpoint: '/api/admin-auth/google',
+                    status: newRes.status,
+                    statusText: newRes.statusText,
+                    type: newRes.type,
+                    redirected: newRes.redirected
+                });
+                
+                resultsText.textContent += `   Status: ${newRes.status} ${newRes.statusText}\n`;
+                resultsText.textContent += `   Type: ${newRes.type}\n\n`;
+            } catch (error) {
+                results.tests.push({
+                    endpoint: '/api/admin-auth/google',
+                    error: error.message
+                });
+                resultsText.textContent += `   Error: ${error.message}\n\n`;
+            }
+            
+            resultsText.textContent += '\n' + '='.repeat(50) + '\n';
+            resultsText.textContent += 'Full Results:\n';
+            resultsText.textContent += JSON.stringify(results, null, 2);
+            
+            // Conclusion
+            const oldTest = results.tests.find(t => t.endpoint === '/api/admin/auth/google');
+            const newTest = results.tests.find(t => t.endpoint === '/api/admin-auth/google');
+            
+            resultsText.textContent += '\n\n' + '='.repeat(50) + '\n';
+            resultsText.textContent += '📊 CONCLUSION:\n';
+            
+            if (oldTest && oldTest.status === 404) {
+                resultsText.textContent += '✅ OLD endpoint correctly returns 404\n';
+            } else {
+                resultsText.textContent += '⚠️ OLD endpoint still accessible!\n';
+            }
+            
+            if (newTest && (newTest.status === 302 || newTest.type === 'opaqueredirect')) {
+                resultsText.textContent += '✅ NEW endpoint working (redirects to Google)\n';
+            } else {
+                resultsText.textContent += '❌ NEW endpoint not working properly\n';
+            }
+        }
+        
+        // Check for callback params
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('login') === 'success') {
+                alert('✅ Login successful!');
+            }
+            if (params.get('error')) {
+                alert('❌ Error: ' + params.get('error'));
+            }
+        });
+    </script>
+</body>
+</html>

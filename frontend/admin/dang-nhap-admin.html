@@ -93,7 +93,7 @@
 
         // Google Login cho Admin
         function loginWithGoogle() {
-            window.location.href = 'http://localhost:3000/api/admin/auth/google';
+            window.location.href = 'http://localhost:3000/api/admin-auth/google';
         }
 
         // Xử lý callback từ Google
@@ -116,7 +116,7 @@
 
             if (loginSuccess === 'success') {
                 showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
-                
+
                 setTimeout(() => {
                     window.location.href = 'index1.html';
                 }, 1000);

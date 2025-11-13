@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Google Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-6 text-center">Test Google OAuth</h1>
+        
+        <div class="space-y-4">
+            <button onclick="testOldUrl()" class="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600">
+                Test OLD URL (sẽ lỗi)
+            </button>
+            
+            <button onclick="testNewUrl()" class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600">
+                Test NEW URL (đúng)
+            </button>
+            
+            <button onclick="checkEndpoint()" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">
+                Check Endpoint
+            </button>
+        </div>
+        
+        <div id="result" class="mt-6 p-4 bg-gray-100 rounded-lg hidden">
+            <h3 class="font-bold mb-2">Kết quả:</h3>
+            <pre id="resultText" class="text-sm overflow-auto"></pre>
+        </div>
+    </div>
+
+    <script>
+        function testOldUrl() {
+            console.log('Testing OLD URL: /api/admin/auth/google');
+            window.location.href = 'http://localhost:3000/api/admin/auth/google';
+        }
+
+        function testNewUrl() {
+            console.log('Testing NEW URL: /api/admin-auth/google');
+            window.location.href = 'http://localhost:3000/api/admin-auth/google';
+        }
+
+        async function checkEndpoint() {
+            const resultDiv = document.getElementById('result');
+            const resultText = document.getElementById('resultText');
+            
+            resultDiv.classList.remove('hidden');
+            resultText.textContent = 'Đang kiểm tra...';
+            
+            try {
+                // Test old URL
+                const oldResponse = await fetch('http://localhost:3000/api/admin/auth/google', {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+                
+                // Test new URL
+                const newResponse = await fetch('http://localhost:3000/api/admin-auth/google', {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+                
+                const result = {
+                    oldUrl: {
+                        url: '/api/admin/auth/google',
+                        status: oldResponse.status,
+                        statusText: oldResponse.statusText,
+                        type: oldResponse.type
+                    },
+                    newUrl: {
+                        url: '/api/admin-auth/google',
+                        status: newResponse.status,
+                        statusText: newResponse.statusText,
+                        type: newResponse.type
+                    }
+                };
+                
+                resultText.textContent = JSON.stringify(result, null, 2);
+                
+            } catch (error) {
+                resultText.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        // Check URL params on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('login') === 'success') {
+                alert('✅ Đăng nhập thành công!');
+            }
+            if (params.get('error')) {
+                alert('❌ Lỗi: ' + params.get('error'));
+            }
+        });
+    </script>
+</body>
+</html>
