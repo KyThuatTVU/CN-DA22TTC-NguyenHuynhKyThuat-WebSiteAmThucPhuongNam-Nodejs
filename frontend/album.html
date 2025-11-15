@@ -61,8 +61,13 @@
     <section class="py-12">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery">
-                <!-- Dishes -->
-                <div class="gallery-item rounded-xl overflow-hidden shadow-sm" data-category="dishes">
+                <!-- Loading state -->
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-spinner fa-spin text-4xl text-orange-600"></i>
+                    <p class="mt-4 text-gray-600">Đang tải album...</p>
+                </div>
+                <!-- Dishes (Old static content - will be replaced by JS) -->
+                <div class="gallery-item rounded-xl overflow-hidden shadow-sm hidden" data-category="dishes">
                     <img src="https://images.unsplash.com/photo-1559847844-5315695dadae?w=600" alt="Cá lóc nướng"
                         class="w-full h-64 object-cover">
                     <div class="p-4 bg-white">
@@ -158,40 +163,6 @@
         </div>
     </section>
 
-    <script>
-        // Filter functionality
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const galleryItems = document.querySelectorAll('.gallery-item');
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Update active button
-                filterBtns.forEach(b => {
-                    b.classList.remove('active', 'bg-orange-600', 'text-white');
-                    b.classList.add('bg-gray-100', 'text-gray-700');
-                });
-                btn.classList.add('active', 'bg-orange-600', 'text-white');
-                btn.classList.remove('bg-gray-100', 'text-gray-700');
-
-                // Filter items
-                const filter = btn.getAttribute('data-filter');
-                galleryItems.forEach(item => {
-                    if (filter === 'all' || item.getAttribute('data-category') === filter) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-        });
-
-        // Set initial active state
-        document.querySelector('.filter-btn.active').classList.add('bg-orange-600', 'text-white');
-        document.querySelectorAll('.filter-btn:not(.active)').forEach(btn => {
-            btn.classList.add('bg-gray-100', 'text-gray-700');
-        });
-    </script>
-
     <!-- Footer Container -->
     <div id="footer-container"></div>
 
@@ -202,6 +173,9 @@
     <script src="js/main.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/load-components.js"></script>
+    
+    <!-- Album functionality -->
+    <script src="js/album.js"></script>
     
     <!-- GSAP Animation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
