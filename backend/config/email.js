@@ -218,7 +218,120 @@ async function sendWelcomeEmail(email, userName) {
     }
 }
 
+// Gửi email đặt lại mật khẩu
+async function sendPasswordResetEmail(email, resetCode, userName) {
+    const mailOptions = {
+        from: `"Nhà hàng Phương Nam" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Đặt lại mật khẩu - Nhà hàng Phương Nam',
+        html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #f9f9f9;
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+                        color: white;
+                        padding: 30px;
+                        text-align: center;
+                        border-radius: 10px 10px 0 0;
+                    }
+                    .content {
+                        background: white;
+                        padding: 30px;
+                        border-radius: 0 0 10px 10px;
+                    }
+                    .code-box {
+                        background: #fff5f0;
+                        border: 2px dashed #ea580c;
+                        padding: 20px;
+                        text-align: center;
+                        margin: 20px 0;
+                        border-radius: 8px;
+                    }
+                    .code {
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #ea580c;
+                        letter-spacing: 5px;
+                    }
+                    .warning-box {
+                        background: #fef2f2;
+                        border-left: 4px solid #dc2626;
+                        padding: 15px;
+                        margin: 20px 0;
+                        border-radius: 4px;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 20px;
+                        color: #666;
+                        font-size: 12px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🔑 Đặt lại mật khẩu</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Xin chào ${userName}!</h2>
+                        <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại <strong>Nhà hàng Phương Nam</strong>.</p>
+                        <p>Để tiếp tục, vui lòng sử dụng mã xác thực bên dưới:</p>
+                        
+                        <div class="code-box">
+                            <p style="margin: 0; color: #666;">Mã xác thực của bạn:</p>
+                            <div class="code">${resetCode}</div>
+                            <p style="margin: 10px 0 0 0; color: #999; font-size: 14px;">Mã có hiệu lực trong 10 phút</p>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <p style="margin: 0;"><strong>⚠️ Lưu ý quan trọng:</strong></p>
+                            <ul style="margin: 10px 0 0 20px; padding: 0;">
+                                <li>Mã xác thực chỉ có hiệu lực trong <strong>10 phút</strong></li>
+                                <li>Không chia sẻ mã này với bất kỳ ai</li>
+                                <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này và thay đổi mật khẩu của bạn ngay lập tức</li>
+                            </ul>
+                        </div>
+                        
+                        <p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.</p>
+                        <p>Trân trọng,<br><strong>Đội ngũ Nhà hàng Phương Nam</strong></p>
+                    </div>
+                    <div class="footer">
+                        <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+                        <p>© 2025 Nhà hàng Phương Nam - Vĩnh Long</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `
+    };
+
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log('✅ Email đặt lại mật khẩu đã gửi:', info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('❌ Lỗi gửi email đặt lại mật khẩu:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 module.exports = {
     sendVerificationEmail,
-    sendWelcomeEmail
+    sendWelcomeEmail,
+    sendPasswordResetEmail
 };

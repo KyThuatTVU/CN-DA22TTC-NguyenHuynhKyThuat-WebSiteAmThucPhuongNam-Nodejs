@@ -630,5 +630,198 @@ router.post('/change-password', authenticateToken, async (req, res) => {
     }
 });
 
+// Quên mật khẩu - Gửi mã xác thực
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Validate
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng nhập email'
+            });
+        }
+
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email không hợp lệ'
+            });
+        }
+
+        // Kiểm tra email có tồn tại không
+        const [users] = await db.query(
+            'SELECT ma_nguoi_dung, ten_nguoi_dung, email FROM nguoi_dung WHERE email = ? AND trang_thai = 1',
+            [email]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Email không tồn tại trong hệ thống'
+            });
+        }
+
+        const user = users[0];
+
+        // Tạo mã xác thực 6 số
+        const resetCode = generateVerificationCode();
+
+        // Xóa các mã reset cũ của email này
+        await db.query('DELETE FROM xac_thuc_email WHERE email = ? AND trang_thai = ?', [email, 'reset_password']);
+
+        // Lưu mã reset vào bảng xac_thuc_email
+        const ngay_het_han = new Date(Date.now() + 10 * 60 * 1000); // Hết hạn sau 10 phút
+
+        await db.query(
+            `INSERT INTO xac_thuc_email 
+            (email, ma_code, ten_nguoi_dung, mat_khau_hash, ngay_het_han, trang_thai) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [email, resetCode, user.ten_nguoi_dung, '', ngay_het_han, 'reset_password']
+        );
+
+        // Gửi email với mã xác thực
+        const { sendPasswordResetEmail } = require('../config/email');
+        const emailResult = await sendPasswordResetEmail(email, resetCode, user.ten_nguoi_dung);
+
+        if (!emailResult.success) {
+            return res.status(500).json({
+                success: false,
+                message: 'Không thể gửi email. Vui lòng thử lại sau.'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Mã xác thực đã được gửi đến email của bạn',
+            data: {
+                email,
+                expires_in: '10 phút'
+            }
+        });
+
+    } catch (error) {
+        console.error('Lỗi quên mật khẩu:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
+// Xác thực mã reset password
+router.post('/verify-reset-code', async (req, res) => {
+    try {
+        const { email, ma_code } = req.body;
+
+        // Validate
+        if (!email || !ma_code) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng nhập email và mã xác thực'
+            });
+        }
+
+        // Tìm mã xác thực
+        const [verifications] = await db.query(
+            `SELECT * FROM xac_thuc_email 
+             WHERE email = ? AND ma_code = ? AND trang_thai = 'reset_password' AND ngay_het_han > NOW()`,
+            [email, ma_code]
+        );
+
+        if (verifications.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Mã xác thực không đúng hoặc đã hết hạn'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Mã xác thực hợp lệ',
+            data: {
+                email,
+                verified: true
+            }
+        });
+
+    } catch (error) {
+        console.error('Lỗi xác thực mã:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
+// Đặt lại mật khẩu mới
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { email, ma_code, mat_khau_moi } = req.body;
+
+        // Validate
+        if (!email || !ma_code || !mat_khau_moi) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng điền đầy đủ thông tin'
+            });
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePassword(mat_khau_moi);
+        if (!passwordValidation.valid) {
+            return res.status(400).json({
+                success: false,
+                message: passwordValidation.message
+            });
+        }
+
+        // Tìm mã xác thực
+        const [verifications] = await db.query(
+            `SELECT * FROM xac_thuc_email 
+             WHERE email = ? AND ma_code = ? AND trang_thai = 'reset_password' AND ngay_het_han > NOW()`,
+            [email, ma_code]
+        );
+
+        if (verifications.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Mã xác thực không đúng hoặc đã hết hạn'
+            });
+        }
+
+        // Hash mật khẩu mới
+        const mat_khau_hash = await bcrypt.hash(mat_khau_moi, 10);
+
+        // Cập nhật mật khẩu trong bảng nguoi_dung
+        await db.query(
+            'UPDATE nguoi_dung SET mat_khau_hash = ? WHERE email = ?',
+            [mat_khau_hash, email]
+        );
+
+        // Cập nhật trạng thái xác thực
+        await db.query(
+            'UPDATE xac_thuc_email SET trang_thai = ? WHERE ma_xac_thuc = ?',
+            ['verified', verifications[0].ma_xac_thuc]
+        );
+
+        res.json({
+            success: true,
+            message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.'
+        });
+
+    } catch (error) {
+        console.error('Lỗi đặt lại mật khẩu:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
 module.exports.authenticateToken = authenticateToken;

@@ -255,7 +255,7 @@ router.get('/google/callback',
             };
 
             // Redirect về trang admin (không có token trong URL)
-            res.redirect('/admin/index1.html?login=success');
+            res.redirect('/admin/index.html?login=success');
 
         } catch (error) {
             console.error('Lỗi Google callback admin:', error);
