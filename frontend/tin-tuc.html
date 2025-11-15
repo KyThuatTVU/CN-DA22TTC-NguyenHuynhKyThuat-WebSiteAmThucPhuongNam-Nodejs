@@ -99,7 +99,16 @@
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-6 sm:space-y-8">
                     <!-- Featured Post -->
-                    <article class="bg-white rounded-xl shadow-sm overflow-hidden" data-news-id="1">
+                    <div id="featured-news"></div>
+
+                    <!-- Regular Posts Grid -->
+                    <div id="news-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+                    <!-- Pagination -->
+                    <div id="pagination" class="mt-8"></div>
+
+                    <!-- Hidden static content for fallback -->
+                    <article class="bg-white rounded-xl shadow-sm overflow-hidden hidden" data-news-id="1">
                         <img src="images/tt2.jpg" alt="News"
                             class="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover news-image">
                         <div class="p-4 sm:p-6 md:p-8">
@@ -238,14 +247,14 @@
                     <!-- Search -->
                     <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                         <h3 class="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Tìm kiếm</h3>
-                        <div class="flex">
-                            <input type="text" placeholder="Tìm kiếm tin tức..."
+                        <form id="search-form" class="flex">
+                            <input type="text" id="search-input" placeholder="Tìm kiếm tin tức..."
                                 class="flex-1 border rounded-l-lg px-3 sm:px-4 py-2 text-sm sm:text-base focus:outline-none focus:border-orange-600">
-                            <button
+                            <button type="submit"
                                 class="bg-orange-600 text-white px-4 sm:px-6 rounded-r-lg hover:bg-orange-700 transition">
                                 <i class="fas fa-search"></i>
                             </button>
-                        </div>
+                        </form>
                     </div>
 
                     <!-- Categories -->
@@ -275,10 +284,10 @@
                         </ul>
                     </div>
 
-                    <!-- Recent Posts -->
+                    <!-- Popular Posts -->
                     <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-                        <h3 class="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Bài viết gần đây</h3>
-                        <div class="space-y-3 sm:space-y-4">
+                        <h3 class="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Bài viết phổ biến</h3>
+                        <div id="popular-news" class="space-y-3 sm:space-y-4">
                             <div class="flex space-x-3">
                                 <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100" alt="Post"
                                     class="w-16 sm:w-20 h-16 sm:h-20 rounded-lg object-cover flex-shrink-0">
@@ -326,8 +335,9 @@
 
     <!-- Scripts -->
     <script src="js/load-components.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/cart.js"></script>
-    <script src="js/tin-tuc.js"></script>
+    <script src="js/news.js"></script>
 
     <!-- GSAP Animation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>

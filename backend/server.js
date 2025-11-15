@@ -75,6 +75,7 @@ const albumRoutes = require('./routes/albums');
 const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/admin-auth');
 const cartRoutes = require('./routes/cart');
+const newsRoutes = require('./routes/news');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -82,6 +83,7 @@ app.use('/api/albums', albumRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin-auth', adminAuthRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/news', newsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
