@@ -202,10 +202,43 @@ window.handleLogout = function() {
 // Alias for backward compatibility
 window.updateUserMenu = window.renderUserMenu;
 
+// Set active navigation link based on current page
+function setActiveNavLink() {
+    // Get current page filename
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const pageName = currentPage.replace('.html', '');
+    
+    console.log('📍 Current page:', pageName);
+    
+    // Set active state for desktop nav links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        const linkPage = link.getAttribute('data-page');
+        if (linkPage === pageName || (pageName === '' && linkPage === 'index')) {
+            link.classList.add('active');
+            console.log('✅ Active link set:', linkPage);
+        } else {
+            link.classList.remove('active');
+        }
+    });
+    
+    // Set active state for mobile nav links
+    const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+    mobileNavLinks.forEach(link => {
+        const linkPage = link.getAttribute('data-page');
+        if (linkPage === pageName || (pageName === '' && linkPage === 'index')) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
 // Auto-initialize after component is rendered
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         initNavbar();
         renderUserMenu();
+        setActiveNavLink();
     }, 100);
 });

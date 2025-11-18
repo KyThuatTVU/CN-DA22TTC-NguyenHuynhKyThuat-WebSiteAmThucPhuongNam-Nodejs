@@ -21,6 +21,31 @@ a, a:hover, a:focus, a:active {
     text-decoration: none !important;
 }
 
+/* Active Navigation Link Styles */
+.nav-link.active {
+    color: #ea580c !important;
+    font-weight: 600 !important;
+    position: relative;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(to right, #ea580c, #dc2626);
+    border-radius: 2px;
+}
+
+.nav-link-mobile.active {
+    background-color: #fff7ed !important;
+    color: #ea580c !important;
+    font-weight: 600 !important;
+    border-left: 4px solid #ea580c;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
