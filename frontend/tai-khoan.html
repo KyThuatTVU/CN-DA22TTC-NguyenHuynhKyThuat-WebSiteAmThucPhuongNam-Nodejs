@@ -73,10 +73,10 @@
                                 <i class="fas fa-lock w-5"></i>
                                 <span>Đổi mật khẩu</span>
                             </button>
-                            <button onclick="showTab('orders', event)" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3">
+                            <a href="don-hang-cua-toi.html" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3 block">
                                 <i class="fas fa-shopping-bag w-5"></i>
                                 <span>Đơn hàng</span>
-                            </button>
+                            </a>
                             <button onclick="showTab('reservations', event)" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3">
                                 <i class="fas fa-calendar-check w-5"></i>
                                 <span>Đặt bàn</span>
@@ -229,26 +229,8 @@
                         </div>
                     </div>
 
-                    <!-- Orders Tab -->
-                    <div id="orders-tab" class="tab-content hidden">
-                        <div class="bg-white rounded-lg shadow-md p-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                                <i class="fas fa-shopping-bag text-orange-600 mr-2"></i>
-                                Đơn Hàng Của Tôi
-                            </h2>
-
-                            <div id="orders-list" class="space-y-4">
-                                <!-- Orders will be loaded here -->
-                                <div class="text-center py-12 text-gray-500">
-                                    <i class="fas fa-shopping-bag text-6xl mb-4 opacity-30"></i>
-                                    <p class="text-lg">Bạn chưa có đơn hàng nào</p>
-                                    <a href="thuc-don.html" class="inline-block mt-4 text-orange-600 hover:text-orange-700 font-semibold">
-                                        Đặt hàng ngay <i class="fas fa-arrow-right ml-2"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Orders Tab - Redirects to dedicated page -->
+                    <!-- This tab is no longer used as orders have their own page -->
 
                     <!-- Reservations Tab -->
                     <div id="reservations-tab" class="tab-content hidden">

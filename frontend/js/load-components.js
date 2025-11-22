@@ -319,8 +319,12 @@ function initializeCart() {
 
     // Timeout after 5 seconds
     setTimeout(() => {
-        clearInterval(checkCartManager);
-        console.warn('⚠️ CartManager not found after 5 seconds');
+        if (typeof cartManager === 'undefined') {
+            clearInterval(checkCartManager);
+            console.warn('⚠️ CartManager not found after 5 seconds - check if cart.js is loaded');
+            // Still update badge with fallback
+            updateCartBadge();
+        }
     }, 5000);
 }
 

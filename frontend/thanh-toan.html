@@ -52,27 +52,23 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Tỉnh/Thành phố *</label>
-                                    <select required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
-                                        <option value="">Chọn tỉnh/thành</option>
-                                        <option value="vinh-long" selected>Vĩnh Long</option>
-                                        <option value="can-tho">Cần Thơ</option>
-                                        <option value="hcm">TP. Hồ Chí Minh</option>
+                                    <select name="province" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                        <option value="">Chọn tỉnh/thành phố</option>
+                                        <!-- Populated by vietnam-address.js -->
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Quận/Huyện *</label>
-                                    <select required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                    <select name="district" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
                                         <option value="">Chọn quận/huyện</option>
-                                        <option value="tp-vinh-long">TP. Vĩnh Long</option>
-                                        <option value="binh-minh">Bình Minh</option>
+                                        <!-- Populated by vietnam-address.js -->
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Phường/Xã *</label>
-                                    <select required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                    <select name="ward" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
                                         <option value="">Chọn phường/xã</option>
-                                        <option value="1">Phường 1</option>
-                                        <option value="2">Phường 2</option>
+                                        <!-- Populated by vietnam-address.js -->
                                     </select>
                                 </div>
                             </div>
@@ -200,7 +196,7 @@
                             </div>
                         </div>
 
-                        <button type="button" onclick="submitOrder()" class="w-full bg-orange-600 text-white py-4 rounded-lg font-medium text-lg hover:bg-orange-700 transition mb-3">
+                        <button type="button" id="submit-order-btn" class="w-full bg-orange-600 text-white py-4 rounded-lg font-medium text-lg hover:bg-orange-700 transition mb-3">
                             <i class="fas fa-check-circle mr-2"></i> Đặt hàng
                         </button>
 
@@ -218,6 +214,11 @@
     <div id="footer-container"></div>
     <!-- Chatbot Container -->
     <div id="chatbot-container"></div>
+    
+    <!-- Core Scripts - Load in correct order -->
+    <script src="js/vietnam-address.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
     <script src="js/main.js"></script>
     <script src="js/checkout.js"></script>
     <script src="js/load-components.js"></script>

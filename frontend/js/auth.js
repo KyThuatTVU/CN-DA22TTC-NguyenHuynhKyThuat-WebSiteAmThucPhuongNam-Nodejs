@@ -229,6 +229,16 @@ async function changePassword(mat_khau_cu, mat_khau_moi) {
 function updateNavbarWithUser() {
     // Wait for navbar to be loaded
     setTimeout(() => {
+        // Show "My Orders" link if logged in
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            const myOrdersLink = document.getElementById('my-orders-link');
+            const myOrdersLinkMobile = document.getElementById('my-orders-link-mobile');
+            if (myOrdersLink) myOrdersLink.classList.remove('hidden');
+            if (myOrdersLinkMobile) myOrdersLinkMobile.classList.remove('hidden');
+            console.log('✅ My Orders link shown');
+        }
+        
         if (typeof window.updateUserMenu === 'function') {
             window.updateUserMenu();
             console.log('✅ Navbar updated with user info');
