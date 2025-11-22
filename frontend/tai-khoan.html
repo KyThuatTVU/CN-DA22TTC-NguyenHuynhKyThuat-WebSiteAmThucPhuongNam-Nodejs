@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài Khoản Của Tôi - Nhà hàng Ẩm thực Phương Nam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/modern-style.css">
+    <link rel="stylesheet" href="css/navbar-fix.css">
+    <script src="js/tailwind-config.js"></script>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Navbar Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Account Page -->
+    <div class="min-h-screen pt-24 pb-16">
+        <div class="container mx-auto px-4 max-w-7xl">
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-user-circle text-orange-600 mr-3"></i>
+                    Tài Khoản Của Tôi
+                </h1>
+                <p class="text-gray-600">Quản lý thông tin cá nhân và cài đặt tài khoản</p>
+            </div>
+
+            <div class="grid lg:grid-cols-4 gap-6">
+                <!-- Mobile Menu Toggle -->
+                <button id="mobile-menu-toggle" class="lg:hidden w-full bg-white rounded-lg shadow-md p-4 flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bars text-orange-600 text-xl"></i>
+                        <span class="font-semibold text-gray-800">Menu Tài Khoản</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-600 transition-transform" id="menu-chevron"></i>
+                </button>
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <div id="sidebar-menu" class="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-24 hidden lg:block">
+                        <!-- User Avatar -->
+                        <div class="text-center mb-6">
+                            <div class="relative inline-block">
+                                <div id="avatar-display" class="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-3xl font-bold mx-auto shadow-lg transition-all duration-300 hover:scale-105">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <button onclick="document.getElementById('avatar-input').click()" class="absolute bottom-0 right-0 bg-orange-600 text-white w-8 h-8 rounded-full hover:bg-orange-700 hover:scale-110 transition-all duration-300 shadow-md flex items-center justify-center">
+                                    <i class="fas fa-camera text-sm"></i>
+                                </button>
+                                <input type="file" id="avatar-input" accept="image/*" class="hidden">
+                                <div id="upload-loading" class="hidden absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-spinner fa-spin text-white text-2xl"></i>
+                                </div>
+                            </div>
+                            <h3 id="sidebar-username" class="text-xl font-bold text-gray-800 mt-4">
+                                <span class="inline-block animate-pulse bg-gray-200 h-6 w-32 rounded" style="display: none;"></span>
+                            </h3>
+                            <p id="sidebar-email" class="text-sm text-gray-600">
+                                <span class="inline-block animate-pulse bg-gray-200 h-4 w-40 rounded" style="display: none;"></span>
+                            </p>
+                        </div>
+
+                        <!-- Navigation Menu -->
+                        <nav class="space-y-2">
+                            <button onclick="showTab('profile', event)" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3 bg-orange-50 text-orange-600 font-semibold">
+                                <i class="fas fa-user w-5"></i>
+                                <span>Thông tin cá nhân</span>
+                            </button>
+                            <button onclick="showTab('password', event)" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3">
+                                <i class="fas fa-lock w-5"></i>
+                                <span>Đổi mật khẩu</span>
+                            </button>
+                            <button onclick="showTab('orders', event)" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3">
+                                <i class="fas fa-shopping-bag w-5"></i>
+                                <span>Đơn hàng</span>
+                            </button>
+                            <button onclick="showTab('reservations', event)" class="tab-button w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3">
+                                <i class="fas fa-calendar-check w-5"></i>
+                                <span>Đặt bàn</span>
+                            </button>
+                            <hr class="my-4">
+                            <button onclick="handleLogout()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 transition flex items-center gap-3">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span>Đăng xuất</span>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="lg:col-span-3">
+                    <!-- Profile Tab -->
+                    <div id="profile-tab" class="tab-content">
+                        <div class="bg-white rounded-lg shadow-md p-8">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800">
+                                    <i class="fas fa-user-edit text-orange-600 mr-2"></i>
+                                    Thông Tin Cá Nhân
+                                </h2>
+                                <button id="edit-profile-btn" onclick="toggleEditMode()" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                                    <i class="fas fa-edit mr-2"></i>Chỉnh sửa
+                                </button>
+                            </div>
+
+                            <form id="profile-form" class="space-y-6">
+                                <!-- Name -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-user mr-2 text-orange-600"></i>Họ và tên
+                                    </label>
+                                    <input type="text" id="ten_nguoi_dung" disabled
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                </div>
+
+                                <!-- Email -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-envelope mr-2 text-orange-600"></i>Email
+                                    </label>
+                                    <input type="email" id="email" disabled
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                                    <p class="text-xs text-gray-500 mt-1">Email không thể thay đổi</p>
+                                </div>
+
+                                <!-- Phone -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-phone mr-2 text-orange-600"></i>Số điện thoại
+                                    </label>
+                                    <input type="tel" id="so_dien_thoai" disabled placeholder="Nhập số điện thoại"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                </div>
+
+                                <!-- Address -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-map-marker-alt mr-2 text-orange-600"></i>Địa chỉ
+                                    </label>
+                                    <textarea id="dia_chi" disabled rows="3" placeholder="Nhập địa chỉ của bạn"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"></textarea>
+                                </div>
+
+                                <!-- Gender -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-venus-mars mr-2 text-orange-600"></i>Giới tính
+                                    </label>
+                                    <select id="gioi_tinh" disabled
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                        <option value="khac">Khác</option>
+                                        <option value="nam">Nam</option>
+                                        <option value="nu">Nữ</option>
+                                    </select>
+                                </div>
+
+                                <!-- Save Button (hidden by default) -->
+                                <div id="save-buttons" class="hidden flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                    <button type="submit" class="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 active:scale-95 transition-all font-semibold">
+                                        <i class="fas fa-save mr-2"></i>Lưu thay đổi
+                                    </button>
+                                    <button type="button" onclick="cancelEdit()" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 active:scale-95 transition-all font-semibold">
+                                        <i class="fas fa-times mr-2"></i>Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Password Tab -->
+                    <div id="password-tab" class="tab-content hidden">
+                        <div class="bg-white rounded-lg shadow-md p-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                                <i class="fas fa-key text-orange-600 mr-2"></i>
+                                Đổi Mật Khẩu
+                            </h2>
+
+                            <form id="password-form" class="space-y-6">
+                                <!-- Current Password -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-lock mr-2 text-orange-600"></i>Mật khẩu hiện tại
+                                    </label>
+                                    <div class="relative">
+                                        <input type="password" id="mat_khau_cu" required
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <button type="button" onclick="togglePassword('mat_khau_cu')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- New Password -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-lock mr-2 text-orange-600"></i>Mật khẩu mới
+                                    </label>
+                                    <div class="relative">
+                                        <input type="password" id="mat_khau_moi" required
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <button type="button" onclick="togglePassword('mat_khau_moi')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ và số</p>
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-lock mr-2 text-orange-600"></i>Xác nhận mật khẩu mới
+                                    </label>
+                                    <div class="relative">
+                                        <input type="password" id="xac_nhan_mat_khau" required
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <button type="button" onclick="togglePassword('xac_nhan_mat_khau')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="w-full bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 active:scale-95 transition-all font-semibold shadow-md">
+                                    <i class="fas fa-check mr-2"></i>Đổi mật khẩu
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div id="orders-tab" class="tab-content hidden">
+                        <div class="bg-white rounded-lg shadow-md p-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                                <i class="fas fa-shopping-bag text-orange-600 mr-2"></i>
+                                Đơn Hàng Của Tôi
+                            </h2>
+
+                            <div id="orders-list" class="space-y-4">
+                                <!-- Orders will be loaded here -->
+                                <div class="text-center py-12 text-gray-500">
+                                    <i class="fas fa-shopping-bag text-6xl mb-4 opacity-30"></i>
+                                    <p class="text-lg">Bạn chưa có đơn hàng nào</p>
+                                    <a href="thuc-don.html" class="inline-block mt-4 text-orange-600 hover:text-orange-700 font-semibold">
+                                        Đặt hàng ngay <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservations Tab -->
+                    <div id="reservations-tab" class="tab-content hidden">
+                        <div class="bg-white rounded-lg shadow-md p-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                                <i class="fas fa-calendar-check text-orange-600 mr-2"></i>
+                                Lịch Đặt Bàn
+                            </h2>
+
+                            <div id="reservations-list" class="space-y-4">
+                                <!-- Reservations will be loaded here -->
+                                <div class="text-center py-12 text-gray-500">
+                                    <i class="fas fa-calendar-times text-6xl mb-4 opacity-30"></i>
+                                    <p class="text-lg">Bạn chưa có lịch đặt bàn nào</p>
+                                    <a href="dat-ban.html" class="inline-block mt-4 text-orange-600 hover:text-orange-700 font-semibold">
+                                        Đặt bàn ngay <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <!-- Chatbot Container -->
+    <div id="chatbot-container"></div>
+
+    <!-- Back to Top Button (Mobile) -->
+    <button id="back-to-top" class="fixed bottom-20 right-4 bg-orange-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-orange-700 transition-all opacity-0 pointer-events-none z-40 flex items-center justify-center">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script>
+        // API Configuration
+        if (typeof window.API_URL === 'undefined') {
+            window.API_URL = 'http://localhost:3000/api';
+        }
+    </script>
+    <script src="js/auth.js"></script>
+    <script src="js/load-components.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        let isEditMode = false;
+        let originalData = {};
+
+        // Check login
+        if (!isLoggedIn()) {
+            window.location.href = 'dang-nhap.html';
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const user = await getCurrentUser();
+                if (!user) {
+                    window.location.href = 'dang-nhap.html';
+                    return;
+                }
+
+                // Display in sidebar
+                document.getElementById('sidebar-username').textContent = user.ten_nguoi_dung;
+                document.getElementById('sidebar-email').textContent = user.email;
+
+                // Display avatar
+                const avatarDisplay = document.getElementById('avatar-display');
+                if (user.anh_dai_dien) {
+                    const avatarUrl = user.anh_dai_dien.startsWith('http') 
+                        ? user.anh_dai_dien 
+                        : `${window.API_URL.replace('/api', '')}${user.anh_dai_dien}`;
+                    avatarDisplay.innerHTML = `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-full h-full object-cover rounded-full" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+                }
+
+                // Fill form
+                document.getElementById('ten_nguoi_dung').value = user.ten_nguoi_dung || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('so_dien_thoai').value = user.so_dien_thoai || '';
+                document.getElementById('dia_chi').value = user.dia_chi || '';
+                document.getElementById('gioi_tinh').value = user.gioi_tinh || 'khac';
+
+                // Store original data
+                originalData = { ...user };
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showNotification('Không thể tải thông tin người dùng', 'error');
+            }
+        }
+
+        // Show tab
+        function showTab(tabName, event) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('bg-orange-50', 'text-orange-600', 'font-semibold');
+                btn.classList.add('text-gray-700');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+
+            // Add active class to clicked button
+            if (event) {
+                const button = event.currentTarget;
+                button.classList.add('bg-orange-50', 'text-orange-600', 'font-semibold');
+                button.classList.remove('text-gray-700');
+            }
+        }
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const fields = ['ten_nguoi_dung', 'so_dien_thoai', 'dia_chi', 'gioi_tinh'];
+            
+            fields.forEach(field => {
+                document.getElementById(field).disabled = !isEditMode;
+            });
+
+            document.getElementById('save-buttons').classList.toggle('hidden', !isEditMode);
+            document.getElementById('edit-profile-btn').classList.toggle('hidden', isEditMode);
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            toggleEditMode();
+            // Restore original data
+            document.getElementById('ten_nguoi_dung').value = originalData.ten_nguoi_dung || '';
+            document.getElementById('so_dien_thoai').value = originalData.so_dien_thoai || '';
+            document.getElementById('dia_chi').value = originalData.dia_chi || '';
+            document.getElementById('gioi_tinh').value = originalData.gioi_tinh || 'khac';
+        }
+
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = event.target.closest('button').querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Handle profile form submit
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                ten_nguoi_dung: document.getElementById('ten_nguoi_dung').value,
+                so_dien_thoai: document.getElementById('so_dien_thoai').value,
+                dia_chi: document.getElementById('dia_chi').value,
+                gioi_tinh: document.getElementById('gioi_tinh').value
+            };
+
+            const result = await updateUserInfo(formData);
+            
+            if (result.success) {
+                // Update localStorage
+                const user = getUserData();
+                Object.assign(user, formData);
+                saveUserData(user);
+                
+                // Reload data
+                await loadUserData();
+                toggleEditMode();
+                
+                // Update navbar
+                if (typeof updateUserMenu === 'function') {
+                    updateUserMenu();
+                }
+            }
+        });
+
+        // Handle password form submit
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const mat_khau_cu = document.getElementById('mat_khau_cu').value;
+            const mat_khau_moi = document.getElementById('mat_khau_moi').value;
+            const xac_nhan = document.getElementById('xac_nhan_mat_khau').value;
+
+            // Validate
+            if (mat_khau_moi !== xac_nhan) {
+                showNotification('Mật khẩu xác nhận không khớp', 'error');
+                return;
+            }
+
+            if (mat_khau_moi.length < 6) {
+                showNotification('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+
+            const result = await changePassword(mat_khau_cu, mat_khau_moi);
+            
+            if (result.success) {
+                // Clear form
+                document.getElementById('password-form').reset();
+            }
+        });
+
+        // Handle avatar upload
+        document.getElementById('avatar-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('File ảnh quá lớn (tối đa 5MB)', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showNotification('Vui lòng chọn file ảnh', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            // Show loading
+            const uploadLoading = document.getElementById('upload-loading');
+            uploadLoading.classList.remove('hidden');
+
+            try {
+                const token = localStorage.getItem('token');
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                const response = await fetch(`${window.API_URL}/auth/upload-avatar`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update avatar path
+                    const updateResult = await updateUserInfo({
+                        anh_dai_dien: result.data.anh_dai_dien
+                    });
+
+                    if (updateResult.success) {
+                        // Update localStorage
+                        const user = getUserData();
+                        user.anh_dai_dien = result.data.anh_dai_dien;
+                        saveUserData(user);
+
+                        showNotification('Cập nhật ảnh đại diện thành công!', 'success');
+                        
+                        // Reload page to show new avatar
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                } else {
+                    showNotification(result.message || 'Upload ảnh thất bại', 'error');
+                    uploadLoading.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showNotification('Lỗi khi upload ảnh', 'error');
+                uploadLoading.classList.add('hidden');
+            }
+            
+            e.target.value = '';
+        });
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const sidebarMenu = document.getElementById('sidebar-menu');
+        const menuChevron = document.getElementById('menu-chevron');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebarMenu.classList.toggle('hidden');
+                sidebarMenu.classList.toggle('block');
+                menuChevron.classList.toggle('rotate-180');
+                
+                // Add smooth animation
+                if (!sidebarMenu.classList.contains('hidden')) {
+                    sidebarMenu.style.animation = 'slideDown 0.3s ease-out';
+                }
+            });
+        }
+
+        // Close mobile menu when tab is selected on mobile
+        function showTabMobile(tabName, event) {
+            showTab(tabName, event);
+            
+            // Close menu on mobile after selection
+            if (window.innerWidth < 1024) {
+                setTimeout(() => {
+                    sidebarMenu.classList.add('hidden');
+                    sidebarMenu.classList.remove('block');
+                    menuChevron.classList.remove('rotate-180');
+                }, 100);
+            }
+        }
+
+        // Update tab buttons to use mobile-friendly function on small screens
+        document.querySelectorAll('.tab-button').forEach(button => {
+            const originalOnclick = button.getAttribute('onclick');
+            if (originalOnclick) {
+                // Replace showTab with showTabMobile
+                const newOnclick = originalOnclick.replace('showTab', 'showTabMobile');
+                button.setAttribute('onclick', newOnclick);
+            }
+        });
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            .tab-content {
+                animation: fadeIn 0.3s ease-in;
+            }
+
+            /* Mobile optimizations */
+            @media (max-width: 1023px) {
+                #sidebar-menu {
+                    position: relative !important;
+                    top: 0 !important;
+                }
+
+                .tab-button {
+                    font-size: 0.95rem;
+                    padding: 0.875rem 1rem;
+                }
+
+                #avatar-display {
+                    width: 80px !important;
+                    height: 80px !important;
+                }
+            }
+
+            /* Touch-friendly buttons on mobile */
+            @media (max-width: 768px) {
+                button, .tab-button, input[type="submit"] {
+                    min-height: 44px;
+                    touch-action: manipulation;
+                }
+
+                input, textarea, select {
+                    font-size: 16px !important; /* Prevent zoom on iOS */
+                }
+            }
+
+            /* Smooth scroll behavior */
+            html {
+                scroll-behavior: smooth;
+            }
+
+            /* Loading skeleton */
+            .skeleton {
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+            }
+
+            @keyframes loading {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+
+            /* Pull to refresh hint (optional) */
+            .pull-refresh-hint {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(to bottom, rgba(234, 88, 12, 0.1), transparent);
+                opacity: 0;
+                transform: translateY(-100%);
+                transition: all 0.3s ease;
+                z-index: 40;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth >= 1024) {
+                    // Show sidebar on desktop
+                    sidebarMenu.classList.remove('hidden');
+                    sidebarMenu.classList.add('block');
+                } else {
+                    // Hide sidebar on mobile
+                    sidebarMenu.classList.add('hidden');
+                    sidebarMenu.classList.remove('block');
+                    menuChevron.classList.remove('rotate-180');
+                }
+            }, 250);
+        });
+
+        // Back to top button functionality
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        // Optimize scroll performance on mobile
+        let ticking = false;
+        let lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            lastScrollY = window.scrollY;
+
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    // Show/hide back to top button
+                    if (backToTopButton) {
+                        if (lastScrollY > 300) {
+                            backToTopButton.style.opacity = '1';
+                            backToTopButton.style.pointerEvents = 'auto';
+                        } else {
+                            backToTopButton.style.opacity = '0';
+                            backToTopButton.style.pointerEvents = 'none';
+                        }
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+
+        // Back to top click handler
+        if (backToTopButton) {
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                
+                // Haptic feedback
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(20);
+                }
+            });
+        }
+
+        // Handle orientation change on mobile
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, window.scrollY);
+            }, 100);
+        });
+
+        // Add haptic feedback for touch devices (if supported)
+        if ('vibrate' in navigator) {
+            document.querySelectorAll('button, .tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    navigator.vibrate(10); // Light haptic feedback
+                });
+            });
+        }
+
+        // Prevent double-tap zoom on buttons
+        document.querySelectorAll('button').forEach(button => {
+            let lastTap = 0;
+            button.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    e.preventDefault();
+                }
+                lastTap = currentTime;
+            });
+        });
+
+        // Swipe gesture for mobile tab switching
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabs = ['profile', 'password', 'orders', 'reservations'];
+        
+        function getCurrentTabIndex() {
+            for (let i = 0; i < tabs.length; i++) {
+                if (!document.getElementById(`${tabs[i]}-tab`).classList.contains('hidden')) {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        function switchToTab(index) {
+            if (index >= 0 && index < tabs.length) {
+                const tabButton = tabButtons[index];
+                if (tabButton) {
+                    tabButton.click();
+                }
+            }
+        }
+
+        // Add swipe detection on mobile
+        if (window.innerWidth < 1024) {
+            document.querySelector('.lg\\:col-span-3').addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            document.querySelector('.lg\\:col-span-3').addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const difference = touchStartX - touchEndX;
+            
+            if (Math.abs(difference) > swipeThreshold) {
+                const currentIndex = getCurrentTabIndex();
+                
+                if (difference > 0) {
+                    // Swipe left - next tab
+                    switchToTab(currentIndex + 1);
+                } else {
+                    // Swipe right - previous tab
+                    switchToTab(currentIndex - 1);
+                }
+            }
+        }
+
+        // Add visual indicator for swipeable content on mobile
+        if (window.innerWidth < 1024) {
+            const style = document.createElement('div');
+            style.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-xs opacity-0 pointer-events-none transition-opacity z-50';
+            style.id = 'swipe-hint';
+            style.innerHTML = '<i class="fas fa-hand-point-left mr-2"></i>Vuốt để chuyển tab<i class="fas fa-hand-point-right ml-2"></i>';
+            document.body.appendChild(style);
+
+            // Show hint briefly on first load
+            setTimeout(() => {
+                const hint = document.getElementById('swipe-hint');
+                hint.style.opacity = '0.9';
+                setTimeout(() => {
+                    hint.style.opacity = '0';
+                }, 3000);
+            }, 1000);
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+            
+            // Initialize mobile menu state
+            if (window.innerWidth >= 1024) {
+                sidebarMenu.classList.remove('hidden');
+                sidebarMenu.classList.add('block');
+            }
+        });
+    </script>
+</body>
+
+</html>

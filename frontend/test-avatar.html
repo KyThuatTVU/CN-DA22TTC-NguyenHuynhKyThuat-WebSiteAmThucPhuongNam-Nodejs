@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Avatar - Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-bug text-orange-600 mr-2"></i>
+            Test Avatar Debug
+        </h1>
+
+        <div class="space-y-6">
+            <!-- User Info Display -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                <h2 class="font-bold text-lg mb-2">Thông tin người dùng từ localStorage:</h2>
+                <pre id="user-info" class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto text-sm"></pre>
+            </div>
+
+            <!-- Avatar Preview -->
+            <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                <h2 class="font-bold text-lg mb-4">Preview Avatar:</h2>
+                <div id="avatar-preview" class="space-y-4">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-4">
+                <button onclick="checkAvatar()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-sync mr-2"></i>
+                    Kiểm tra lại
+                </button>
+                <button onclick="clearStorage()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition">
+                    <i class="fas fa-trash mr-2"></i>
+                    Xóa localStorage
+                </button>
+                <a href="dang-nhap.html" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition inline-block">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Đăng nhập lại
+                </a>
+            </div>
+
+            <!-- Debug Console -->
+            <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded">
+                <h2 class="font-bold text-lg mb-2">Debug Console:</h2>
+                <div id="debug-console" class="bg-gray-900 text-white p-4 rounded h-64 overflow-y-auto font-mono text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        function log(message, type = 'info') {
+            const console = document.getElementById('debug-console');
+            const colors = {
+                'info': 'text-blue-400',
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'warning': 'text-yellow-400'
+            };
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️'
+            };
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = colors[type] + ' mb-1';
+            entry.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> ${icons[type]} ${message}`;
+            console.appendChild(entry);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function checkAvatar() {
+            log('Bắt đầu kiểm tra avatar...', 'info');
+            
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (!userStr || !token) {
+                log('Không tìm thấy thông tin người dùng trong localStorage', 'warning');
+                document.getElementById('user-info').textContent = 'Chưa đăng nhập';
+                document.getElementById('avatar-preview').innerHTML = '<p class="text-gray-600">Vui lòng đăng nhập trước</p>';
+                return;
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                log(`Tìm thấy user: ${user.ten_nguoi_dung} (${user.email})`, 'success');
+                
+                // Display user info
+                document.getElementById('user-info').textContent = JSON.stringify(user, null, 2);
+                
+                // Check avatar
+                log(`Avatar path từ DB: ${user.anh_dai_dien || 'NULL'}`, 'info');
+                
+                const avatarPreview = document.getElementById('avatar-preview');
+                
+                if (!user.anh_dai_dien || user.anh_dai_dien.trim() === '') {
+                    log('Người dùng chưa có ảnh đại diện', 'warning');
+                    avatarPreview.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center">
+                                <i class="fas fa-user text-orange-600 text-3xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold">${user.ten_nguoi_dung}</p>
+                                <p class="text-gray-600">Chưa có ảnh đại diện</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Build avatar URL
+                    let avatarUrl = user.anh_dai_dien.startsWith('http') 
+                        ? user.anh_dai_dien 
+                        : `http://localhost:3000${user.anh_dai_dien}`;
+                    
+                    log(`Avatar URL: ${avatarUrl}`, 'info');
+                    
+                    // Test if image loads
+                    const testImg = new Image();
+                    testImg.onload = function() {
+                        log('✓ Ảnh tải thành công!', 'success');
+                        avatarPreview.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" 
+                                     class="w-20 h-20 rounded-full object-cover border-4 border-orange-200 shadow-lg">
+                                <div>
+                                    <p class="font-bold text-xl">${user.ten_nguoi_dung}</p>
+                                    <p class="text-gray-600">${user.email}</p>
+                                    <p class="text-green-600 text-sm mt-1">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Avatar hoạt động tốt
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-white rounded border">
+                                <p class="text-sm text-gray-700"><strong>Path:</strong> ${user.anh_dai_dien}</p>
+                                <p class="text-sm text-gray-700"><strong>Full URL:</strong> ${avatarUrl}</p>
+                            </div>
+                        `;
+                    };
+                    testImg.onerror = function() {
+                        log('✗ Không thể tải ảnh! Kiểm tra đường dẫn hoặc file không tồn tại', 'error');
+                        avatarPreview.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center border-4 border-red-200">
+                                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold">${user.ten_nguoi_dung}</p>
+                                    <p class="text-red-600">Lỗi tải ảnh đại diện</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-red-50 rounded border border-red-200">
+                                <p class="text-sm text-red-700"><strong>Path:</strong> ${user.anh_dai_dien}</p>
+                                <p class="text-sm text-red-700"><strong>Attempted URL:</strong> ${avatarUrl}</p>
+                                <p class="text-sm text-red-700 mt-2">
+                                    <strong>Lỗi:</strong> File ảnh không tồn tại hoặc đường dẫn sai
+                                </p>
+                            </div>
+                        `;
+                    };
+                    testImg.src = avatarUrl;
+                }
+                
+            } catch (error) {
+                log(`Lỗi parse user data: ${error.message}`, 'error');
+                document.getElementById('user-info').textContent = 'Lỗi: ' + error.message;
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Bạn có chắc muốn xóa tất cả dữ liệu localStorage?')) {
+                localStorage.clear();
+                log('Đã xóa localStorage', 'success');
+                checkAvatar();
+            }
+        }
+
+        // Auto-run on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Trang test-avatar đã tải', 'info');
+            checkAvatar();
+        });
+    </script>
+</body>
+</html>

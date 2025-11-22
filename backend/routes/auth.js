@@ -434,6 +434,14 @@ router.post('/login', async (req, res) => {
         // Trả về thông tin người dùng (không bao gồm mật khẩu)
         const { mat_khau_hash, ...userData } = user;
 
+        console.log('✅ Login successful for:', user.email);
+        console.log('📦 User data being sent:', {
+            ma_nguoi_dung: userData.ma_nguoi_dung,
+            ten_nguoi_dung: userData.ten_nguoi_dung,
+            email: userData.email,
+            anh_dai_dien: userData.anh_dai_dien
+        });
+
         res.json({
             success: true,
             message: 'Đăng nhập thành công',

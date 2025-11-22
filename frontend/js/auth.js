@@ -29,6 +29,12 @@ function setLoadingButton(button, isLoading) {
 
 // Save user data to localStorage
 function saveUserData(data) {
+    console.log('💾 Saving user data to localStorage:', {
+        name: data.ten_nguoi_dung,
+        email: data.email,
+        avatar: data.anh_dai_dien,
+        hasToken: !!data.token
+    });
     localStorage.setItem('user', JSON.stringify(data));
     localStorage.setItem('token', data.token);
 }

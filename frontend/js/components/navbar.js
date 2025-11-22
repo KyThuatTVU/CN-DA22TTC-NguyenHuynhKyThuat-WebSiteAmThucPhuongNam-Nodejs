@@ -118,15 +118,29 @@ window.renderUserMenu = function() {
     if (userStr && token) {
         try {
             const user = JSON.parse(userStr);
-            const avatarUrl = user.anh_dai_dien 
-                ? `http://localhost:3000${user.anh_dai_dien}` 
-                : null;
+            console.log('👤 User data:', { 
+                name: user.ten_nguoi_dung, 
+                avatar: user.anh_dai_dien,
+                avatarType: typeof user.anh_dai_dien
+            });
+            
+            // Xử lý avatar URL - kiểm tra null, undefined, và empty string
+            let avatarUrl = null;
+            if (user.anh_dai_dien && user.anh_dai_dien.trim() !== '') {
+                // Nếu đường dẫn đã có http, giữ nguyên, nếu không thì thêm localhost:3000
+                avatarUrl = user.anh_dai_dien.startsWith('http') 
+                    ? user.anh_dai_dien 
+                    : `http://localhost:3000${user.anh_dai_dien}`;
+                console.log('🖼️ Avatar URL:', avatarUrl);
+            } else {
+                console.log('⚠️ No avatar found for user');
+            }
 
             userMenuContainer.innerHTML = `
                 <div class="relative group">
                     <button class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition">
                         ${avatarUrl 
-                            ? `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-8 h-8 rounded-full object-cover border-2 border-orange-200" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27%23ea580c%27%3E%3Cpath d=%27M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%27/%3E%3C/svg%3E';">`
+                            ? `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-8 h-8 rounded-full object-cover border-2 border-orange-200" onerror="console.error('Failed to load avatar:', this.src); this.onerror=null; this.parentElement.innerHTML='<div class=\'w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center\'><i class=\'fas fa-user text-orange-600\'></i></div>';">`
                             : `<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                                 <i class="fas fa-user text-orange-600"></i>
                                </div>`
