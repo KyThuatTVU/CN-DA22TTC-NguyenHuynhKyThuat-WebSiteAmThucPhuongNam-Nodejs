@@ -153,15 +153,24 @@
     <script src="js/my-orders.js"></script>
 
     <!-- GSAP Animation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    
     <script>
-        // Animate page load
-        gsap.from('.bg-white', {
-            y: 30,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out'
+        // Animate page header only (không animate order cards vì my-orders.js đã xử lý)
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.from('.text-center.mb-8', {
+                y: 30,
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power3.out'
+            });
+
+            gsap.from('.filter-buttons', {
+                y: 20,
+                opacity: 0,
+                duration: 0.6,
+                delay: 0.2,
+                ease: 'power3.out'
+            });
         });
     </script>
 </body>

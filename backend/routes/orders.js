@@ -63,7 +63,7 @@ const authenticateToken = (req, res, next) => {
 // Tạo đơn hàng mới từ giỏ hàng
 router.post('/create', authenticateToken, async (req, res) => {
     const connection = await db.getConnection();
-    
+
     try {
         await connection.beginTransaction();
 
@@ -167,7 +167,7 @@ router.post('/create', authenticateToken, async (req, res) => {
 
             if (promoRows.length > 0) {
                 const promo = promoRows[0];
-                
+
                 // Kiểm tra đơn hàng tối thiểu
                 if (tong_tien_hang >= parseFloat(promo.don_hang_toi_thieu)) {
                     if (promo.loai_giam_gia === 'percentage') {
@@ -290,14 +290,12 @@ router.post('/create', authenticateToken, async (req, res) => {
             );
         }
 
-        // Đánh dấu giỏ hàng là đã đặt hàng
-        await connection.query(
-            'UPDATE gio_hang SET trang_thai = "ordered" WHERE ma_gio_hang = ?',
-            [ma_gio_hang]
-        );
+        // KHÔNG đánh dấu cart = "ordered" ở đây vì user chưa thanh toán
+        // Cart sẽ được xử lý sau khi thanh toán thành công:
+        // - VNPay: trong vnpay-return callback
+        // - COD/khác: trong trang dat-hang-thanh-cong.html khi frontend clear cart
 
-        // Xóa các items trong giỏ hàng (hoặc giữ lại để tracking)
-        // await connection.query('DELETE FROM chi_tiet_gio_hang WHERE ma_gio_hang = ?', [ma_gio_hang]);
+        // GIỮ NGUYÊN cart = "active" để nếu thanh toán thất bại, user vẫn còn món
 
         await connection.commit();
 
@@ -372,7 +370,20 @@ router.get('/my-orders', authenticateToken, async (req, res) => {
                  WHERE ct.ma_don_hang = ?`,
                 [order.ma_don_hang]
             );
+
+            // Kiểm tra trạng thái thanh toán
+            // Nếu không có record trong bảng thanh_toan, coi như COD
+            const paymentMethod = order.phuong_thuc || 'cod';
+            const paymentStatus = order.trang_thai_thanh_toan; // 'pending', 'success', 'failed'
             
+            // Đơn hàng được coi là "chưa thanh toán" nếu:
+            // - Có bản ghi thanh toán (không phải COD) VÀ
+            // - Trạng thái thanh toán là 'pending' hoặc 'failed'
+            const isPaymentFailed = 
+                order.phuong_thuc && // Có record trong thanh_toan (không phải COD)
+                order.phuong_thuc !== 'cod' && 
+                (!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'failed');
+
             // Transform order data to match frontend expectations
             transformedOrders.push({
                 id_don_hang: order.ma_don_hang,
@@ -388,7 +399,9 @@ router.get('/my-orders', authenticateToken, async (req, res) => {
                 quan_huyen: '',
                 tinh_thanh: '',
                 ghi_chu: order.ghi_chu || '',
-                phuong_thuc_thanh_toan: order.phuong_thuc || 'cod',
+                phuong_thuc_thanh_toan: paymentMethod,
+                trang_thai_thanh_toan: paymentStatus,
+                can_thanh_toan_lai: isPaymentFailed, // Flag để hiển thị nút "Thanh toán lại"
                 tong_tien_hang: parseFloat(order.tong_tien) || 0,
                 phi_van_chuyen: 0,
                 giam_gia: parseFloat(order.tien_giam_gia) || 0,
@@ -519,7 +532,7 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
 // Hủy đơn hàng (chỉ cho đơn hàng chờ xác nhận hoặc đã xác nhận)
 router.put('/:orderId/cancel', authenticateToken, async (req, res) => {
     const connection = await db.getConnection();
-    
+
     try {
         await connection.beginTransaction();
 
@@ -543,9 +556,27 @@ router.put('/:orderId/cancel', authenticateToken, async (req, res) => {
 
         const order = orderRows[0];
 
+        // Kiểm tra trạng thái thanh toán
+        const [paymentRows] = await connection.query(
+            'SELECT * FROM thanh_toan WHERE ma_don_hang = ?',
+            [orderId]
+        );
+
+        // Không cho phép hủy nếu đã thanh toán thành công (đặc biệt là VNPay)
+        if (paymentRows.length > 0) {
+            const payment = paymentRows[0];
+            if (payment.trang_thai === 'success' || payment.trang_thai === 'completed') {
+                await connection.rollback();
+                return res.status(400).json({
+                    success: false,
+                    message: 'Không thể hủy đơn hàng đã thanh toán thành công. Vui lòng liên hệ CSKH để được hỗ trợ.'
+                });
+            }
+        }
+
         // Chỉ cho phép hủy đơn hàng chờ xác nhận hoặc đã xác nhận
-        const canCancel = ['cho_xac_nhan', 'da_xac_nhan', 'pending'].includes(order.trang_thai);
-        
+        const canCancel = ['cho_xac_nhan', 'da_xac_nhan', 'pending', 'confirmed'].includes(order.trang_thai);
+
         if (!canCancel) {
             await connection.rollback();
             return res.status(400).json({
@@ -567,23 +598,23 @@ router.put('/:orderId/cancel', authenticateToken, async (req, res) => {
             );
         }
 
-        // Cập nhật trạng thái đơn hàng
+        // Cập nhật trạng thái đơn hàng (sử dụng giá trị database 'cancelled')
         const ghi_chu_huy = ly_do_huy ? `Lý do: ${ly_do_huy}` : 'Khách hàng hủy đơn';
-        
+
         await connection.query(
-            'UPDATE don_hang SET trang_thai = "da_huy", ghi_chu = CONCAT(IFNULL(ghi_chu, ""), "\n", ?) WHERE ma_don_hang = ?',
+            'UPDATE don_hang SET trang_thai = "cancelled", ghi_chu = CONCAT(IFNULL(ghi_chu, ""), "\n", ?) WHERE ma_don_hang = ?',
             [ghi_chu_huy, orderId]
         );
 
-        // Cập nhật trạng thái thanh toán
+        // Cập nhật trạng thái thanh toán (sử dụng 'cancelled')
         await connection.query(
-            'UPDATE thanh_toan SET trang_thai = "da_huy" WHERE ma_don_hang = ?',
+            'UPDATE thanh_toan SET trang_thai = "cancelled" WHERE ma_don_hang = ?',
             [orderId]
         );
 
-        // Cập nhật hóa đơn
+        // Cập nhật hóa đơn (sử dụng 'cancelled')
         await connection.query(
-            'UPDATE hoa_don SET trang_thai = "da_huy" WHERE ma_don_hang = ?',
+            'UPDATE hoa_don SET trang_thai = "cancelled" WHERE ma_don_hang = ?',
             [orderId]
         );
 

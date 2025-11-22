@@ -18,7 +18,7 @@ function renderCheckoutItems() {
 
     // Get cart from cartManager if available, otherwise use localStorage fallback
     let cart = { items: [], tong_tien: 0, so_luong: 0 };
-    
+
     if (typeof cartManager !== 'undefined') {
         cart = cartManager.getCart();
     } else {
@@ -44,10 +44,10 @@ function renderCheckoutItems() {
     }
 
     container.innerHTML = cart.items.map(item => {
-        const imageSrc = item.anh_mon 
+        const imageSrc = item.anh_mon
             ? (item.anh_mon.startsWith('http') ? item.anh_mon : `http://localhost:3000${item.anh_mon}`)
             : '/images/default-dish.jpg';
-        
+
         return `
         <div class="flex items-center gap-3">
             <div class="relative">
@@ -75,7 +75,7 @@ function renderCheckoutItems() {
 function updateCheckoutSummary() {
     // Get cart data
     let cart = { items: [], tong_tien: 0 };
-    
+
     if (typeof cartManager !== 'undefined') {
         cart = cartManager.getCart();
     } else {
@@ -119,7 +119,7 @@ function formatCurrency(amount) {
 }
 
 // Handle payment method change and initialization
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Check authentication
     if (!isAuthenticated()) {
         showNotification('Vui lòng đăng nhập để thanh toán', 'warning');
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submit-order-btn');
     console.log('🔍 Submit button found:', submitBtn);
     if (submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
+        submitBtn.addEventListener('click', function (e) {
             console.log('🖱️ Button clicked!');
             submitOrder(e);
         });
@@ -157,15 +157,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Payment method toggle
     const paymentOptions = document.querySelectorAll('.payment-option');
     const qrSection = document.getElementById('qr-code-section');
-    
+
     paymentOptions.forEach(option => {
-        option.addEventListener('click', function() {
+        option.addEventListener('click', function () {
             paymentOptions.forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
-            
+
             const radio = this.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
-            
+
             // Show QR code if QR payment selected
             if (radio && radio.value === 'qr') {
                 qrSection.classList.remove('hidden');
@@ -179,18 +179,18 @@ document.addEventListener('DOMContentLoaded', function() {
 // Submit order
 async function submitOrder(event) {
     console.log('🚀 submitOrder called!', event);
-    
+
     if (event) event.preventDefault();
-    
+
     const form = document.getElementById('checkout-form');
     console.log('📝 Form found:', form);
-    
+
     if (!form.checkValidity()) {
         console.warn('⚠️ Form validation failed');
         form.reportValidity();
         return;
     }
-    
+
     console.log('✅ Form validation passed');
 
     // Check authentication
@@ -229,7 +229,7 @@ async function submitOrder(event) {
     const formInputs = form.querySelectorAll('input, select, textarea');
     const formData = {};
     console.log('Found', formInputs.length, 'form inputs');
-    
+
     formInputs.forEach(input => {
         if (input.name) {
             // For selects, get the display text from API data
@@ -281,7 +281,7 @@ async function submitOrder(event) {
 
     // Validate required fields
     console.log('🔍 Order data:', orderData);
-    if (!orderData.ten_nguoi_nhan || !orderData.so_dien_thoai || !orderData.dia_chi || 
+    if (!orderData.ten_nguoi_nhan || !orderData.so_dien_thoai || !orderData.dia_chi ||
         !orderData.tinh_thanh || !orderData.quan_huyen || !orderData.phuong_xa) {
         console.error('❌ Missing required fields:', {
             ten_nguoi_nhan: orderData.ten_nguoi_nhan,
@@ -304,7 +304,7 @@ async function submitOrder(event) {
         console.log('🔑 Token:', token ? 'Present' : 'Missing');
         console.log('🌐 API URL:', `${API_URL}/orders/create`);
         console.log('📤 Sending order data:', JSON.stringify(orderData, null, 2));
-        
+
         const response = await fetch(`${API_URL}/orders/create`, {
             method: 'POST',
             headers: {
@@ -319,19 +319,61 @@ async function submitOrder(event) {
         console.log('📥 Response data:', result);
 
         if (response.ok && result.success) {
-            showNotification('Đặt hàng thành công!', 'success');
-            
-            // Clear cart
-            if (typeof cartManager !== 'undefined') {
-                await cartManager.clearCart();
+            const orderId = result.data.ma_don_hang;
+            const totalAmount = cart.tong_tien + (cart.tong_tien >= 150000 ? 0 : 30000); // Include shipping
+
+            // If payment method is VNPay, redirect to VNPay payment gateway
+            if (paymentMethod === 'vnpay') {
+                console.log('💳 Processing VNPay payment...');
+                showNotification('Đang chuyển đến cổng thanh toán VNPay...', 'info');
+
+                try {
+                    const paymentResponse = await fetch(`${API_URL}/payment/vnpay/create-payment`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            amount: totalAmount,
+                            orderInfo: `Thanh toan don hang ${orderId}`,
+                            bankCode: '' // Leave empty to show bank selection at VNPay
+                        })
+                    });
+
+                    const paymentResult = await paymentResponse.json();
+                    console.log('💳 Payment response:', paymentResult);
+
+                    if (paymentResponse.ok && paymentResult.success) {
+                        // KHÔNG xóa giỏ hàng ở đây - chỉ xóa khi thanh toán thành công
+                        // Cart sẽ được xóa trong trang dat-hang-thanh-cong.html
+
+                        // Redirect to VNPay
+                        window.location.href = paymentResult.data.paymentUrl;
+                    } else {
+                        showNotification(paymentResult.message || 'Không thể tạo thanh toán VNPay', 'error');
+                    }
+                } catch (error) {
+                    console.error('Lỗi tạo thanh toán VNPay:', error);
+                    showNotification('Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại.', 'error');
+                }
             } else {
-                localStorage.removeItem('cart');
+                // Other payment methods
+                showNotification('Đặt hàng thành công!', 'success');
+
+                // Clear cart
+                if (typeof cartManager !== 'undefined') {
+                    await cartManager.clearCart();
+                } else {
+                    localStorage.removeItem('cart');
+                }
+
+                // Redirect to success page
+                setTimeout(() => {
+                    window.location.href = `dat-hang-thanh-cong.html?orderId=${orderId}`;
+                }, 2000);
             }
-            
-            // Redirect to order history or home page
-            setTimeout(() => {
-                window.location.href = `index.html?order_success=${result.data.ma_don_hang}`;
-            }, 2000);
         } else {
             showNotification(result.message || 'Đặt hàng thất bại', 'error');
         }
@@ -344,22 +386,22 @@ async function submitOrder(event) {
 // Prefill user information
 function prefillUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
+
     if (user.ten_nguoi_dung) {
         const nameInput = document.querySelector('input[type="text"][placeholder*="Nguyễn Văn A"]');
         if (nameInput) nameInput.value = user.ten_nguoi_dung;
     }
-    
+
     if (user.so_dien_thoai) {
         const phoneInput = document.querySelector('input[type="tel"]');
         if (phoneInput) phoneInput.value = user.so_dien_thoai;
     }
-    
+
     if (user.email) {
         const emailInput = document.querySelector('input[type="email"]');
         if (emailInput) emailInput.value = user.email;
     }
-    
+
     if (user.dia_chi) {
         const addressInput = document.querySelector('input[type="text"][placeholder*="Số nhà"]');
         if (addressInput) addressInput.value = user.dia_chi;
@@ -373,14 +415,14 @@ function showNotification(message, type = 'success') {
         window.authShowNotification(message, type);
         return;
     }
-    
+
     // Fallback notification
-    const bgColor = type === 'success' ? 'bg-green-500' : 
-                    type === 'info' ? 'bg-blue-500' : 
-                    type === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
-    const icon = type === 'success' ? 'check' : 
-                 type === 'warning' ? 'exclamation-triangle' : 'info';
-                 
+    const bgColor = type === 'success' ? 'bg-green-500' :
+        type === 'info' ? 'bg-blue-500' :
+            type === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
+    const icon = type === 'success' ? 'check' :
+        type === 'warning' ? 'exclamation-triangle' : 'info';
+
     const notification = document.createElement('div');
     notification.className = `fixed top-24 right-6 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white`;
     notification.innerHTML = `
@@ -389,9 +431,9 @@ function showNotification(message, type = 'success') {
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => notification.remove(), 300);

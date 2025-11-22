@@ -126,7 +126,7 @@ async function loadOrders() {
 
         if (response.ok && result.success) {
             allOrders = result.data || [];
-            
+
             if (allOrders.length === 0) {
                 container.classList.add('hidden');
                 emptyState.classList.remove('hidden');
@@ -157,7 +157,7 @@ async function loadOrders() {
 // Render orders
 function renderOrders(orders) {
     const container = document.getElementById('orders-container');
-    
+
     if (orders.length === 0) {
         container.innerHTML = `
             <div class="bg-white rounded-xl p-12 text-center">
@@ -172,7 +172,7 @@ function renderOrders(orders) {
     container.innerHTML = orders.map(order => {
         const statusInfo = getStatusInfo(order.trang_thai);
         const canCancel = ['cho_xac_nhan', 'da_xac_nhan'].includes(order.trang_thai);
-        
+
         return `
             <div class="order-card bg-white rounded-xl shadow-sm overflow-hidden" data-status="${order.trang_thai}">
                 <div class="p-6">
@@ -241,8 +241,20 @@ function renderOrders(orders) {
                         <div>
                             <p class="text-sm text-gray-500">Tổng thanh toán</p>
                             <p class="text-2xl font-bold text-orange-600">${formatCurrency(order.tong_thanh_toan)}</p>
+                            ${order.can_thanh_toan_lai ? `
+                                <p class="text-xs text-red-600 mt-1">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    ${order.trang_thai_thanh_toan === 'failed' ? 'Thanh toán thất bại' : 'Chưa thanh toán'}
+                                </p>
+                            ` : ''}
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 flex-wrap">
+                            ${order.can_thanh_toan_lai ? `
+                                <button onclick="retryPayment(${order.id_don_hang})" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition">
+                                    <i class="fas fa-credit-card mr-2"></i>
+                                    ${order.trang_thai_thanh_toan === 'failed' ? 'Thanh toán lại' : 'Thanh toán ngay'}
+                                </button>
+                            ` : ''}
                             <button onclick="viewOrderDetail(${order.id_don_hang})" class="bg-orange-100 text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-orange-200 transition">
                                 <i class="fas fa-eye mr-2"></i>
                                 Chi tiết
@@ -260,14 +272,22 @@ function renderOrders(orders) {
         `;
     }).join('');
 
-    // Animate
-    gsap.from('.order-card', {
-        y: 20,
-        opacity: 0,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: 'power3.out'
-    });
+    // Animate nếu GSAP có sẵn
+    if (typeof gsap !== 'undefined') {
+        gsap.from('.order-card', {
+            y: 20,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: 'power3.out',
+            clearProps: 'opacity' // Chỉ xóa opacity, giữ các prop khác
+        });
+    } else {
+        // Nếu GSAP chưa load, đảm bảo hiển thị bình thường
+        document.querySelectorAll('.order-card').forEach(card => {
+            card.style.opacity = '1';
+        });
+    }
 }
 
 // Filter orders
@@ -279,7 +299,7 @@ function filterOrders(status) {
         btn.classList.remove('active', 'bg-orange-600', 'text-white');
         btn.classList.add('bg-gray-100', 'text-gray-600');
     });
-    
+
     const activeBtn = document.querySelector(`[data-status="${status}"]`);
     if (activeBtn) {
         activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
@@ -436,8 +456,8 @@ function renderOrderDetail(order) {
                 </h4>
                 <div class="space-y-3">
                     ${order.lich_su_trang_thai.map(log => {
-                        const logStatus = getStatusInfo(log.trang_thai);
-                        return `
+        const logStatus = getStatusInfo(log.trang_thai);
+        return `
                             <div class="flex gap-3">
                                 <div class="flex-shrink-0">
                                     <div class="w-10 h-10 bg-${logStatus.class.includes('green') ? 'green' : logStatus.class.includes('red') ? 'red' : 'orange'}-100 rounded-full flex items-center justify-center">
@@ -451,7 +471,7 @@ function renderOrderDetail(order) {
                                 </div>
                             </div>
                         `;
-                    }).join('')}
+    }).join('')}
                 </div>
             </div>
         ` : ''}
@@ -510,6 +530,36 @@ async function confirmCancelOrder() {
     }
 }
 
+// Thanh toán lại đơn hàng
+async function retryPayment(orderId) {
+    if (!confirm('Bạn có muốn thanh toán lại đơn hàng này không?')) {
+        return;
+    }
+
+    try {
+        const token = getToken();
+        const response = await fetch(`${API_URL}/payment/vnpay/retry-payment/${orderId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const result = await response.json();
+        console.log('🔄 Retry payment result:', result);
+
+        if (response.ok && result.success) {
+            // Redirect sang trang thanh toán VNPay
+            window.location.href = result.data.paymentUrl;
+        } else {
+            throw new Error(result.message || 'Không thể tạo thanh toán');
+        }
+    } catch (error) {
+        console.error('❌ Error retry payment:', error);
+        showNotification(error.message, 'error');
+    }
+}
+
 // Show notification
 function showNotification(message, type = 'success') {
     if (window.authShowNotification && typeof window.authShowNotification === 'function') {
@@ -517,10 +567,10 @@ function showNotification(message, type = 'success') {
         return;
     }
 
-    const bgColor = type === 'success' ? 'bg-green-500' : 
-                    type === 'info' ? 'bg-blue-500' : 
-                    type === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
-                    
+    const bgColor = type === 'success' ? 'bg-green-500' :
+        type === 'info' ? 'bg-blue-500' :
+            type === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
+
     const notification = document.createElement('div');
     notification.className = `fixed top-24 right-6 z-50 px-6 py-4 rounded-lg shadow-lg ${bgColor} text-white`;
     notification.innerHTML = `
@@ -529,9 +579,9 @@ function showNotification(message, type = 'success') {
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => notification.remove(), 300);
@@ -539,7 +589,7 @@ function showNotification(message, type = 'success') {
 }
 
 // Close modals on background click
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (e.target.id === 'order-detail-modal') {
         closeOrderDetail();
     }
@@ -549,8 +599,15 @@ document.addEventListener('click', function(e) {
 });
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (checkAuth()) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const failed = urlParams.get('payment_failed');
+        const msg = urlParams.get('message');
+        if (failed === 'true') {
+            showNotification(msg || 'Thanh toán không thành công', 'error');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
         loadOrders();
     }
 });

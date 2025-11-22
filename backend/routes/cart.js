@@ -349,4 +349,55 @@ router.delete('/clear', authenticateToken, async (req, res) => {
     }
 });
 
+// Đánh dấu giỏ hàng là đã đặt (gọi sau khi thanh toán thành công)
+router.post('/mark-ordered', authenticateToken, async (req, res) => {
+    const connection = await db.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const ma_nguoi_dung = req.user.ma_nguoi_dung;
+
+        // Lấy cart active hiện tại
+        const [cartRows] = await connection.query(
+            'SELECT ma_gio_hang FROM gio_hang WHERE ma_nguoi_dung = ? AND trang_thai = "active"',
+            [ma_nguoi_dung]
+        );
+
+        if (cartRows.length > 0) {
+            const ma_gio_hang = cartRows[0].ma_gio_hang;
+
+            // Đánh dấu cart cũ là "ordered"
+            await connection.query(
+                'UPDATE gio_hang SET trang_thai = "ordered" WHERE ma_gio_hang = ?',
+                [ma_gio_hang]
+            );
+
+            // Tạo cart mới cho user
+            await connection.query(
+                'INSERT INTO gio_hang (ma_nguoi_dung, trang_thai) VALUES (?, "active")',
+                [ma_nguoi_dung]
+            );
+        }
+
+        await connection.commit();
+
+        res.json({
+            success: true,
+            message: 'Đã cập nhật giỏ hàng'
+        });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Lỗi đánh dấu giỏ hàng:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    } finally {
+        connection.release();
+    }
+});
+
 module.exports = router;
