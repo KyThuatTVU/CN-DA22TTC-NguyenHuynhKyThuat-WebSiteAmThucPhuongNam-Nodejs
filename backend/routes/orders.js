@@ -326,6 +326,9 @@ router.post('/create', authenticateToken, async (req, res) => {
     }
 });
 
+// IMPORTANT: Specific routes MUST come BEFORE parameterized routes (/:id)
+// Otherwise Express will match /my-orders as /:id with id="my-orders"
+
 // Lấy danh sách đơn hàng của user
 router.get('/my-orders', authenticateToken, async (req, res) => {
     try {
@@ -364,7 +367,13 @@ router.get('/my-orders', authenticateToken, async (req, res) => {
         const transformedOrders = [];
         for (let order of orders) {
             const [items] = await db.query(
-                `SELECT ct.*, m.ten_mon, m.anh_mon 
+                `SELECT 
+                    ct.ma_mon,
+                    ct.so_luong,
+                    ct.gia_tai_thoi_diem as gia,
+                    (ct.so_luong * ct.gia_tai_thoi_diem) as thanh_tien,
+                    m.ten_mon, 
+                    m.anh_mon 
                  FROM chi_tiet_don_hang ct
                  JOIN mon_an m ON ct.ma_mon = m.ma_mon
                  WHERE ct.ma_don_hang = ?`,
@@ -477,13 +486,13 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
             const [historyRows] = await db.query(
                 `SELECT * FROM lich_su_trang_thai_don_hang 
                  WHERE ma_don_hang = ? 
-                 ORDER BY thoi_gian DESC`,
+                 ORDER BY thoi_gian_thay_doi DESC`,
                 [orderId]
             );
             lichSuTrangThai = historyRows;
         } catch (err) {
-            // Bảng chưa tồn tại, bỏ qua
-            console.log('Bảng lich_su_trang_thai_don_hang chưa tồn tại');
+            // Bảng chưa tồn tại hoặc lỗi query, bỏ qua
+            console.error('Lỗi khi lấy lịch sử trạng thái:', err.message);
         }
 
         // Transform order data to match frontend expectations
@@ -618,16 +627,8 @@ router.put('/:orderId/cancel', authenticateToken, async (req, res) => {
             [orderId]
         );
 
-        // Lưu lịch sử trạng thái (nếu bảng tồn tại)
-        try {
-            await connection.query(
-                `INSERT INTO lich_su_trang_thai_don_hang (ma_don_hang, trang_thai, ghi_chu, thoi_gian)
-                 VALUES (?, 'da_huy', ?, NOW())`,
-                [orderId, ghi_chu_huy]
-            );
-        } catch (err) {
-            console.log('Bảng lich_su_trang_thai_don_hang chưa tồn tại');
-        }
+        // Lưu lịch sử trạng thái (trigger sẽ tự động ghi log khi UPDATE don_hang)
+        // Không cần insert thủ công vì trigger after_don_hang_update sẽ xử lý
 
         await connection.commit();
 

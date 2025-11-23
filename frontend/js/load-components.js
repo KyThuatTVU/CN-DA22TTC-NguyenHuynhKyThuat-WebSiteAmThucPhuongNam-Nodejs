@@ -40,6 +40,8 @@ async function loadAllComponents() {
 
 // Initialize component functionality
 function initializeComponents() {
+    console.log('🔧 Initializing components...');
+    
     // Update cart badge after a short delay to ensure navbar is loaded
     setTimeout(() => {
         updateCartBadge();
@@ -63,8 +65,14 @@ function initializeComponents() {
         });
     }
     
-    // Set active nav link
+    // Set active nav link - call immediately and after delay
     setActiveNavLink();
+    
+    // Also set active link after a longer delay to ensure everything is loaded
+    setTimeout(() => {
+        console.log('🔄 Re-checking active nav link...');
+        setActiveNavLink();
+    }, 500);
     
     // Refresh cart when page becomes visible (user returns to tab)
     document.addEventListener('visibilitychange', () => {
@@ -256,34 +264,50 @@ window.handleLogout = function() {
 
 // Set active navigation link based on current page
 function setActiveNavLink() {
-    // Get current page filename
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const pageName = currentPage.replace('.html', '');
-    
-    console.log('📍 Current page:', pageName);
-    
-    // Set active state for desktop nav links
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        const linkPage = link.getAttribute('data-page');
-        if (linkPage === pageName || (pageName === '' && linkPage === 'index')) {
-            link.classList.add('active');
-            console.log('✅ Active link set:', linkPage);
-        } else {
+    // Wait a bit for navbar to be fully loaded
+    setTimeout(() => {
+        // Get current page filename
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const pageName = currentPage.replace('.html', '');
+        
+        console.log('📍 Current page:', pageName);
+        console.log('📍 Full path:', window.location.pathname);
+        
+        // Set active state for desktop nav links
+        const navLinks = document.querySelectorAll('.nav-link');
+        console.log('🔍 Found nav links:', navLinks.length);
+        
+        navLinks.forEach(link => {
+            const linkPage = link.getAttribute('data-page');
+            console.log('🔗 Checking link:', linkPage, 'vs', pageName);
+            
+            // Remove active class first
             link.classList.remove('active');
-        }
-    });
-    
-    // Set active state for mobile nav links
-    const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
-    mobileNavLinks.forEach(link => {
-        const linkPage = link.getAttribute('data-page');
-        if (linkPage === pageName || (pageName === '' && linkPage === 'index')) {
-            link.classList.add('active');
-        } else {
+            
+            // Add active class if matches
+            if (linkPage === pageName || (pageName === '' && linkPage === 'index')) {
+                link.classList.add('active');
+                console.log('✅ Active link set:', linkPage);
+            }
+        });
+        
+        // Set active state for mobile nav links
+        const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+        console.log('🔍 Found mobile nav links:', mobileNavLinks.length);
+        
+        mobileNavLinks.forEach(link => {
+            const linkPage = link.getAttribute('data-page');
+            
+            // Remove active class first
             link.classList.remove('active');
-        }
-    });
+            
+            // Add active class if matches
+            if (linkPage === pageName || (pageName === '' && linkPage === 'index')) {
+                link.classList.add('active');
+                console.log('✅ Active mobile link set:', linkPage);
+            }
+        });
+    }, 200); // Wait 200ms for navbar to load
 }
 
 // Load components when DOM is ready
@@ -295,6 +319,17 @@ if (document.readyState === 'loading') {
 
 // Initialize cart after components are loaded (only if cart.js is already loaded)
 function initializeCart() {
+    // Skip cart initialization on pages that don't need it
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const pagesWithoutCart = ['dat-hang-thanh-cong.html', 'dang-nhap.html', 'dang-ky.html', 'quen-mat-khau.html', 'dat-lai-mat-khau.html', 'xac-thuc-email.html'];
+    
+    if (pagesWithoutCart.includes(currentPage)) {
+        console.log('ℹ️ Skipping cart initialization on', currentPage);
+        // Still update badge with fallback
+        updateCartBadge();
+        return;
+    }
+    
     // Wait for cartManager to be available
     const checkCartManager = setInterval(() => {
         if (typeof cartManager !== 'undefined') {

@@ -163,6 +163,7 @@
     <div id="footer-container"></div>
 
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/load-components.js"></script>
@@ -184,7 +185,8 @@
         // Get order ID from URL
         function getOrderId() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('order');
+            // Try both 'orderId' and 'order' parameters
+            return urlParams.get('orderId') || urlParams.get('order');
         }
 
         // Load order details
@@ -192,29 +194,49 @@
             const orderId = getOrderId();
             const orderCodeEl = document.getElementById('order-code');
 
+            console.log('🔍 Order ID from URL:', orderId);
+
             if (!orderId) {
+                console.error('❌ No order ID found in URL');
                 orderCodeEl.textContent = 'Không tìm thấy mã đơn hàng';
                 return;
             }
 
-            orderCodeEl.textContent = orderId;
+            orderCodeEl.textContent = `DH${String(orderId).padStart(6, '0')}`;
 
             try {
                 const token = getToken();
-                const response = await fetch(`${API_URL}/orders/${orderId}`, {
+                console.log('🔑 Token:', token ? 'Found' : 'Not found');
+                
+                const url = `${API_URL}/orders/${orderId}`;
+                console.log('📡 Fetching:', url);
+                
+                const response = await fetch(url, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
+                console.log('📥 Response status:', response.status);
+
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('📦 Order data:', result);
+                    
                     if (result.success) {
                         displayOrderDetails(result.data);
+                    } else {
+                        console.error('❌ API returned success=false:', result.message);
+                        orderCodeEl.textContent = result.message || 'Không tìm thấy đơn hàng';
                     }
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ API error:', response.status, errorText);
+                    orderCodeEl.textContent = 'Lỗi khi tải đơn hàng';
                 }
             } catch (error) {
-                console.error('Error loading order:', error);
+                console.error('❌ Error loading order:', error);
+                orderCodeEl.textContent = 'Lỗi kết nối';
             }
         }
 

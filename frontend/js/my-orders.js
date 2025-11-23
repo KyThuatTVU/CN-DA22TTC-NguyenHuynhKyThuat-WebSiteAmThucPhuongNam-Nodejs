@@ -115,17 +115,25 @@ async function loadOrders() {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_URL}/orders/my-orders`, {
+        console.log('🔑 Token:', token ? 'Found' : 'Not found');
+        
+        const url = `${API_URL}/orders/my-orders`;
+        console.log('📡 Fetching:', url);
+        
+        const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
 
+        console.log('📥 Response status:', response.status);
+        
         const result = await response.json();
-        console.log('📦 Orders loaded:', result);
+        console.log('📦 Orders response:', result);
 
         if (response.ok && result.success) {
             allOrders = result.data || [];
+            console.log('✅ Orders count:', allOrders.length);
 
             if (allOrders.length === 0) {
                 container.classList.add('hidden');
@@ -136,6 +144,12 @@ async function loadOrders() {
                 renderOrders(allOrders);
             }
         } else {
+            console.error('❌ API error:', {
+                status: response.status,
+                success: result.success,
+                message: result.message,
+                error: result.error
+            });
             throw new Error(result.message || 'Không thể tải đơn hàng');
         }
     } catch (error) {
