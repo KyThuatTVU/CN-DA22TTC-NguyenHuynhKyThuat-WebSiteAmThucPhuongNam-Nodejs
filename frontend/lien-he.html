@@ -18,7 +18,6 @@
         body { 
             font-family: 'Poppins', sans-serif;
             overflow-x: hidden;
-            padding-top: 80px; /* Space for fixed navbar */
         }
         
         .font-playfair { 
@@ -142,6 +141,13 @@
 <body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
     <!-- Navigation Container -->
     <div id="navbar-container"></div>
+    
+    <style>
+        /* Ensure navbar is loaded with proper spacing */
+        body {
+            padding-top: 80px;
+        }
+    </style>
 
     <!-- Hero Section with Particles -->
     <section class="relative pt-32 pb-20 overflow-hidden">

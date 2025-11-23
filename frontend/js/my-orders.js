@@ -30,14 +30,26 @@ function formatCurrency(amount) {
 
 // Format date
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    if (!dateString) {
+        return 'Chưa cập nhật';
+    }
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return 'Chưa cập nhật';
+        }
+        return date.toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Chưa cập nhật';
+    }
 }
 
 // Format address - remove empty parts and extra commas
@@ -50,6 +62,7 @@ function formatAddress(dia_chi, phuong_xa, quan_huyen, tinh_thanh) {
 // Get status info
 function getStatusInfo(status) {
     const statusMap = {
+        // Frontend status values
         'cho_xac_nhan': {
             label: 'Chờ xác nhận',
             class: 'bg-yellow-100 text-yellow-800',
@@ -79,13 +92,46 @@ function getStatusInfo(status) {
             label: 'Đã hủy',
             class: 'bg-red-100 text-red-800',
             icon: 'times-circle'
+        },
+        // Database status values (fallback)
+        'pending': {
+            label: 'Chờ xác nhận',
+            class: 'bg-yellow-100 text-yellow-800',
+            icon: 'clock'
+        },
+        'confirmed': {
+            label: 'Đã xác nhận',
+            class: 'bg-blue-100 text-blue-800',
+            icon: 'check-circle'
+        },
+        'preparing': {
+            label: 'Đang chuẩn bị',
+            class: 'bg-purple-100 text-purple-800',
+            icon: 'fire'
+        },
+        'delivered': {
+            label: 'Hoàn thành',
+            class: 'bg-green-100 text-green-800',
+            icon: 'check-double'
+        },
+        'cancelled': {
+            label: 'Đã hủy',
+            class: 'bg-red-100 text-red-800',
+            icon: 'times-circle'
         }
     };
-    return statusMap[status] || {
-        label: status,
-        class: 'bg-gray-100 text-gray-800',
-        icon: 'info-circle'
-    };
+    
+    // Nếu không tìm thấy, trả về status gốc với style mặc định
+    if (!statusMap[status]) {
+        console.warn('⚠️ Unknown status:', status);
+        return {
+            label: status || 'Không xác định',
+            class: 'bg-gray-100 text-gray-800',
+            icon: 'info-circle'
+        };
+    }
+    
+    return statusMap[status];
 }
 
 // Get payment method label
@@ -352,6 +398,15 @@ async function viewOrderDetail(orderId) {
 
         const result = await response.json();
         console.log('📋 Order detail loaded:', result);
+        
+        // Debug lịch sử trạng thái
+        if (result.data && result.data.lich_su_trang_thai) {
+            console.log('📜 Lịch sử trạng thái:', result.data.lich_su_trang_thai);
+            result.data.lich_su_trang_thai.forEach((log, index) => {
+                console.log(`  [${index}] Full log object:`, log);
+                console.log(`  [${index}] trang_thai:`, log.trang_thai, '| trang_thai_moi:', log.trang_thai_moi, '| label:', getStatusInfo(log.trang_thai || log.trang_thai_moi).label);
+            });
+        }
 
         if (response.ok && result.success) {
             renderOrderDetail(result.data);
@@ -470,7 +525,11 @@ function renderOrderDetail(order) {
                 </h4>
                 <div class="space-y-3">
                     ${order.lich_su_trang_thai.map(log => {
-        const logStatus = getStatusInfo(log.trang_thai);
+        // Fallback cho trạng thái
+        const statusValue = log.trang_thai || log.trang_thai_moi || 'pending';
+        const logStatus = getStatusInfo(statusValue);
+        const timeField = log.thoi_gian_thay_doi || log.thoi_gian || log.created_at;
+        const noteField = log.ghi_chu || log.mo_ta || '';
         return `
                             <div class="flex gap-3">
                                 <div class="flex-shrink-0">
@@ -480,8 +539,8 @@ function renderOrderDetail(order) {
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-medium">${logStatus.label}</p>
-                                    <p class="text-sm text-gray-500">${formatDate(log.thoi_gian)}</p>
-                                    ${log.ghi_chu ? `<p class="text-sm text-gray-600 mt-1">${log.ghi_chu}</p>` : ''}
+                                    <p class="text-sm text-gray-500">${formatDate(timeField)}</p>
+                                    ${noteField ? `<p class="text-sm text-gray-600 mt-1">${noteField}</p>` : ''}
                                 </div>
                             </div>
                         `;
@@ -546,13 +605,13 @@ async function confirmCancelOrder() {
 
 // Thanh toán lại đơn hàng
 async function retryPayment(orderId) {
-    if (!confirm('Bạn có muốn thanh toán lại đơn hàng này không?')) {
+    if (!confirm('Bạn có muốn thanh toán lại đơn hàng này qua MoMo không?')) {
         return;
     }
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_URL}/payment/vnpay/retry-payment/${orderId}`, {
+        const response = await fetch(`${API_URL}/payment/momo/retry-payment/${orderId}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -563,7 +622,7 @@ async function retryPayment(orderId) {
         console.log('🔄 Retry payment result:', result);
 
         if (response.ok && result.success) {
-            // Redirect sang trang thanh toán VNPay
+            // Redirect sang trang thanh toán MoMo
             window.location.href = result.data.paymentUrl;
         } else {
             throw new Error(result.message || 'Không thể tạo thanh toán');

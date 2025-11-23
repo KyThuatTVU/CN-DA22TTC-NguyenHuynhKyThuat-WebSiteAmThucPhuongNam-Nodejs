@@ -77,7 +77,7 @@ const adminAuthRoutes = require('./routes/admin-auth');
 const cartRoutes = require('./routes/cart');
 const newsRoutes = require('./routes/news');
 const orderRoutes = require('./routes/orders');
-const paymentRoutes = require('./routes/payment');
+const momoPaymentRoutes = require('./routes/momo-payment');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -87,7 +87,7 @@ app.use('/api/admin-auth', adminAuthRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payment', momoPaymentRoutes); // MoMo payment routes
 
 // Error handling middleware
 app.use((err, req, res, next) => {

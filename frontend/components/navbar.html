@@ -1,4 +1,29 @@
 <!-- Navigation Bar -->
+<style>
+    /* Active nav link styles */
+    .nav-link.active,
+    .nav-link-mobile.active {
+        color: #ea580c !important;
+        position: relative;
+    }
+    
+    .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #ea580c, #dc2626);
+        border-radius: 2px;
+    }
+    
+    .nav-link-mobile.active {
+        background-color: #fff7ed !important;
+        border-left: 4px solid #ea580c;
+    }
+</style>
+
 <nav id="navbar" class="fixed w-full top-0 z-50 bg-white shadow-md transition-all duration-300">
     <div class="container mx-auto px-3 sm:px-4">
         <div class="flex items-center justify-between h-16 sm:h-18 md:h-20">

@@ -484,11 +484,21 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
         let lichSuTrangThai = [];
         try {
             const [historyRows] = await db.query(
-                `SELECT * FROM lich_su_trang_thai_don_hang 
+                `SELECT 
+                    ma_lich_su,
+                    ma_don_hang,
+                    trang_thai_cu,
+                    trang_thai_moi,
+                    nguoi_thay_doi,
+                    loai_nguoi_thay_doi,
+                    ghi_chu,
+                    thoi_gian_thay_doi
+                 FROM lich_su_trang_thai_don_hang 
                  WHERE ma_don_hang = ? 
                  ORDER BY thoi_gian_thay_doi DESC`,
                 [orderId]
             );
+            console.log(`📜 Raw history for order ${orderId}:`, historyRows);
             lichSuTrangThai = historyRows;
         } catch (err) {
             // Bảng chưa tồn tại hoặc lỗi query, bỏ qua
@@ -521,10 +531,22 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
                     ...item,
                     thanh_tien: parseFloat(item.so_luong) * parseFloat(item.gia_tai_thoi_diem)
                 })),
-                lich_su_trang_thai: lichSuTrangThai.map(h => ({
-                    ...h,
-                    trang_thai: mapOrderStatus(h.trang_thai)
-                }))
+                lich_su_trang_thai: lichSuTrangThai.map(h => {
+                    // Sử dụng trang_thai_moi vì đó là trạng thái hiện tại của log
+                    const originalStatus = h.trang_thai_moi || h.trang_thai;
+                    const mappedStatus = mapOrderStatus(originalStatus);
+                    console.log(`🔄 Mapping history: trang_thai_moi=${h.trang_thai_moi}, trang_thai=${h.trang_thai} -> ${mappedStatus}`);
+                    return {
+                        ma_lich_su: h.ma_lich_su,
+                        ma_don_hang: h.ma_don_hang,
+                        trang_thai_cu: h.trang_thai_cu ? mapOrderStatus(h.trang_thai_cu) : null,
+                        trang_thai: mappedStatus,
+                        nguoi_thay_doi: h.nguoi_thay_doi,
+                        loai_nguoi_thay_doi: h.loai_nguoi_thay_doi,
+                        ghi_chu: h.ghi_chu,
+                        thoi_gian_thay_doi: h.thoi_gian_thay_doi
+                    };
+                })
             }
         });
 

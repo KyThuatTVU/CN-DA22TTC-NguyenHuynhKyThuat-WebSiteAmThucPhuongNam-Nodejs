@@ -322,13 +322,16 @@ async function submitOrder(event) {
             const orderId = result.data.ma_don_hang;
             const totalAmount = cart.tong_tien + (cart.tong_tien >= 150000 ? 0 : 30000); // Include shipping
 
-            // If payment method is VNPay, redirect to VNPay payment gateway
-            if (paymentMethod === 'vnpay') {
-                console.log('💳 Processing VNPay payment...');
-                showNotification('Đang chuyển đến cổng thanh toán VNPay...', 'info');
+            // If payment method is MoMo, redirect to payment gateway
+            if (paymentMethod === 'momo') {
+                const gatewayName = 'MoMo';
+                const endpoint = 'momo/create-payment';
+                
+                console.log(`💳 Processing ${gatewayName} payment...`);
+                showNotification(`Đang chuyển đến cổng thanh toán ${gatewayName}...`, 'info');
 
                 try {
-                    const paymentResponse = await fetch(`${API_URL}/payment/vnpay/create-payment`, {
+                    const paymentResponse = await fetch(`${API_URL}/payment/${endpoint}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -349,13 +352,13 @@ async function submitOrder(event) {
                         // KHÔNG xóa giỏ hàng ở đây - chỉ xóa khi thanh toán thành công
                         // Cart sẽ được xóa trong trang dat-hang-thanh-cong.html
 
-                        // Redirect to VNPay
+                        // Redirect to payment gateway
                         window.location.href = paymentResult.data.paymentUrl;
                     } else {
-                        showNotification(paymentResult.message || 'Không thể tạo thanh toán VNPay', 'error');
+                        showNotification(paymentResult.message || `Không thể tạo thanh toán ${gatewayName}`, 'error');
                     }
                 } catch (error) {
-                    console.error('Lỗi tạo thanh toán VNPay:', error);
+                    console.error(`Lỗi tạo thanh toán ${gatewayName}:`, error);
                     showNotification('Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại.', 'error');
                 }
             } else {
