@@ -244,12 +244,13 @@ router.get('/google/callback',
 
             const admin = admins[0];
 
-            // Lưu thông tin admin vào session
+            // Lưu thông tin admin vào session (bao gồm avatar từ Google)
             req.session.admin = {
                 ma_admin: admin.ma_admin,
                 tai_khoan: admin.tai_khoan,
                 email: admin.email,
-                ten_hien_thi: admin.ten_hien_thi,
+                ten_hien_thi: admin.ten_hien_thi || req.user.displayName,
+                anh_dai_dien: req.user.photos && req.user.photos[0] ? req.user.photos[0].value : null,
                 quyen: admin.quyen,
                 role: 'admin'
             };

@@ -70,17 +70,20 @@
                 </nav>
 
                 <!-- User Profile -->
-                <div class="p-4 border-t">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=ea580c&color=fff" alt="Admin" class="w-10 h-10 rounded-full">
-                        <div class="flex-1">
-                            <p id="admin-name" class="font-medium text-sm text-gray-800">Admin</p>
-                            <p class="text-xs text-gray-500">Quản trị viên</p>
+                <div class="p-4 border-t bg-gradient-to-br from-orange-50 to-orange-100">
+                    <div class="flex items-center space-x-3 mb-3 p-3 bg-white rounded-lg shadow-sm">
+                        <div class="relative">
+                            <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=ea580c&color=fff" alt="Admin" class="w-12 h-12 rounded-full border-2 border-orange-300">
+                            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p id="admin-name" class="font-bold text-sm text-gray-800 truncate">Admin</p>
+                            <p class="text-xs text-orange-600 font-medium">Quản trị viên</p>
                         </div>
                     </div>
-                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span>Đăng xuất</span>
+                        <span class="font-medium">Đăng xuất</span>
                     </button>
                 </div>
             </div>
@@ -102,13 +105,29 @@
                     </div>
                     
                     <div class="flex items-center space-x-4">
+                        <!-- AI Chatbot Button -->
+                        <button onclick="toggleAIChatbot()" class="relative px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-md flex items-center space-x-2">
+                            <i class="fas fa-robot"></i>
+                            <span class="hidden md:inline font-medium">AI Phân tích</span>
+                        </button>
+                        
                         <button class="relative text-gray-600 hover:text-gray-800">
                             <i class="fas fa-bell text-xl"></i>
                             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">3</span>
                         </button>
+                        
                         <a href="../index.html" target="_blank" class="text-gray-600 hover:text-gray-800">
                             <i class="fas fa-external-link-alt text-xl"></i>
                         </a>
+                        
+                        <!-- Admin Info in Header -->
+                        <div class="hidden lg:flex items-center space-x-3 pl-4 border-l">
+                            <img id="admin-avatar-header" src="https://ui-avatars.com/api/?name=Admin&background=ea580c&color=fff" alt="Admin" class="w-10 h-10 rounded-full border-2 border-orange-300">
+                            <div>
+                                <p id="admin-name-header" class="font-bold text-sm text-gray-800">Admin</p>
+                                <p class="text-xs text-gray-500">Quản trị viên</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -238,35 +257,92 @@
         </div>
     </div>
 
+    <!-- AI Chatbot Window -->
+    <div id="ai-chatbot" class="fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl transform translate-y-full opacity-0 transition-all duration-300 z-50 overflow-hidden border border-gray-200">
+        <!-- Chatbot Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-robot text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white">AI Phân Tích Doanh Thu</h3>
+                    <p class="text-xs text-purple-200">Trợ lý thông minh</p>
+                </div>
+            </div>
+            <button onclick="toggleAIChatbot()" class="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="p-4 bg-purple-50 border-b">
+            <p class="text-xs text-gray-600 mb-2 font-medium">Phân tích nhanh:</p>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="askAI('Phân tích doanh thu tháng này')" class="px-3 py-1.5 bg-white text-purple-600 rounded-full text-xs font-medium hover:bg-purple-100 transition shadow-sm">
+                    <i class="fas fa-chart-line mr-1"></i> Doanh thu
+                </button>
+                <button onclick="askAI('Món ăn bán chạy nhất')" class="px-3 py-1.5 bg-white text-purple-600 rounded-full text-xs font-medium hover:bg-purple-100 transition shadow-sm">
+                    <i class="fas fa-fire mr-1"></i> Bán chạy
+                </button>
+                <button onclick="askAI('Đề xuất cải thiện')" class="px-3 py-1.5 bg-white text-purple-600 rounded-full text-xs font-medium hover:bg-purple-100 transition shadow-sm">
+                    <i class="fas fa-lightbulb mr-1"></i> Đề xuất
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="ai-messages" class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            <!-- Welcome Message -->
+            <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm">
+                        <p class="text-sm text-gray-800 leading-relaxed">
+                            👋 Xin chào! Tôi là trợ lý AI của bạn. Tôi có thể giúp bạn:
+                        </p>
+                        <ul class="mt-2 space-y-1 text-sm text-gray-700">
+                            <li>📊 Phân tích doanh thu và xu hướng</li>
+                            <li>🎯 Đề xuất chiến lược kinh doanh</li>
+                            <li>📈 Dự đoán nhu cầu khách hàng</li>
+                            <li>💡 Tối ưu hóa menu và giá cả</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 ml-2">Vừa xong</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-4 bg-white border-t">
+            <div class="flex items-center space-x-2">
+                <input 
+                    type="text" 
+                    id="ai-input" 
+                    placeholder="Hỏi AI về doanh thu, chiến lược..." 
+                    class="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                    onkeypress="if(event.key === 'Enter') sendAIMessage()"
+                >
+                <button onclick="sendAIMessage()" class="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md flex items-center justify-center">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="check-auth.js"></script>
+    <script src="admin-layout.js"></script>
     <script>
-        const API_URL = 'http://localhost:3000/api';
-
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
-        }
-
-        // Logout
-        async function logout() {
-            if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                try {
-                    await fetch(`${API_URL}/admin-auth/logout`, {
-                        method: 'POST',
-                        credentials: 'include'
-                    });
-                    window.location.href = 'dang-nhap-admin.html';
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    window.location.href = 'dang-nhap-admin.html';
-                }
-            }
-        }
+        // API_URL is already defined in admin-layout.js
+        // toggleSidebar and logout are already defined in admin-layout.js
 
         // Load dashboard data
         async function loadDashboardData() {
             try {
+                const API_URL = 'http://localhost:3000/api'; // Local scope
+                
                 // Load stats (mock data for now)
                 document.getElementById('revenue-today').textContent = '12.500.000đ';
                 document.getElementById('orders-count').textContent = '45';
@@ -395,15 +471,157 @@
             });
         }
 
-        // Active nav link
-        document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.href === window.location.href) {
-                link.classList.add('active', 'bg-orange-50', 'text-orange-600', 'font-medium');
-            }
-        });
-
         // Load data on page load
         loadDashboardData();
+        
+        // Active nav link is handled by admin-layout.js
+
+        // ===== AI CHATBOT FUNCTIONS =====
+        
+        // Toggle AI Chatbot
+        function toggleAIChatbot() {
+            const chatbot = document.getElementById('ai-chatbot');
+            const isHidden = chatbot.classList.contains('translate-y-full');
+            
+            if (isHidden) {
+                chatbot.classList.remove('translate-y-full', 'opacity-0');
+                chatbot.classList.add('translate-y-0', 'opacity-100');
+            } else {
+                chatbot.classList.add('translate-y-full', 'opacity-0');
+                chatbot.classList.remove('translate-y-0', 'opacity-100');
+            }
+        }
+
+        // Quick Ask AI
+        function askAI(question) {
+            document.getElementById('ai-input').value = question;
+            sendAIMessage();
+        }
+
+        // Send AI Message
+        function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addUserMessage(message);
+            input.value = '';
+            
+            // Simulate AI thinking
+            setTimeout(() => {
+                addAIResponse(message);
+            }, 1000);
+        }
+
+        // Add User Message
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('ai-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-3 justify-end';
+            messageDiv.innerHTML = `
+                <div class="flex-1 text-right">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl rounded-tr-none p-4 shadow-sm inline-block max-w-xs">
+                        <p class="text-sm leading-relaxed">${message}</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 mr-2">Vừa xong</p>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Add AI Response (Mock responses)
+        function addAIResponse(userMessage) {
+            const messagesContainer = document.getElementById('ai-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-3';
+            
+            let response = getAIResponse(userMessage);
+            
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm">
+                        <p class="text-sm text-gray-800 leading-relaxed">${response}</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 ml-2">Vừa xong</p>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Get AI Response (Mock intelligent responses)
+        function getAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('doanh thu')) {
+                return `📊 <strong>Phân tích doanh thu:</strong><br><br>
+                    • Doanh thu tháng này: <strong>385 triệu đồng</strong> (+12% so với tháng trước)<br>
+                    • Ngày có doanh thu cao nhất: <strong>Chủ nhật</strong> (18.5 triệu)<br>
+                    • Khung giờ vàng: <strong>18:00 - 21:00</strong><br><br>
+                    💡 <strong>Đề xuất:</strong> Tăng cường marketing vào cuối tuần và tối để tối đa hóa doanh thu.`;
+            }
+            
+            if (lowerMessage.includes('bán chạy') || lowerMessage.includes('món ăn')) {
+                return `🔥 <strong>Top 3 món bán chạy nhất:</strong><br><br>
+                    1. <strong>Cá Lóc Nướng Trui</strong> - 156 phần (200k)<br>
+                    2. <strong>Lẩu Mắm Miền Tây</strong> - 142 phần (350k)<br>
+                    3. <strong>Bánh Xèo</strong> - 128 phần (120k)<br><br>
+                    💡 <strong>Đề xuất:</strong> Tạo combo với các món này để tăng giá trị đơn hàng trung bình.`;
+            }
+            
+            if (lowerMessage.includes('đề xuất') || lowerMessage.includes('cải thiện')) {
+                return `💡 <strong>Đề xuất chiến lược:</strong><br><br>
+                    1. <strong>Tối ưu menu:</strong> Loại bỏ 3 món ít bán nhất, thêm 2 món mới theo xu hướng<br>
+                    2. <strong>Chương trình khuyến mãi:</strong> Happy Hour 15:00-17:00 giảm 20%<br>
+                    3. <strong>Tăng trải nghiệm:</strong> Thêm dịch vụ đặt bàn online và giao hàng nhanh<br>
+                    4. <strong>Marketing:</strong> Tập trung vào Facebook Ads và Google Maps<br><br>
+                    📈 Dự kiến tăng doanh thu 25-30% trong 3 tháng tới.`;
+            }
+            
+            if (lowerMessage.includes('khách hàng')) {
+                return `👥 <strong>Phân tích khách hàng:</strong><br><br>
+                    • Tổng khách hàng: <strong>1,245 người</strong><br>
+                    • Khách hàng trung thành: <strong>342 người</strong> (27%)<br>
+                    • Độ tuổi chủ yếu: <strong>25-45 tuổi</strong><br>
+                    • Giá trị đơn hàng TB: <strong>285,000đ</strong><br><br>
+                    💡 <strong>Đề xuất:</strong> Tạo chương trình loyalty để giữ chân khách hàng cũ.`;
+            }
+            
+            if (lowerMessage.includes('xu hướng') || lowerMessage.includes('dự đoán')) {
+                return `📈 <strong>Dự đoán xu hướng:</strong><br><br>
+                    • Tháng tới dự kiến tăng <strong>15%</strong> do mùa lễ hội<br>
+                    • Món ăn chay đang có xu hướng tăng <strong>+35%</strong><br>
+                    • Đặt bàn online tăng <strong>+42%</strong><br><br>
+                    💡 <strong>Đề xuất:</strong> Chuẩn bị thêm nguyên liệu và nhân sự cho mùa cao điểm.`;
+            }
+            
+            if (lowerMessage.includes('chi phí') || lowerMessage.includes('lợi nhuận')) {
+                return `💰 <strong>Phân tích lợi nhuận:</strong><br><br>
+                    • Doanh thu: <strong>385 triệu</strong><br>
+                    • Chi phí nguyên liệu: <strong>154 triệu</strong> (40%)<br>
+                    • Chi phí nhân sự: <strong>92 triệu</strong> (24%)<br>
+                    • Lợi nhuận ròng: <strong>139 triệu</strong> (36%)<br><br>
+                    💡 <strong>Đề xuất:</strong> Tối ưu nguồn cung nguyên liệu để giảm 5% chi phí.`;
+            }
+            
+            // Default response
+            return `🤖 Tôi hiểu bạn muốn biết về "${message}".<br><br>
+                Tôi có thể giúp bạn phân tích:<br>
+                • 📊 Doanh thu và xu hướng<br>
+                • 🔥 Món ăn bán chạy<br>
+                • 👥 Hành vi khách hàng<br>
+                • 💡 Đề xuất chiến lược<br>
+                • 📈 Dự đoán tương lai<br><br>
+                Hãy hỏi tôi cụ thể hơn nhé!`;
+        }
+
+        // Admin info will be loaded by admin-layout.js
     </script>
 </body>
 </html>

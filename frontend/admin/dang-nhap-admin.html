@@ -101,6 +101,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             const loginSuccess = urlParams.get('login');
             const error = urlParams.get('error');
+            const logout = urlParams.get('logout');
+
+            if (logout === 'success') {
+                showAlert('Đã đăng xuất thành công!', 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
 
             if (error === 'not_admin') {
                 showAlert('Email này không có quyền truy cập. Vui lòng liên hệ quản trị viên!', 'error');
@@ -108,8 +115,20 @@
                 return;
             }
 
-            if (error) {
+            if (error === 'unauthorized') {
+                showAlert('Vui lòng đăng nhập để tiếp tục', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            if (error === 'google_auth_failed') {
                 showAlert('Đăng nhập Google thất bại. Vui lòng thử lại!', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            if (error) {
+                showAlert('Có lỗi xảy ra. Vui lòng thử lại!', 'error');
                 window.history.replaceState({}, document.title, window.location.pathname);
                 return;
             }
@@ -118,7 +137,7 @@
                 showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
 
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'dashboard.html';
                 }, 1000);
             }
         });

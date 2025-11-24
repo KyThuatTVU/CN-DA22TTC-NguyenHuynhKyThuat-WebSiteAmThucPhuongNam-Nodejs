@@ -196,9 +196,6 @@ window.renderGuestMenu = function() {
                 <a href="dang-ky.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                     <i class="fas fa-user-plus mr-2"></i> Đăng ký
                 </a>
-                <a href="admin/index.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-t border-gray-100">
-                    <i class="fas fa-user-shield mr-2"></i> Quản trị
-                </a>
             </div>
         </div>
     `;

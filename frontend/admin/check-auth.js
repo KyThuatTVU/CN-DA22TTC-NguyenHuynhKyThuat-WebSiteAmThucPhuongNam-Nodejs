@@ -55,7 +55,14 @@ async function logoutAdmin() {
 window.checkAdminAuth = checkAdminAuth;
 window.logoutAdmin = logoutAdmin;
 
-// Tự động kiểm tra khi load trang admin
-if (window.location.pathname.includes('/admin/') && !window.location.pathname.includes('dang-nhap-admin.html')) {
-    checkAdminAuth();
-}
+// Tự động kiểm tra khi load trang admin (trừ trang đăng nhập)
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath.includes('dang-nhap-admin.html');
+    const isAdminPage = currentPath.includes('/admin/');
+    
+    // Chỉ check auth nếu là trang admin và KHÔNG phải trang đăng nhập
+    if (isAdminPage && !isLoginPage) {
+        checkAdminAuth();
+    }
+});
