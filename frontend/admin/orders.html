@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Đơn hàng - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0">
+            <div class="h-full flex flex-col">
+                <div class="p-6 border-b">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-utensils text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
+                            <p class="text-xs text-gray-500">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-1">
+                        <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-chart-line w-5"></i><span>Dashboard</span>
+                        </a>
+                        <a href="products.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-utensils w-5"></i><span>Món ăn</span>
+                        </a>
+                        <a href="orders.html" class="active bg-orange-50 text-orange-600 font-medium flex items-center space-x-3 px-4 py-3 rounded-lg transition">
+                            <i class="fas fa-shopping-cart w-5"></i><span>Đơn hàng</span>
+                        </a>
+                        <a href="reservations.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-calendar-check w-5"></i><span>Đặt bàn</span>
+                        </a>
+                        <a href="customers.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-users w-5"></i><span>Khách hàng</span>
+                        </a>
+                        <a href="news.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-newspaper w-5"></i><span>Tin tức</span>
+                        </a>
+                        <a href="albums.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-images w-5"></i><span>Album ảnh</span>
+                        </a>
+                        <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-cog w-5"></i><span>Cài đặt</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="p-4 border-t">
+                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                        <i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm">
+                <div class="px-6 py-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Quản lý Đơn hàng</h2>
+                    <p class="text-sm text-gray-500">Theo dõi và xử lý đơn hàng</p>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Chờ xác nhận</p>
+                                <p class="text-2xl font-bold text-orange-600">12</p>
+                            </div>
+                            <i class="fas fa-clock text-3xl text-orange-200"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Đang xử lý</p>
+                                <p class="text-2xl font-bold text-blue-600">8</p>
+                            </div>
+                            <i class="fas fa-spinner text-3xl text-blue-200"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Đang giao</p>
+                                <p class="text-2xl font-bold text-yellow-600">15</p>
+                            </div>
+                            <i class="fas fa-shipping-fast text-3xl text-yellow-200"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Hoàn thành</p>
+                                <p class="text-2xl font-bold text-green-600">156</p>
+                            </div>
+                            <i class="fas fa-check-circle text-3xl text-green-200"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <input type="text" id="search" placeholder="Tìm mã đơn, khách hàng..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <select id="status-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="cho_xac_nhan">Chờ xác nhận</option>
+                            <option value="dang_chuan_bi">Đang chuẩn bị</option>
+                            <option value="dang_giao">Đang giao</option>
+                            <option value="hoan_thanh">Hoàn thành</option>
+                            <option value="huy">Đã hủy</option>
+                        </select>
+                        <select id="payment-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Thanh toán</option>
+                            <option value="chua_thanh_toan">Chưa thanh toán</option>
+                            <option value="da_thanh_toan">Đã thanh toán</option>
+                        </select>
+                        <input type="date" id="date-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <button onclick="applyFilters()" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">
+                            <i class="fas fa-filter mr-2"></i>Lọc
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày đặt</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thanh toán</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-tbody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+                                        <p>Đang tải...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="order-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-bold">Chi tiết đơn hàng</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="order-detail" class="p-6">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="check-auth.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let orders = [];
+
+        async function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                await fetch(`${API_URL}/admin-auth/logout`, { method: 'POST', credentials: 'include' });
+                window.location.href = 'dang-nhap-admin.html';
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/orders/all`, { 
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    orders = data.data || [];
+                    console.log('Loaded orders:', orders);
+                    renderOrders(orders);
+                    updateStats(orders);
+                } else {
+                    throw new Error(data.message || 'Failed to load orders');
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('orders-tbody').innerHTML = `
+                    <tr><td colspan="7" class="px-6 py-12 text-center text-red-500">
+                        <i class="fas fa-exclamation-circle text-3xl mb-2"></i>
+                        <p>Không thể tải dữ liệu: ${error.message}</p>
+                        <button onclick="loadOrders()" class="mt-2 text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-redo mr-1"></i>Thử lại
+                        </button>
+                    </td></tr>
+                `;
+            }
+        }
+
+        function updateStats(ordersList) {
+            const stats = {
+                cho_xac_nhan: 0,
+                dang_xu_ly: 0,
+                dang_giao: 0,
+                hoan_thanh: 0
+            };
+
+            ordersList.forEach(order => {
+                const status = order.trang_thai || 'pending';
+                if (status === 'pending') stats.cho_xac_nhan++;
+                else if (status === 'confirmed' || status === 'preparing') stats.dang_xu_ly++;
+                else if (status === 'delivering') stats.dang_giao++;
+                else if (status === 'delivered') stats.hoan_thanh++;
+            });
+
+            // Cập nhật UI stats nếu có
+            console.log('Order stats:', stats);
+        }
+
+        function renderOrders(items) {
+            const tbody = document.getElementById('orders-tbody');
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">Chưa có đơn hàng</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = items.map(order => {
+                const tenKhach = order.ten_khach_hang || order.ten_khach_vang_lai || order.ten_nguoi_nhan || 'Khách hàng';
+                const trangThaiTT = order.trang_thai_thanh_toan || 'chua_thanh_toan';
+                const trangThaiDH = order.trang_thai_don_hang || order.trang_thai || 'cho_xac_nhan';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">#DH${String(order.ma_don_hang).padStart(6, '0')}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${tenKhach}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${formatDate(order.ngay_tao || order.thoi_gian_tao)}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${formatPrice(order.tong_thanh_toan || order.tong_tien || 0)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                                trangThaiTT === 'da_thanh_toan' || trangThaiTT === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                            }">
+                                ${trangThaiTT === 'da_thanh_toan' || trangThaiTT === 'success' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <select onchange="updateOrderStatus(${order.ma_don_hang}, this.value)" 
+                                    class="px-3 py-1 rounded-lg text-xs font-medium border ${getStatusClass(trangThaiDH)}">
+                                <option value="cho_xac_nhan" ${trangThaiDH === 'cho_xac_nhan' || trangThaiDH === 'pending' ? 'selected' : ''}>Chờ xác nhận</option>
+                                <option value="dang_chuan_bi" ${trangThaiDH === 'dang_chuan_bi' || trangThaiDH === 'preparing' ? 'selected' : ''}>Đang chuẩn bị</option>
+                                <option value="dang_giao" ${trangThaiDH === 'dang_giao' || trangThaiDH === 'delivering' ? 'selected' : ''}>Đang giao</option>
+                                <option value="hoan_thanh" ${trangThaiDH === 'hoan_thanh' || trangThaiDH === 'delivered' ? 'selected' : ''}>Hoàn thành</option>
+                                <option value="huy" ${trangThaiDH === 'huy' || trangThaiDH === 'cancelled' ? 'selected' : ''}>Đã hủy</option>
+                            </select>
+                        </td>
+                        <td class="px-6 py-4">
+                            <button onclick="viewOrder(${order.ma_don_hang})" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'cho_xac_nhan': 'bg-orange-50 text-orange-700',
+                'dang_chuan_bi': 'bg-blue-50 text-blue-700',
+                'dang_giao': 'bg-yellow-50 text-yellow-700',
+                'hoan_thanh': 'bg-green-50 text-green-700',
+                'huy': 'bg-red-50 text-red-700'
+            };
+            return classes[status] || '';
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            if (!confirm('Xác nhận thay đổi trạng thái đơn hàng?')) {
+                loadOrders(); // Reload để reset select về giá trị cũ
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ trang_thai_don_hang: newStatus })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Cập nhật trạng thái thành công!');
+                    loadOrders();
+                } else {
+                    alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại'));
+                    loadOrders();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+                loadOrders();
+            }
+        }
+
+        function viewOrder(orderId) {
+            const order = orders.find(o => o.ma_don_hang === orderId);
+            if (!order) return;
+
+            const tenKhach = order.ten_khach_hang || order.ten_khach_vang_lai || order.ten_nguoi_nhan || 'Khách hàng';
+            const sdt = order.sdt_giao_hang || order.so_dt_khach || order.so_dien_thoai || 'N/A';
+            const diaChi = order.dia_chi_giao_hang || order.dia_chi_giao || order.dia_chi || 'N/A';
+            const tongTien = order.tong_thanh_toan || order.tong_tien || 0;
+            const phiShip = order.phi_van_chuyen || 0;
+            const giamGia = order.tien_giam_gia || order.giam_gia || 0;
+
+            document.getElementById('order-detail').innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Mã đơn hàng</p>
+                            <p class="font-medium">#DH${String(order.ma_don_hang).padStart(6, '0')}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Ngày đặt</p>
+                            <p class="font-medium">${formatDate(order.ngay_tao || order.thoi_gian_tao)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Khách hàng</p>
+                            <p class="font-medium">${tenKhach}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Số điện thoại</p>
+                            <p class="font-medium">${sdt}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-sm text-gray-500">Địa chỉ giao hàng</p>
+                            <p class="font-medium">${diaChi}</p>
+                        </div>
+                        ${order.ghi_chu ? `
+                        <div class="col-span-2">
+                            <p class="text-sm text-gray-500">Ghi chú</p>
+                            <p class="font-medium">${order.ghi_chu}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="border-t pt-4">
+                        <p class="font-medium mb-2">Chi tiết đơn hàng</p>
+                        <div class="text-sm text-gray-500">
+                            ${order.items && order.items.length > 0 ? 
+                                order.items.map(item => `
+                                    <div class="flex justify-between py-2 border-b">
+                                        <div>
+                                            <p class="font-medium">${item.ten_mon}</p>
+                                            <p class="text-xs text-gray-400">SL: ${item.so_luong} x ${formatPrice(item.gia_tai_thoi_diem || item.gia)}</p>
+                                        </div>
+                                        <p class="font-medium">${formatPrice(item.thanh_tien || (item.so_luong * (item.gia_tai_thoi_diem || item.gia)))}</p>
+                                    </div>
+                                `).join('') 
+                                : 'Đang tải chi tiết...'}
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between mb-2">
+                            <span>Tổng tiền hàng:</span>
+                            <span class="font-medium">${formatPrice(tongTien)}</span>
+                        </div>
+                        ${phiShip > 0 ? `
+                        <div class="flex justify-between mb-2">
+                            <span>Phí vận chuyển:</span>
+                            <span class="font-medium">${formatPrice(phiShip)}</span>
+                        </div>
+                        ` : ''}
+                        ${giamGia > 0 ? `
+                        <div class="flex justify-between mb-2 text-green-600">
+                            <span>Giảm giá:</span>
+                            <span class="font-medium">-${formatPrice(giamGia)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="flex justify-between text-lg font-bold border-t pt-2">
+                            <span>Tổng thanh toán:</span>
+                            <span class="text-orange-600">${formatPrice(tongTien)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('vi-VN', { 
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const status = document.getElementById('status-filter').value;
+            const payment = document.getElementById('payment-filter').value;
+
+            let filtered = orders.filter(o => {
+                const tenKhach = o.ten_khach_hang || o.ten_khach_vang_lai || o.ten_nguoi_dung || '';
+                const matchSearch = o.ma_don_hang.toString().includes(search) || 
+                                  tenKhach.toLowerCase().includes(search) ||
+                                  (o.so_dt_khach && o.so_dt_khach.includes(search));
+                
+                // Map status
+                const statusMap = {
+                    'cho_xac_nhan': 'pending',
+                    'dang_chuan_bi': 'preparing',
+                    'dang_giao': 'preparing',
+                    'hoan_thanh': 'delivered',
+                    'huy': 'cancelled'
+                };
+                const dbStatus = statusMap[status] || status;
+                const matchStatus = !status || o.trang_thai === dbStatus || o.trang_thai_don_hang === status;
+                
+                const matchPayment = !payment || o.trang_thai_thanh_toan === payment;
+                return matchSearch && matchStatus && matchPayment;
+            });
+
+            renderOrders(filtered);
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>

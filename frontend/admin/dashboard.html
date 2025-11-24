@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Phương Nam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-white shadow-lg flex-shrink-0 transition-all duration-300">
+            <div class="h-full flex flex-col">
+                <!-- Logo -->
+                <div class="p-6 border-b">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-utensils text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
+                            <p class="text-xs text-gray-500">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-1">
+                        <a href="dashboard.html" class="nav-link active flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="products.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-utensils w-5"></i>
+                            <span>Món ăn</span>
+                        </a>
+                        <a href="orders.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-shopping-cart w-5"></i>
+                            <span>Đơn hàng</span>
+                            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">5</span>
+                        </a>
+                        <a href="reservations.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-calendar-check w-5"></i>
+                            <span>Đặt bàn</span>
+                        </a>
+                        <a href="customers.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Khách hàng</span>
+                        </a>
+                        <a href="news.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-newspaper w-5"></i>
+                            <span>Tin tức</span>
+                        </a>
+                        <a href="albums.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-images w-5"></i>
+                            <span>Album ảnh</span>
+                        </a>
+                        <a href="reviews.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-star w-5"></i>
+                            <span>Đánh giá</span>
+                        </a>
+                        <a href="settings.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- User Profile -->
+                <div class="p-4 border-t">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=ea580c&color=fff" alt="Admin" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="admin-name" class="font-medium text-sm text-gray-800">Admin</p>
+                            <p class="text-xs text-gray-500">Quản trị viên</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                            <p class="text-sm text-gray-500">Tổng quan hệ thống</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button class="relative text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">3</span>
+                        </button>
+                        <a href="../index.html" target="_blank" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-external-link-alt text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-2xl"></i>
+                            </div>
+                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Hôm nay</span>
+                        </div>
+                        <p class="text-3xl font-bold mb-1" id="revenue-today">0đ</p>
+                        <p class="text-sm opacity-90">Doanh thu</p>
+                        <div class="mt-3 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>12% so với hôm qua</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-2xl"></i>
+                            </div>
+                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Mới</span>
+                        </div>
+                        <p class="text-3xl font-bold mb-1" id="orders-count">0</p>
+                        <p class="text-sm opacity-90">Đơn hàng</p>
+                        <div class="mt-3 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>8% so với hôm qua</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-2xl"></i>
+                            </div>
+                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Hôm nay</span>
+                        </div>
+                        <p class="text-3xl font-bold mb-1" id="reservations-count">0</p>
+                        <p class="text-sm opacity-90">Đặt bàn</p>
+                        <div class="mt-3 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>15% so với hôm qua</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-2xl"></i>
+                            </div>
+                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Tháng này</span>
+                        </div>
+                        <p class="text-3xl font-bold mb-1" id="customers-count">0</p>
+                        <p class="text-sm opacity-90">Khách hàng mới</p>
+                        <div class="mt-3 flex items-center text-sm">
+                            <i class="fas fa-arrow-down mr-1"></i>
+                            <span>5% so với tháng trước</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-bold mb-4">Doanh thu 7 ngày qua</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-bold mb-4">Đơn hàng theo trạng thái</h3>
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Orders & Top Products -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Recent Orders -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold">Đơn hàng gần đây</h3>
+                            <a href="orders.html" class="text-orange-600 hover:text-orange-700 text-sm font-medium">Xem tất cả →</a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Mã đơn</th>
+                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Khách hàng</th>
+                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Tổng tiền</th>
+                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-orders">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-8 text-gray-500">
+                                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                            <p>Đang tải...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Products -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold">Món ăn bán chạy</h3>
+                            <a href="products.html" class="text-orange-600 hover:text-orange-700 text-sm font-medium">Xem tất cả →</a>
+                        </div>
+                        <div id="top-products" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                <p>Đang tải...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="check-auth.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // Logout
+        async function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                try {
+                    await fetch(`${API_URL}/admin-auth/logout`, {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    window.location.href = 'dang-nhap-admin.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = 'dang-nhap-admin.html';
+                }
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load stats (mock data for now)
+                document.getElementById('revenue-today').textContent = '12.500.000đ';
+                document.getElementById('orders-count').textContent = '45';
+                document.getElementById('reservations-count').textContent = '23';
+                document.getElementById('customers-count').textContent = '156';
+
+                // Load recent orders
+                loadRecentOrders();
+                
+                // Load top products
+                loadTopProducts();
+                
+                // Initialize charts
+                initCharts();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadRecentOrders() {
+            const tbody = document.getElementById('recent-orders');
+            tbody.innerHTML = `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 text-sm">#ORD001</td>
+                    <td class="py-3 text-sm">Nguyễn Văn A</td>
+                    <td class="py-3 text-sm font-medium">450.000đ</td>
+                    <td class="py-3"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">Hoàn thành</span></td>
+                </tr>
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 text-sm">#ORD002</td>
+                    <td class="py-3 text-sm">Trần Thị B</td>
+                    <td class="py-3 text-sm font-medium">320.000đ</td>
+                    <td class="py-3"><span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-medium">Đang giao</span></td>
+                </tr>
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 text-sm">#ORD003</td>
+                    <td class="py-3 text-sm">Lê Văn C</td>
+                    <td class="py-3 text-sm font-medium">680.000đ</td>
+                    <td class="py-3"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">Đang xử lý</span></td>
+                </tr>
+            `;
+        }
+
+        async function loadTopProducts() {
+            const container = document.getElementById('top-products');
+            container.innerHTML = `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <img src="http://localhost:3000/images/ca-loc-nuong-trui.jpg" alt="Dish" class="w-14 h-14 rounded-lg object-cover">
+                        <div>
+                            <p class="font-medium text-sm">Cá Lóc Nướng Trui</p>
+                            <p class="text-xs text-gray-500">156 đã bán</p>
+                        </div>
+                    </div>
+                    <p class="font-bold text-orange-600">200.000đ</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <img src="http://localhost:3000/images/lau-mam.jpg" alt="Dish" class="w-14 h-14 rounded-lg object-cover">
+                        <div>
+                            <p class="font-medium text-sm">Lẩu Mắm Miền Tây</p>
+                            <p class="text-xs text-gray-500">142 đã bán</p>
+                        </div>
+                    </div>
+                    <p class="font-bold text-orange-600">350.000đ</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <img src="http://localhost:3000/images/banh-xeo.jpg" alt="Dish" class="w-14 h-14 rounded-lg object-cover">
+                        <div>
+                            <p class="font-medium text-sm">Bánh Xèo Miền Tây</p>
+                            <p class="text-xs text-gray-500">128 đã bán</p>
+                        </div>
+                    </div>
+                    <p class="font-bold text-orange-600">120.000đ</p>
+                </div>
+            `;
+        }
+
+        function initCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    datasets: [{
+                        label: 'Doanh thu (triệu đồng)',
+                        data: [8.5, 10.2, 9.8, 12.5, 11.3, 13.7, 15.2],
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Orders Chart
+            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+            new Chart(ordersCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hoàn thành', 'Đang giao', 'Đang xử lý', 'Đã hủy'],
+                    datasets: [{
+                        data: [45, 23, 15, 7],
+                        backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // Active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add('active', 'bg-orange-50', 'text-orange-600', 'font-medium');
+            }
+        });
+
+        // Load data on page load
+        loadDashboardData();
+    </script>
+</body>
+</html>

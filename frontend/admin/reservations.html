@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Đặt bàn - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0">
+            <div class="h-full flex flex-col">
+                <div class="p-6 border-b">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-utensils text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
+                            <p class="text-xs text-gray-500">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-1">
+                        <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-chart-line w-5"></i><span>Dashboard</span>
+                        </a>
+                        <a href="products.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-utensils w-5"></i><span>Món ăn</span>
+                        </a>
+                        <a href="orders.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-shopping-cart w-5"></i><span>Đơn hàng</span>
+                        </a>
+                        <a href="reservations.html" class="active bg-orange-50 text-orange-600 font-medium flex items-center space-x-3 px-4 py-3 rounded-lg transition">
+                            <i class="fas fa-calendar-check w-5"></i><span>Đặt bàn</span>
+                        </a>
+                        <a href="customers.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-users w-5"></i><span>Khách hàng</span>
+                        </a>
+                        <a href="news.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-newspaper w-5"></i><span>Tin tức</span>
+                        </a>
+                        <a href="albums.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-images w-5"></i><span>Album ảnh</span>
+                        </a>
+                        <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-cog w-5"></i><span>Cài đặt</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="p-4 border-t">
+                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                        <i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm">
+                <div class="px-6 py-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Quản lý Đặt bàn</h2>
+                    <p class="text-sm text-gray-500">Theo dõi và xử lý đặt bàn</p>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Chờ xác nhận</p>
+                                <p class="text-2xl font-bold text-orange-600">8</p>
+                            </div>
+                            <i class="fas fa-clock text-3xl text-orange-200"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Đã xác nhận</p>
+                                <p class="text-2xl font-bold text-blue-600">15</p>
+                            </div>
+                            <i class="fas fa-check-circle text-3xl text-blue-200"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Hoàn thành</p>
+                                <p class="text-2xl font-bold text-green-600">234</p>
+                            </div>
+                            <i class="fas fa-check-double text-3xl text-green-200"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Đã hủy</p>
+                                <p class="text-2xl font-bold text-red-600">12</p>
+                            </div>
+                            <i class="fas fa-times-circle text-3xl text-red-200"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <input type="text" id="search" placeholder="Tìm tên, SĐT..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <select id="status-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="cho_xac_nhan">Chờ xác nhận</option>
+                            <option value="da_xac_nhan">Đã xác nhận</option>
+                            <option value="hoan_thanh">Hoàn thành</option>
+                            <option value="huy">Đã hủy</option>
+                        </select>
+                        <input type="date" id="date-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <select id="time-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tất cả giờ</option>
+                            <option value="morning">Sáng (6h-11h)</option>
+                            <option value="afternoon">Trưa (11h-14h)</option>
+                            <option value="evening">Chiều (14h-18h)</option>
+                            <option value="night">Tối (18h-22h)</option>
+                        </select>
+                        <button onclick="applyFilters()" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">
+                            <i class="fas fa-filter mr-2"></i>Lọc
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reservations Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đặt bàn</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Liên hệ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày đặt</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giờ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số người</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reservations-tbody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+                                        <p>Đang tải...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="check-auth.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let reservations = [];
+
+        async function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                await fetch(`${API_URL}/admin-auth/logout`, { method: 'POST', credentials: 'include' });
+                window.location.href = 'dang-nhap-admin.html';
+            }
+        }
+
+        async function loadReservations() {
+            try {
+                // Mock data - replace with actual API
+                reservations = [
+                    {
+                        ma_dat_ban: 1,
+                        ten_khach_hang: 'Nguyễn Văn A',
+                        so_dien_thoai: '0901234567',
+                        email: 'nguyenvana@example.com',
+                        ngay_dat: '2024-11-25',
+                        gio_dat: '18:00',
+                        so_nguoi: 4,
+                        ghi_chu: 'Bàn gần cửa sổ',
+                        trang_thai: 'cho_xac_nhan',
+                        ngay_tao: '2024-11-24'
+                    }
+                ];
+                renderReservations(reservations);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderReservations(items) {
+            const tbody = document.getElementById('reservations-tbody');
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-12 text-center text-gray-500">Chưa có đặt bàn</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = items.map(res => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm font-medium">#${res.ma_dat_ban}</td>
+                    <td class="px-6 py-4 text-sm">${res.ten_khach_hang}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <div>${res.so_dien_thoai}</div>
+                        <div class="text-gray-500 text-xs">${res.email}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm">${formatDate(res.ngay_dat)}</td>
+                    <td class="px-6 py-4 text-sm font-medium">${res.gio_dat}</td>
+                    <td class="px-6 py-4 text-sm">${res.so_nguoi} người</td>
+                    <td class="px-6 py-4">
+                        <select onchange="updateStatus(${res.ma_dat_ban}, this.value)" 
+                                class="px-3 py-1 rounded-lg text-xs font-medium border ${getStatusClass(res.trang_thai)}">
+                            <option value="cho_xac_nhan" ${res.trang_thai === 'cho_xac_nhan' ? 'selected' : ''}>Chờ xác nhận</option>
+                            <option value="da_xac_nhan" ${res.trang_thai === 'da_xac_nhan' ? 'selected' : ''}>Đã xác nhận</option>
+                            <option value="hoan_thanh" ${res.trang_thai === 'hoan_thanh' ? 'selected' : ''}>Hoàn thành</option>
+                            <option value="huy" ${res.trang_thai === 'huy' ? 'selected' : ''}>Đã hủy</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button onclick="viewDetail(${res.ma_dat_ban})" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'cho_xac_nhan': 'bg-orange-50 text-orange-700',
+                'da_xac_nhan': 'bg-blue-50 text-blue-700',
+                'hoan_thanh': 'bg-green-50 text-green-700',
+                'huy': 'bg-red-50 text-red-700'
+            };
+            return classes[status] || '';
+        }
+
+        async function updateStatus(id, newStatus) {
+            if (confirm('Xác nhận thay đổi trạng thái?')) {
+                alert('Cập nhật thành công!');
+                loadReservations();
+            }
+        }
+
+        function viewDetail(id) {
+            const res = reservations.find(r => r.ma_dat_ban === id);
+            if (!res) return;
+            alert(`Chi tiết đặt bàn #${id}\n\nKhách hàng: ${res.ten_khach_hang}\nSố người: ${res.so_nguoi}\nGhi chú: ${res.ghi_chu || 'Không có'}`);
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('vi-VN');
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const status = document.getElementById('status-filter').value;
+
+            let filtered = reservations.filter(r => {
+                const matchSearch = r.ten_khach_hang.toLowerCase().includes(search) || r.so_dien_thoai.includes(search);
+                const matchStatus = !status || r.trang_thai === status;
+                return matchSearch && matchStatus;
+            });
+
+            renderReservations(filtered);
+        }
+
+        loadReservations();
+    </script>
+</body>
+</html>

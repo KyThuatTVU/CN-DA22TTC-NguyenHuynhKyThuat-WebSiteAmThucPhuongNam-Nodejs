@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Album ảnh - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg flex-shrink-0">
+            <div class="h-full flex flex-col">
+                <div class="p-6 border-b">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-utensils text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
+                            <p class="text-xs text-gray-500">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-1">
+                        <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-chart-line w-5"></i><span>Dashboard</span>
+                        </a>
+                        <a href="products.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-utensils w-5"></i><span>Món ăn</span>
+                        </a>
+                        <a href="orders.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-shopping-cart w-5"></i><span>Đơn hàng</span>
+                        </a>
+                        <a href="reservations.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-calendar-check w-5"></i><span>Đặt bàn</span>
+                        </a>
+                        <a href="customers.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-users w-5"></i><span>Khách hàng</span>
+                        </a>
+                        <a href="news.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-newspaper w-5"></i><span>Tin tức</span>
+                        </a>
+                        <a href="albums.html" class="active bg-orange-50 text-orange-600 font-medium flex items-center space-x-3 px-4 py-3 rounded-lg transition">
+                            <i class="fas fa-images w-5"></i><span>Album ảnh</span>
+                        </a>
+                        <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                            <i class="fas fa-cog w-5"></i><span>Cài đặt</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="p-4 border-t">
+                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                        <i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Quản lý Album ảnh</h2>
+                        <p class="text-sm text-gray-500">Quản lý hình ảnh nhà hàng</p>
+                    </div>
+                    <button onclick="openUploadModal()" class="bg-orange-600 text-white px-6 py-2.5 rounded-lg hover:bg-orange-700 transition flex items-center space-x-2">
+                        <i class="fas fa-upload"></i>
+                        <span>Tải ảnh lên</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <select id="type-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tất cả loại ảnh</option>
+                            <option value="mon_an">Món ăn</option>
+                            <option value="khong_gian">Không gian</option>
+                            <option value="su_kien">Sự kiện</option>
+                            <option value="khong_ro">Khác</option>
+                        </select>
+                        <input type="date" id="date-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <button onclick="applyFilters()" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">
+                            <i class="fas fa-filter mr-2"></i>Lọc
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Albums Grid -->
+                <div id="albums-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Đang tải...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-bold">Tải ảnh lên</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="upload-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Chọn ảnh *</label>
+                    <input type="file" id="images" accept="image/*" multiple required class="w-full px-4 py-2 border rounded-lg">
+                    <p class="text-xs text-gray-500 mt-1">Có thể chọn nhiều ảnh cùng lúc</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Loại ảnh *</label>
+                    <select id="loai_anh" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <option value="">Chọn loại ảnh</option>
+                        <option value="mon_an">Món ăn</option>
+                        <option value="khong_gian">Không gian</option>
+                        <option value="su_kien">Sự kiện</option>
+                        <option value="khong_ro">Khác</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
+                    <textarea id="mo_ta" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition">Hủy</button>
+                    <button type="submit" class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Tải lên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="preview-modal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full">
+            <div class="flex justify-end mb-4">
+                <button onclick="closePreview()" class="text-white hover:text-gray-300">
+                    <i class="fas fa-times text-3xl"></i>
+                </button>
+            </div>
+            <img id="preview-image" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <script src="check-auth.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let albums = [];
+
+        async function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                await fetch(`${API_URL}/admin-auth/logout`, { method: 'POST', credentials: 'include' });
+                window.location.href = 'dang-nhap-admin.html';
+            }
+        }
+
+        async function loadAlbums() {
+            try {
+                const response = await fetch(`${API_URL}/albums`);
+                const data = await response.json();
+                albums = data.data || [];
+                renderAlbums(albums);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('albums-container').innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i>
+                        <p class="text-gray-500">Không thể tải dữ liệu</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderAlbums(items) {
+            const container = document.getElementById('albums-container');
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-images text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Chưa có ảnh nào</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map(album => `
+                <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-square">
+                        <img src="${API_URL.replace('/api', '')}/images/${album.duong_dan_anh}" 
+                             alt="${album.mo_ta || 'Album'}" 
+                             class="w-full h-full object-cover cursor-pointer"
+                             onclick="previewImage('${API_URL.replace('/api', '')}/images/${album.duong_dan_anh}')"
+                             onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+                    </div>
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div class="flex space-x-2">
+                            <button onclick="previewImage('${API_URL.replace('/api', '')}/images/${album.duong_dan_anh}')" class="bg-white text-gray-800 px-3 py-2 rounded-lg hover:bg-gray-100">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteAlbum(${album.ma_album})" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <span class="inline-block px-2 py-1 text-xs rounded ${getTypeClass(album.loai_anh)}">
+                            ${getTypeName(album.loai_anh)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getTypeClass(type) {
+            const classes = {
+                'mon_an': 'bg-orange-100 text-orange-700',
+                'khong_gian': 'bg-blue-100 text-blue-700',
+                'su_kien': 'bg-green-100 text-green-700',
+                'khong_ro': 'bg-gray-100 text-gray-700'
+            };
+            return classes[type] || classes['khong_ro'];
+        }
+
+        function getTypeName(type) {
+            const names = {
+                'mon_an': 'Món ăn',
+                'khong_gian': 'Không gian',
+                'su_kien': 'Sự kiện',
+                'khong_ro': 'Khác'
+            };
+            return names[type] || 'Khác';
+        }
+
+        function openUploadModal() {
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+        }
+
+        function previewImage(src) {
+            document.getElementById('preview-image').src = src;
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.add('hidden');
+        }
+
+        async function deleteAlbum(id) {
+            if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/albums/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    alert('Xóa thành công!');
+                    loadAlbums();
+                } else {
+                    alert('Có lỗi xảy ra!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const files = document.getElementById('images').files;
+            const loaiAnh = document.getElementById('loai_anh').value;
+            const moTa = document.getElementById('mo_ta').value;
+
+            for (let file of files) {
+                formData.append('images', file);
+            }
+            formData.append('loai_anh', loaiAnh);
+            formData.append('mo_ta', moTa);
+
+            try {
+                const response = await fetch(`${API_URL}/albums`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    alert('Tải ảnh thành công!');
+                    closeModal();
+                    loadAlbums();
+                } else {
+                    alert('Có lỗi xảy ra!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        });
+
+        function applyFilters() {
+            const type = document.getElementById('type-filter').value;
+
+            let filtered = albums.filter(a => {
+                return !type || a.loai_anh === type;
+            });
+
+            renderAlbums(filtered);
+        }
+
+        loadAlbums();
+    </script>
+</body>
+</html>

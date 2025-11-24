@@ -329,6 +329,81 @@ router.post('/create', authenticateToken, async (req, res) => {
 // IMPORTANT: Specific routes MUST come BEFORE parameterized routes (/:id)
 // Otherwise Express will match /my-orders as /:id with id="my-orders"
 
+// Admin: Lấy tất cả đơn hàng (không cần token, dùng session)
+router.get('/all', async (req, res) => {
+    try {
+        // Kiểm tra session admin (nếu cần)
+        // if (!req.session || !req.session.admin) {
+        //     return res.status(401).json({ success: false, message: 'Unauthorized' });
+        // }
+
+        const { trang_thai, limit = 50, offset = 0 } = req.query;
+
+        let query = `
+            SELECT 
+                dh.*,
+                nd.ten_nguoi_dung,
+                nd.email,
+                MAX(tt.phuong_thuc) as phuong_thuc_thanh_toan,
+                MAX(tt.trang_thai) as trang_thai_thanh_toan,
+                COUNT(DISTINCT ct.ma_ct_don) as so_luong_mon
+            FROM don_hang dh
+            LEFT JOIN nguoi_dung nd ON dh.ma_nguoi_dung = nd.ma_nguoi_dung
+            LEFT JOIN thanh_toan tt ON dh.ma_don_hang = tt.ma_don_hang
+            LEFT JOIN chi_tiet_don_hang ct ON dh.ma_don_hang = ct.ma_don_hang
+            WHERE 1=1
+        `;
+
+        const params = [];
+
+        if (trang_thai) {
+            query += ` AND dh.trang_thai = ?`;
+            params.push(trang_thai);
+        }
+
+        query += ` GROUP BY dh.ma_don_hang
+                   ORDER BY dh.thoi_gian_tao DESC LIMIT ? OFFSET ?`;
+        params.push(parseInt(limit), parseInt(offset));
+
+        const [orders] = await db.query(query, params);
+
+        // Load items for each order
+        const ordersWithItems = [];
+        for (let order of orders) {
+            const [items] = await db.query(
+                `SELECT 
+                    ct.*,
+                    m.ten_mon, 
+                    m.anh_mon 
+                 FROM chi_tiet_don_hang ct
+                 JOIN mon_an m ON ct.ma_mon = m.ma_mon
+                 WHERE ct.ma_don_hang = ?`,
+                [order.ma_don_hang]
+            );
+
+            ordersWithItems.push({
+                ...order,
+                ten_khach_hang: order.ten_khach_vang_lai || order.ten_nguoi_dung || 'Khách hàng',
+                items: items
+            });
+        }
+
+        res.json({
+            success: true,
+            data: ordersWithItems,
+            total: ordersWithItems.length
+        });
+
+    } catch (error) {
+        console.error('Lỗi lấy danh sách đơn hàng admin:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
 // Lấy danh sách đơn hàng của user
 router.get('/my-orders', authenticateToken, async (req, res) => {
     try {
@@ -552,6 +627,51 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Lỗi lấy chi tiết đơn hàng:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
+// Admin: Cập nhật trạng thái đơn hàng
+router.put('/:orderId/status', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { trang_thai_don_hang } = req.body;
+
+        if (!trang_thai_don_hang) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu trạng thái đơn hàng'
+            });
+        }
+
+        // Map frontend status to database status
+        const statusMap = {
+            'cho_xac_nhan': 'pending',
+            'da_xac_nhan': 'confirmed',
+            'dang_chuan_bi': 'preparing',
+            'dang_giao': 'preparing',
+            'hoan_thanh': 'delivered',
+            'huy': 'cancelled'
+        };
+
+        const dbStatus = statusMap[trang_thai_don_hang] || trang_thai_don_hang;
+
+        await db.query(
+            'UPDATE don_hang SET trang_thai = ? WHERE ma_don_hang = ?',
+            [dbStatus, orderId]
+        );
+
+        res.json({
+            success: true,
+            message: 'Cập nhật trạng thái thành công'
+        });
+
+    } catch (error) {
+        console.error('Lỗi cập nhật trạng thái:', error);
         res.status(500).json({
             success: false,
             message: 'Lỗi server',
