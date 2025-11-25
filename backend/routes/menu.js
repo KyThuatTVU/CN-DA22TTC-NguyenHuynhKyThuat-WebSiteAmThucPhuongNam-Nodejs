@@ -94,4 +94,71 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Middleware kiểm tra admin
+const requireAdmin = (req, res, next) => {
+  if (req.session && req.session.admin) {
+    next();
+  } else {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+};
+
+// Thêm món ăn mới (Admin)
+router.post('/', requireAdmin, async (req, res) => {
+  try {
+    const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon } = req.body;
+    
+    const [result] = await db.query(
+      `INSERT INTO mon_an (ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [ten_mon, ma_danh_muc, gia_tien, so_luong_ton || 0, mo_ta_chi_tiet, trang_thai, anh_mon]
+    );
+    
+    res.json({ success: true, message: 'Thêm món ăn thành công', id: result.insertId });
+  } catch (error) {
+    console.error('Error adding product:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Cập nhật món ăn (Admin)
+router.put('/:id', requireAdmin, async (req, res) => {
+  try {
+    const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon } = req.body;
+    
+    const [result] = await db.query(
+      `UPDATE mon_an 
+       SET ten_mon = ?, ma_danh_muc = ?, gia_tien = ?, so_luong_ton = ?, 
+           mo_ta_chi_tiet = ?, trang_thai = ?, anh_mon = COALESCE(?, anh_mon)
+       WHERE ma_mon = ?`,
+      [ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon, req.params.id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
+    }
+    
+    res.json({ success: true, message: 'Cập nhật món ăn thành công' });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Xóa món ăn (Admin)
+router.delete('/:id', requireAdmin, async (req, res) => {
+  try {
+    const [result] = await db.query('DELETE FROM mon_an WHERE ma_mon = ?', [req.params.id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
+    }
+    
+    res.json({ success: true, message: 'Xóa món ăn thành công' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

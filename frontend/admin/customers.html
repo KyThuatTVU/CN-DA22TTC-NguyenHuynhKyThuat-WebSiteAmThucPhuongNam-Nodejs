@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+
 <body class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
@@ -14,47 +16,54 @@
             <div class="h-full flex flex-col">
                 <div class="p-6 border-b">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-utensils text-white text-xl"></i>
-                        </div>
+                        <img src="../images/Green Simple Clean Vegan Food Logo.png" alt="Logo Phương Nam" class="w-12 h-12 rounded-lg object-contain">
                         <div>
                             <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
                             <p class="text-xs text-gray-500">Admin Panel</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <nav class="flex-1 overflow-y-auto p-4">
                     <div class="space-y-1">
-                        <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="dashboard.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-chart-line w-5"></i><span>Dashboard</span>
                         </a>
-                        <a href="products.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="products.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-utensils w-5"></i><span>Món ăn</span>
                         </a>
-                        <a href="orders.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="orders.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-shopping-cart w-5"></i><span>Đơn hàng</span>
                         </a>
-                        <a href="reservations.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="reservations.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-calendar-check w-5"></i><span>Đặt bàn</span>
                         </a>
-                        <a href="customers.html" class="active bg-orange-50 text-orange-600 font-medium flex items-center space-x-3 px-4 py-3 rounded-lg transition">
+                        <a href="customers.html"
+                            class="active bg-orange-50 text-orange-600 font-medium flex items-center space-x-3 px-4 py-3 rounded-lg transition">
                             <i class="fas fa-users w-5"></i><span>Khách hàng</span>
                         </a>
-                        <a href="news.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="news.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-newspaper w-5"></i><span>Tin tức</span>
                         </a>
-                        <a href="albums.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="albums.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-images w-5"></i><span>Album ảnh</span>
                         </a>
-                        <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <a href="settings.html"
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-cog w-5"></i><span>Cài đặt</span>
                         </a>
                     </div>
                 </nav>
 
                 <div class="p-4 border-t">
-                    <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                    <button onclick="logout()"
+                        class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
                         <i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span>
                     </button>
                 </div>
@@ -86,7 +95,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-500 text-sm">Mới tháng này</p>
-                                <p class="text-2xl font-bold text-green-600">0</p>
+                                <p class="text-2xl font-bold text-green-600" id="new-customers">0</p>
                             </div>
                             <i class="fas fa-user-plus text-3xl text-green-200"></i>
                         </div>
@@ -104,7 +113,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-500 text-sm">Đã khóa</p>
-                                <p class="text-2xl font-bold text-red-600">0</p>
+                                <p class="text-2xl font-bold text-red-600" id="locked-customers">0</p>
                             </div>
                             <i class="fas fa-user-lock text-3xl text-red-200"></i>
                         </div>
@@ -114,19 +123,23 @@
                 <!-- Filters -->
                 <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <input type="text" id="search" placeholder="Tìm tên, email, SĐT..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
-                        <select id="status-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <input type="text" id="search" placeholder="Tìm tên, email, SĐT..."
+                            class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <select id="status-filter"
+                            class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
                             <option value="">Tất cả trạng thái</option>
                             <option value="1">Đang hoạt động</option>
                             <option value="0">Đã khóa</option>
                         </select>
-                        <select id="gender-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <select id="gender-filter"
+                            class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
                             <option value="">Tất cả giới tính</option>
                             <option value="nam">Nam</option>
                             <option value="nu">Nữ</option>
                             <option value="khac">Khác</option>
                         </select>
-                        <button onclick="applyFilters()" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">
+                        <button onclick="applyFilters()"
+                            class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">
                             <i class="fas fa-filter mr-2"></i>Lọc
                         </button>
                     </div>
@@ -138,13 +151,20 @@
                         <table class="w-full">
                             <thead class="bg-gray-50 border-b">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số điện thoại</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giới tính</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày đăng ký</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách
+                                        hàng</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số điện
+                                        thoại</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giới
+                                        tính</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày
+                                        đăng ký</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng
+                                        thái</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="customers-tbody" class="divide-y divide-gray-200">
@@ -163,7 +183,8 @@
     </div>
 
     <!-- Customer Detail Modal -->
-    <div id="customer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div id="customer-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-bold">Thông tin khách hàng</h3>
@@ -172,7 +193,7 @@
                 </button>
             </div>
             <div id="customer-detail" class="p-6">
-                <!-- Customer details will be loaded here -->
+                <!--  Customer details will be loaded here -->
             </div>
         </div>
     </div>
@@ -191,42 +212,49 @@
 
         async function loadCustomers() {
             try {
-                // Mock data for now - replace with actual API call
-                customers = [
-                    {
-                        ma_nguoi_dung: 1,
-                        ten_nguoi_dung: 'Nguyễn Văn A',
-                        email: 'nguyenvana@example.com',
-                        so_dien_thoai: '0901234567',
-                        gioi_tinh: 'nam',
-                        dia_chi: 'Vĩnh Long',
-                        trang_thai: 1,
-                        ngay_tao: '2024-01-15',
-                        anh_dai_dien: null
-                    },
-                    {
-                        ma_nguoi_dung: 2,
-                        ten_nguoi_dung: 'Trần Thị B',
-                        email: 'tranthib@example.com',
-                        so_dien_thoai: '0907654321',
-                        gioi_tinh: 'nu',
-                        dia_chi: 'Cần Thơ',
-                        trang_thai: 1,
-                        ngay_tao: '2024-02-20',
-                        anh_dai_dien: null
-                    }
-                ];
-                
-                document.getElementById('total-customers').textContent = customers.length;
-                document.getElementById('active-customers').textContent = customers.filter(c => c.trang_thai === 1).length;
-                
-                renderCustomers(customers);
+                const response = await fetch(`${API_URL}/customers`, {
+                    credentials: 'include'
+                });
+
+                // Check if response is JSON (if not, user is not authenticated)
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // Redirect to login page
+                    window.location.href = 'dang-nhap-admin.html';
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    customers = result.data || [];
+                    updateStats();
+                    renderCustomers(customers);
+                } else {
+                    throw new Error(result.message);
+                }
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('customers-tbody').innerHTML = `
-                    <tr><td colspan="7" class="px-6 py-12 text-center text-red-500">Không thể tải dữ liệu</td></tr>
+                    <tr><td colspan="7" class="px-6 py-12 text-center text-red-500">
+                        <i class="fas fa-exclamation-circle text-2xl mb-2"></i><br>
+                        Không thể tải dữ liệu: ${error.message}
+                    </td></tr>
                 `;
             }
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const newCustomersCount = customers.filter(c => new Date(c.ngay_tao) >= startOfMonth).length;
+            const activeCount = customers.filter(c => c.trang_thai === 1).length;
+            const lockedCount = customers.filter(c => c.trang_thai === 0).length;
+
+            document.getElementById('total-customers').textContent = customers.length;
+            document.getElementById('new-customers').textContent = newCustomersCount;
+            document.getElementById('active-customers').textContent = activeCount;
+            document.getElementById('locked-customers').textContent = lockedCount;
         }
 
         function renderCustomers(items) {
@@ -254,9 +282,7 @@
                     <td class="px-6 py-4 text-sm text-gray-900">${customer.gioi_tinh === 'nam' ? 'Nam' : customer.gioi_tinh === 'nu' ? 'Nữ' : 'Khác'}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${formatDate(customer.ngay_tao)}</td>
                     <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                            customer.trang_thai === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${customer.trang_thai === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
                             ${customer.trang_thai === 1 ? 'Hoạt động' : 'Đã khóa'}
                         </span>
                     </td>
@@ -287,9 +313,7 @@
                         <div>
                             <h4 class="text-xl font-bold">${customer.ten_nguoi_dung}</h4>
                             <p class="text-gray-500">Mã KH: #${customer.ma_nguoi_dung}</p>
-                            <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                                customer.trang_thai === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                            }">
+                            <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${customer.trang_thai === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
                                 ${customer.trang_thai === 1 ? 'Hoạt động' : 'Đã khóa'}
                             </span>
                         </div>
@@ -316,23 +340,6 @@
                             <p class="font-medium">${customer.dia_chi || 'Chưa cập nhật'}</p>
                         </div>
                     </div>
-                    <div class="border-t pt-4">
-                        <h5 class="font-medium mb-3">Thống kê</h5>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="bg-gray-50 p-3 rounded-lg text-center">
-                                <p class="text-2xl font-bold text-orange-600">0</p>
-                                <p class="text-sm text-gray-500">Đơn hàng</p>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg text-center">
-                                <p class="text-2xl font-bold text-green-600">0đ</p>
-                                <p class="text-sm text-gray-500">Tổng chi tiêu</p>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg text-center">
-                                <p class="text-2xl font-bold text-blue-600">0</p>
-                                <p class="text-sm text-gray-500">Đánh giá</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             `;
             document.getElementById('customer-modal').classList.remove('hidden');
@@ -349,10 +356,28 @@
             const action = customer.trang_thai === 1 ? 'khóa' : 'mở khóa';
             if (!confirm(`Bạn có chắc muốn ${action} tài khoản này?`)) return;
 
-            // Mock update - replace with actual API call
-            customer.trang_thai = customer.trang_thai === 1 ? 0 : 1;
-            renderCustomers(customers);
-            alert(`${action.charAt(0).toUpperCase() + action.slice(1)} tài khoản thành công!`);
+            try {
+                const newStatus = customer.trang_thai === 1 ? 0 : 1;
+                const response = await fetch(`${API_URL}/customers/${customerId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trang_thai: newStatus }),
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    customer.trang_thai = newStatus;
+                    updateStats();
+                    renderCustomers(customers);
+                    alert(`${action.charAt(0).toUpperCase() + action.slice(1)} tài khoản thành công!`);
+                } else {
+                    alert('Có lỗi xảy ra: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            }
         }
 
         function formatDate(date) {
@@ -366,8 +391,8 @@
 
             let filtered = customers.filter(c => {
                 const matchSearch = c.ten_nguoi_dung.toLowerCase().includes(search) ||
-                                  c.email.toLowerCase().includes(search) ||
-                                  c.so_dien_thoai.includes(search);
+                    c.email.toLowerCase().includes(search) ||
+                    c.so_dien_thoai.includes(search);
                 const matchStatus = !status || c.trang_thai == status;
                 const matchGender = !gender || c.gioi_tinh === gender;
                 return matchSearch && matchStatus && matchGender;
@@ -379,4 +404,5 @@
         loadCustomers();
     </script>
 </body>
+
 </html>

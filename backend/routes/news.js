@@ -243,4 +243,72 @@ router.get('/search/query', async (req, res) => {
     }
 });
 
+// Middleware kiểm tra admin
+const requireAdmin = (req, res, next) => {
+    if (req.session && req.session.admin) {
+        next();
+    } else {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+};
+
+// Thêm tin tức mới (Admin)
+router.post('/', requireAdmin, async (req, res) => {
+    try {
+        const { tieu_de, tom_tat, noi_dung, anh_dai_dien, tac_gia, trang_thai } = req.body;
+        const ma_admin_dang = req.session.admin?.ma_admin || null;
+        
+        const [result] = await db.query(
+            `INSERT INTO tin_tuc (tieu_de, tom_tat, noi_dung, anh_dai_dien, ma_admin_dang, trang_thai, ngay_dang, luot_xem) 
+             VALUES (?, ?, ?, ?, ?, ?, NOW(), 0)`,
+            [tieu_de, tom_tat || '', noi_dung, anh_dai_dien, ma_admin_dang, trang_thai || 1]
+        );
+        
+        res.json({ success: true, message: 'Thêm tin tức thành công', id: result.insertId });
+    } catch (error) {
+        console.error('Error adding news:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Cập nhật tin tức (Admin)
+router.put('/:id', requireAdmin, async (req, res) => {
+    try {
+        const { tieu_de, tom_tat, noi_dung, anh_dai_dien, trang_thai } = req.body;
+        
+        const [result] = await db.query(
+            `UPDATE tin_tuc 
+             SET tieu_de = ?, tom_tat = ?, noi_dung = ?, 
+                 anh_dai_dien = COALESCE(?, anh_dai_dien), trang_thai = ?
+             WHERE ma_tin_tuc = ?`,
+            [tieu_de, tom_tat, noi_dung, anh_dai_dien, trang_thai, req.params.id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy tin tức' });
+        }
+        
+        res.json({ success: true, message: 'Cập nhật tin tức thành công' });
+    } catch (error) {
+        console.error('Error updating news:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Xóa tin tức (Admin)
+router.delete('/:id', requireAdmin, async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM tin_tuc WHERE ma_tin_tuc = ?', [req.params.id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy tin tức' });
+        }
+        
+        res.json({ success: true, message: 'Xóa tin tức thành công' });
+    } catch (error) {
+        console.error('Error deleting news:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

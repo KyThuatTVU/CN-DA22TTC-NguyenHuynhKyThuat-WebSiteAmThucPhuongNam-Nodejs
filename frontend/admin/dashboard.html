@@ -16,9 +16,7 @@
                 <!-- Logo -->
                 <div class="p-6 border-b">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-utensils text-white text-xl"></i>
-                        </div>
+                        <img src="../images/Green Simple Clean Vegan Food Logo.png" alt="Logo Phương Nam" class="w-12 h-12 rounded-lg object-contain">
                         <div>
                             <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
                             <p class="text-xs text-gray-500">Admin Panel</p>
@@ -40,7 +38,6 @@
                         <a href="orders.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-shopping-cart w-5"></i>
                             <span>Đơn hàng</span>
-                            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">5</span>
                         </a>
                         <a href="reservations.html" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition">
                             <i class="fas fa-calendar-check w-5"></i>
@@ -334,145 +331,14 @@
 
     <script src="check-auth.js"></script>
     <script src="admin-layout.js"></script>
+    <script src="dashboard-loader.js"></script>
     <script>
         // API_URL is already defined in admin-layout.js
         // toggleSidebar and logout are already defined in admin-layout.js
 
         // Load dashboard data
-        async function loadDashboardData() {
-            try {
-                const API_URL = 'http://localhost:3000/api'; // Local scope
-                
-                // Load stats (mock data for now)
-                document.getElementById('revenue-today').textContent = '12.500.000đ';
-                document.getElementById('orders-count').textContent = '45';
-                document.getElementById('reservations-count').textContent = '23';
-                document.getElementById('customers-count').textContent = '156';
-
-                // Load recent orders
-                loadRecentOrders();
-                
-                // Load top products
-                loadTopProducts();
-                
-                // Initialize charts
-                initCharts();
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-            }
-        }
-
-        async function loadRecentOrders() {
-            const tbody = document.getElementById('recent-orders');
-            tbody.innerHTML = `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3 text-sm">#ORD001</td>
-                    <td class="py-3 text-sm">Nguyễn Văn A</td>
-                    <td class="py-3 text-sm font-medium">450.000đ</td>
-                    <td class="py-3"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">Hoàn thành</span></td>
-                </tr>
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3 text-sm">#ORD002</td>
-                    <td class="py-3 text-sm">Trần Thị B</td>
-                    <td class="py-3 text-sm font-medium">320.000đ</td>
-                    <td class="py-3"><span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-medium">Đang giao</span></td>
-                </tr>
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3 text-sm">#ORD003</td>
-                    <td class="py-3 text-sm">Lê Văn C</td>
-                    <td class="py-3 text-sm font-medium">680.000đ</td>
-                    <td class="py-3"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">Đang xử lý</span></td>
-                </tr>
-            `;
-        }
-
-        async function loadTopProducts() {
-            const container = document.getElementById('top-products');
-            container.innerHTML = `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <img src="http://localhost:3000/images/ca-loc-nuong-trui.jpg" alt="Dish" class="w-14 h-14 rounded-lg object-cover">
-                        <div>
-                            <p class="font-medium text-sm">Cá Lóc Nướng Trui</p>
-                            <p class="text-xs text-gray-500">156 đã bán</p>
-                        </div>
-                    </div>
-                    <p class="font-bold text-orange-600">200.000đ</p>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <img src="http://localhost:3000/images/lau-mam.jpg" alt="Dish" class="w-14 h-14 rounded-lg object-cover">
-                        <div>
-                            <p class="font-medium text-sm">Lẩu Mắm Miền Tây</p>
-                            <p class="text-xs text-gray-500">142 đã bán</p>
-                        </div>
-                    </div>
-                    <p class="font-bold text-orange-600">350.000đ</p>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <img src="http://localhost:3000/images/banh-xeo.jpg" alt="Dish" class="w-14 h-14 rounded-lg object-cover">
-                        <div>
-                            <p class="font-medium text-sm">Bánh Xèo Miền Tây</p>
-                            <p class="text-xs text-gray-500">128 đã bán</p>
-                        </div>
-                    </div>
-                    <p class="font-bold text-orange-600">120.000đ</p>
-                </div>
-            `;
-        }
-
-        function initCharts() {
-            // Revenue Chart
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-                    datasets: [{
-                        label: 'Doanh thu (triệu đồng)',
-                        data: [8.5, 10.2, 9.8, 12.5, 11.3, 13.7, 15.2],
-                        borderColor: '#ea580c',
-                        backgroundColor: 'rgba(234, 88, 12, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-
-            // Orders Chart
-            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
-            new Chart(ordersCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Hoàn thành', 'Đang giao', 'Đang xử lý', 'Đã hủy'],
-                    datasets: [{
-                        data: [45, 23, 15, 7],
-                        backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
-
-        // Load data on page load
-        loadDashboardData();
+        // All dashboard data loading is now handled by dashboard-loader.js
+        // This ensures real-time data from API instead of mock/fake data
         
         // Active nav link is handled by admin-layout.js
 
@@ -561,53 +427,38 @@
             
             if (lowerMessage.includes('doanh thu')) {
                 return `📊 <strong>Phân tích doanh thu:</strong><br><br>
-                    • Doanh thu tháng này: <strong>385 triệu đồng</strong> (+12% so với tháng trước)<br>
-                    • Ngày có doanh thu cao nhất: <strong>Chủ nhật</strong> (18.5 triệu)<br>
-                    • Khung giờ vàng: <strong>18:00 - 21:00</strong><br><br>
-                    💡 <strong>Đề xuất:</strong> Tăng cường marketing vào cuối tuần và tối để tối đa hóa doanh thu.`;
+                    Đang phân tích dữ liệu thực tế từ hệ thống...<br><br>
+                    💡 <strong>Lưu ý:</strong> Tính năng AI phân tích dữ liệu thực tế đang được phát triển.`;
             }
             
             if (lowerMessage.includes('bán chạy') || lowerMessage.includes('món ăn')) {
-                return `🔥 <strong>Top 3 món bán chạy nhất:</strong><br><br>
-                    1. <strong>Cá Lóc Nướng Trui</strong> - 156 phần (200k)<br>
-                    2. <strong>Lẩu Mắm Miền Tây</strong> - 142 phần (350k)<br>
-                    3. <strong>Bánh Xèo</strong> - 128 phần (120k)<br><br>
-                    💡 <strong>Đề xuất:</strong> Tạo combo với các món này để tăng giá trị đơn hàng trung bình.`;
+                return `🔥 <strong>Món ăn bán chạy:</strong><br><br>
+                    Đang phân tích dữ liệu thực tế từ hệ thống...<br><br>
+                    💡 <strong>Lưu ý:</strong> Bạn có thể xem danh sách món bán chạy ngay trên dashboard này.`;
             }
             
             if (lowerMessage.includes('đề xuất') || lowerMessage.includes('cải thiện')) {
                 return `💡 <strong>Đề xuất chiến lược:</strong><br><br>
-                    1. <strong>Tối ưu menu:</strong> Loại bỏ 3 món ít bán nhất, thêm 2 món mới theo xu hướng<br>
-                    2. <strong>Chương trình khuyến mãi:</strong> Happy Hour 15:00-17:00 giảm 20%<br>
-                    3. <strong>Tăng trải nghiệm:</strong> Thêm dịch vụ đặt bàn online và giao hàng nhanh<br>
-                    4. <strong>Marketing:</strong> Tập trung vào Facebook Ads và Google Maps<br><br>
-                    📈 Dự kiến tăng doanh thu 25-30% trong 3 tháng tới.`;
+                    Tính năng AI phân tích và đề xuất chiến lược dựa trên dữ liệu thực tế đang được phát triển.<br><br>
+                    Hiện tại bạn có thể xem các thống kê chi tiết trên dashboard để đưa ra quyết định.`;
             }
             
             if (lowerMessage.includes('khách hàng')) {
                 return `👥 <strong>Phân tích khách hàng:</strong><br><br>
-                    • Tổng khách hàng: <strong>1,245 người</strong><br>
-                    • Khách hàng trung thành: <strong>342 người</strong> (27%)<br>
-                    • Độ tuổi chủ yếu: <strong>25-45 tuổi</strong><br>
-                    • Giá trị đơn hàng TB: <strong>285,000đ</strong><br><br>
-                    💡 <strong>Đề xuất:</strong> Tạo chương trình loyalty để giữ chân khách hàng cũ.`;
+                    Đang phân tích dữ liệu thực tế từ hệ thống...<br><br>
+                    💡 <strong>Gợi ý:</strong> Vào mục "Khách hàng" để xem chi tiết danh sách và thông tin khách hàng.`;
             }
             
             if (lowerMessage.includes('xu hướng') || lowerMessage.includes('dự đoán')) {
                 return `📈 <strong>Dự đoán xu hướng:</strong><br><br>
-                    • Tháng tới dự kiến tăng <strong>15%</strong> do mùa lễ hội<br>
-                    • Món ăn chay đang có xu hướng tăng <strong>+35%</strong><br>
-                    • Đặt bàn online tăng <strong>+42%</strong><br><br>
-                    💡 <strong>Đề xuất:</strong> Chuẩn bị thêm nguyên liệu và nhân sự cho mùa cao điểm.`;
+                    Tính năng dự đoán xu hướng bằng AI đang được phát triển.<br><br>
+                    💡 <strong>Hiện tại:</strong> Bạn có thể xem biểu đồ doanh thu 7 ngày gần nhất trên dashboard.`;
             }
             
             if (lowerMessage.includes('chi phí') || lowerMessage.includes('lợi nhuận')) {
                 return `💰 <strong>Phân tích lợi nhuận:</strong><br><br>
-                    • Doanh thu: <strong>385 triệu</strong><br>
-                    • Chi phí nguyên liệu: <strong>154 triệu</strong> (40%)<br>
-                    • Chi phí nhân sự: <strong>92 triệu</strong> (24%)<br>
-                    • Lợi nhuận ròng: <strong>139 triệu</strong> (36%)<br><br>
-                    💡 <strong>Đề xuất:</strong> Tối ưu nguồn cung nguyên liệu để giảm 5% chi phí.`;
+                    Tính năng phân tích chi phí và lợi nhuận chi tiết đang được phát triển.<br><br>
+                    💡 <strong>Hiện tại:</strong> Bạn có thể xem tổng doanh thu trên dashboard.`;
             }
             
             // Default response

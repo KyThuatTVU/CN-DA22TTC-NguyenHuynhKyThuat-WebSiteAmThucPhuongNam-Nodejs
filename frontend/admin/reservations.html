@@ -10,13 +10,11 @@
 <body class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white shadow-lg flex-shrink-0">
+        <aside id="sidebar" class="w-64 bg-white shadow-lg flex-shrink-0">
             <div class="h-full flex flex-col">
                 <div class="p-6 border-b">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-utensils text-white text-xl"></i>
-                        </div>
+                        <img src="../images/Green Simple Clean Vegan Food Logo.png" alt="Logo Phương Nam" class="w-12 h-12 rounded-lg object-contain">
                         <div>
                             <h1 class="font-bold text-lg text-gray-800">Phương Nam</h1>
                             <p class="text-xs text-gray-500">Admin Panel</p>
@@ -181,24 +179,37 @@
 
         async function loadReservations() {
             try {
-                // Mock data - replace with actual API
-                reservations = [
-                    {
-                        ma_dat_ban: 1,
-                        ten_khach_hang: 'Nguyễn Văn A',
-                        so_dien_thoai: '0901234567',
-                        email: 'nguyenvana@example.com',
-                        ngay_dat: '2024-11-25',
-                        gio_dat: '18:00',
-                        so_nguoi: 4,
-                        ghi_chu: 'Bàn gần cửa sổ',
-                        trang_thai: 'cho_xac_nhan',
-                        ngay_tao: '2024-11-24'
+                const response = await fetch(`${API_URL}/reservations`, { 
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                ];
-                renderReservations(reservations);
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    reservations = data.data || [];
+                    renderReservations(reservations);
+                } else {
+                    throw new Error(data.message || 'Failed to load reservations');
+                }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error loading reservations:', error);
+                const tbody = document.getElementById('reservations-tbody');
+                tbody.innerHTML = `
+                    <tr><td colspan="8" class="px-6 py-12 text-center text-red-500">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p>Không thể tải dữ liệu: ${error.message}</p>
+                        <button onclick="loadReservations()" class="mt-2 text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-redo mr-1"></i>Thử lại
+                        </button>
+                    </td></tr>
+                `;
             }
         }
 
@@ -212,21 +223,21 @@
             tbody.innerHTML = items.map(res => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 text-sm font-medium">#${res.ma_dat_ban}</td>
-                    <td class="px-6 py-4 text-sm">${res.ten_khach_hang}</td>
+                    <td class="px-6 py-4 text-sm">${res.ten_nguoi_dat}</td>
                     <td class="px-6 py-4 text-sm">
                         <div>${res.so_dien_thoai}</div>
-                        <div class="text-gray-500 text-xs">${res.email}</div>
+                        <div class="text-gray-500 text-xs">${res.email || 'N/A'}</div>
                     </td>
                     <td class="px-6 py-4 text-sm">${formatDate(res.ngay_dat)}</td>
-                    <td class="px-6 py-4 text-sm font-medium">${res.gio_dat}</td>
-                    <td class="px-6 py-4 text-sm">${res.so_nguoi} người</td>
+                    <td class="px-6 py-4 text-sm font-medium">${res.gio_den}</td>
+                    <td class="px-6 py-4 text-sm">${res.so_luong} người</td>
                     <td class="px-6 py-4">
                         <select onchange="updateStatus(${res.ma_dat_ban}, this.value)" 
                                 class="px-3 py-1 rounded-lg text-xs font-medium border ${getStatusClass(res.trang_thai)}">
-                            <option value="cho_xac_nhan" ${res.trang_thai === 'cho_xac_nhan' ? 'selected' : ''}>Chờ xác nhận</option>
-                            <option value="da_xac_nhan" ${res.trang_thai === 'da_xac_nhan' ? 'selected' : ''}>Đã xác nhận</option>
-                            <option value="hoan_thanh" ${res.trang_thai === 'hoan_thanh' ? 'selected' : ''}>Hoàn thành</option>
-                            <option value="huy" ${res.trang_thai === 'huy' ? 'selected' : ''}>Đã hủy</option>
+                            <option value="pending" ${res.trang_thai === 'pending' ? 'selected' : ''}>Chờ xác nhận</option>
+                            <option value="confirmed" ${res.trang_thai === 'confirmed' ? 'selected' : ''}>Đã xác nhận</option>
+                            <option value="attended" ${res.trang_thai === 'attended' ? 'selected' : ''}>Đã đến</option>
+                            <option value="cancelled" ${res.trang_thai === 'cancelled' ? 'selected' : ''}>Đã hủy</option>
                         </select>
                     </td>
                     <td class="px-6 py-4">
@@ -240,17 +251,41 @@
 
         function getStatusClass(status) {
             const classes = {
-                'cho_xac_nhan': 'bg-orange-50 text-orange-700',
-                'da_xac_nhan': 'bg-blue-50 text-blue-700',
-                'hoan_thanh': 'bg-green-50 text-green-700',
-                'huy': 'bg-red-50 text-red-700'
+                'pending': 'bg-orange-50 text-orange-700',
+                'confirmed': 'bg-blue-50 text-blue-700',
+                'attended': 'bg-green-50 text-green-700',
+                'cancelled': 'bg-red-50 text-red-700'
             };
             return classes[status] || '';
         }
 
         async function updateStatus(id, newStatus) {
-            if (confirm('Xác nhận thay đổi trạng thái?')) {
-                alert('Cập nhật thành công!');
+            if (!confirm('Xác nhận thay đổi trạng thái?')) {
+                loadReservations(); // Reload để reset select về giá trị cũ
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/reservations/${id}/status`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ trang_thai: newStatus })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Cập nhật trạng thái thành công!');
+                    loadReservations();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Lỗi: ' + error.message);
                 loadReservations();
             }
         }

@@ -160,4 +160,71 @@ router.get('/product/:id', async (req, res) => {
     }
 });
 
+// Middleware kiểm tra admin
+const requireAdmin = (req, res, next) => {
+    if (req.session && req.session.admin) {
+        next();
+    } else {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+};
+
+// Thêm ảnh vào album (Admin)
+router.post('/', requireAdmin, async (req, res) => {
+    try {
+        const { duong_dan_anh, loai_anh, mo_ta } = req.body;
+        
+        const [result] = await db.query(
+            `INSERT INTO album_anh (duong_dan_anh, loai_anh, mo_ta, ngay_tao) 
+             VALUES (?, ?, ?, NOW())`,
+            [duong_dan_anh, loai_anh || 'khac', mo_ta || '']
+        );
+        
+        res.json({ success: true, message: 'Thêm ảnh thành công', id: result.insertId });
+    } catch (error) {
+        console.error('Error adding album:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Cập nhật thông tin ảnh (Admin)
+router.put('/:id', requireAdmin, async (req, res) => {
+    try {
+        const { duong_dan_anh, loai_anh, mo_ta } = req.body;
+        
+        const [result] = await db.query(
+            `UPDATE album_anh 
+             SET duong_dan_anh = COALESCE(?, duong_dan_anh), 
+                 loai_anh = ?, mo_ta = ?
+             WHERE ma_album = ?`,
+            [duong_dan_anh, loai_anh, mo_ta, req.params.id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy ảnh' });
+        }
+        
+        res.json({ success: true, message: 'Cập nhật ảnh thành công' });
+    } catch (error) {
+        console.error('Error updating album:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Xóa ảnh khỏi album (Admin)
+router.delete('/:id', requireAdmin, async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM album_anh WHERE ma_album = ?', [req.params.id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy ảnh' });
+        }
+        
+        res.json({ success: true, message: 'Xóa ảnh thành công' });
+    } catch (error) {
+        console.error('Error deleting album:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

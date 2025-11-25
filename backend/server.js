@@ -78,6 +78,9 @@ const cartRoutes = require('./routes/cart');
 const newsRoutes = require('./routes/news');
 const orderRoutes = require('./routes/orders');
 const momoPaymentRoutes = require('./routes/momo-payment');
+const customerRoutes = require('./routes/customers');
+const statsRoutes = require('./routes/stats');
+const reservationRoutes = require('./routes/reservations');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -87,7 +90,18 @@ app.use('/api/admin-auth', adminAuthRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/payment', momoPaymentRoutes); // MoMo payment routes
+app.use('/api/payment', momoPaymentRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/reservations', reservationRoutes);
+
+// 404 handler for API routes - return JSON instead of HTML
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'API endpoint không tồn tại'
+  });
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
