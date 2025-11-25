@@ -48,8 +48,8 @@ router.post('/login', async (req, res) => {
 
         // Tạo JWT token với role admin
         const token = jwt.sign(
-            { 
-                ma_admin: admin.ma_admin, 
+            {
+                ma_admin: admin.ma_admin,
                 tai_khoan: admin.tai_khoan,
                 quyen: admin.quyen,
                 role: 'admin'
@@ -210,7 +210,7 @@ router.post('/change-password', authenticateAdmin, async (req, res) => {
 
 // Khởi tạo đăng nhập Google cho Admin
 router.get('/google',
-    passport.authenticate('google', { 
+    passport.authenticate('google', {
         scope: ['profile', 'email'],
         session: true, // Dùng session thay vì JWT
         prompt: 'select_account', // Bắt buộc chọn tài khoản mỗi lần đăng nhập
@@ -220,13 +220,17 @@ router.get('/google',
 
 // Callback từ Google cho Admin
 router.get('/google/callback',
-    passport.authenticate('google', { 
+    passport.authenticate('google', {
         session: true, // Dùng session
-        failureRedirect: '/admin/dang-nhap-admin.html?error=google_auth_failed' 
+        failureRedirect: '/admin/dang-nhap-admin.html?error=google_auth_failed'
     }),
     async (req, res) => {
         try {
             const email = req.user.email;
+            const googleDisplayName = req.user.ten_hien_thi; // Lấy tên hiển thị từ user object
+            const googleAvatar = req.user.anh_dai_dien; // Lấy avatar đã xử lý từ passport
+
+            console.log('🔍 Google login data:', { email, googleDisplayName, googleAvatar });
 
             // Kiểm tra xem email này có phải là admin không
             const [admins] = await db.query(
@@ -244,16 +248,42 @@ router.get('/google/callback',
 
             const admin = admins[0];
 
+            // Cập nhật thông tin Google vào database (tên hiển thị và avatar)
+            const updateFields = [];
+            const updateValues = [];
+
+            // Cập nhật tên hiển thị nếu chưa có hoặc khác với Google
+            if (googleDisplayName && (!admin.ten_hien_thi || admin.ten_hien_thi !== googleDisplayName)) {
+                updateFields.push('ten_hien_thi = ?');
+                updateValues.push(googleDisplayName);
+            }
+
+            // Cập nhật avatar nếu có từ Google
+            if (googleAvatar && admin.anh_dai_dien !== googleAvatar) {
+                updateFields.push('anh_dai_dien = ?');
+                updateValues.push(googleAvatar);
+            }
+
+            // Thực hiện update nếu có thay đổi
+            if (updateFields.length > 0) {
+                updateValues.push(admin.ma_admin);
+                const updateQuery = `UPDATE admin SET ${updateFields.join(', ')} WHERE ma_admin = ?`;
+                await db.query(updateQuery, updateValues);
+                console.log('✅ Updated admin info from Google:', { googleDisplayName, googleAvatar });
+            }
+
             // Lưu thông tin admin vào session (bao gồm avatar từ Google)
             req.session.admin = {
                 ma_admin: admin.ma_admin,
                 tai_khoan: admin.tai_khoan,
                 email: admin.email,
-                ten_hien_thi: admin.ten_hien_thi || req.user.displayName,
-                anh_dai_dien: req.user.photos && req.user.photos[0] ? req.user.photos[0].value : null,
+                ten_hien_thi: googleDisplayName || admin.ten_hien_thi,
+                anh_dai_dien: googleAvatar || admin.anh_dai_dien,
                 quyen: admin.quyen,
                 role: 'admin'
             };
+
+            console.log('📦 Session admin data:', req.session.admin);
 
             // Redirect về trang admin (không có token trong URL)
             res.redirect('/admin/index.html?login=success');
@@ -291,7 +321,7 @@ router.post('/logout', (req, res) => {
                 message: 'Lỗi đăng xuất'
             });
         }
-        
+
         // Xóa session
         req.session.destroy((err) => {
             if (err) {
@@ -300,7 +330,7 @@ router.post('/logout', (req, res) => {
                     message: 'Lỗi xóa session'
                 });
             }
-            
+
             res.json({
                 success: true,
                 message: 'Đăng xuất thành công'

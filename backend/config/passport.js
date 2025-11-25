@@ -40,35 +40,52 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK_URL
 },
-async (accessToken, refreshToken, profile, done) => {
-    try {
-        const email = profile.emails[0].value;
-        const ten_hien_thi = profile.displayName;
-        const anh_dai_dien = profile.photos[0]?.value || null;
+    async (accessToken, refreshToken, profile, done) => {
+        try {
+            const email = profile.emails[0].value;
+            const ten_hien_thi = profile.displayName;
 
-        // Chỉ kiểm tra trong bảng admin, không tạo mới
-        const [existingAdmins] = await db.query(
-            'SELECT * FROM admin WHERE email = ?',
-            [email]
-        );
+            // Lấy URL ảnh và thay đổi size để có ảnh lớn hơn
+            let anh_dai_dien = profile.photos[0]?.value || null;
+            if (anh_dai_dien) {
+                // Xử lý URL ảnh Google để có size phù hợp
+                // URL thường có dạng: https://lh3.googleusercontent.com/a/ACg8ocK...
 
-        if (existingAdmins.length > 0) {
-            // Admin đã tồn tại, cho phép đăng nhập
-            return done(null, {
-                ...existingAdmins[0],
-                email,
-                ten_hien_thi: existingAdmins[0].ten_hien_thi || ten_hien_thi
-            });
+                // Loại bỏ tham số size cũ nếu có
+                anh_dai_dien = anh_dai_dien.split('=s')[0].split('?')[0];
+
+                // Thêm tham số size mới
+                if (anh_dai_dien.includes('googleusercontent.com')) {
+                    anh_dai_dien = `${anh_dai_dien}=s200-c`;
+                }
+
+                console.log('📸 Google Avatar URL:', anh_dai_dien);
+            }
+
+            // Chỉ kiểm tra trong bảng admin, không tạo mới
+            const [existingAdmins] = await db.query(
+                'SELECT * FROM admin WHERE email = ?',
+                [email]
+            );
+
+            if (existingAdmins.length > 0) {
+                // Admin đã tồn tại, cho phép đăng nhập
+                return done(null, {
+                    ...existingAdmins[0],
+                    email,
+                    ten_hien_thi: existingAdmins[0].ten_hien_thi || ten_hien_thi,
+                    anh_dai_dien: anh_dai_dien || existingAdmins[0].anh_dai_dien
+                });
+            }
+
+            // Không tìm thấy admin với email này
+            // Trả về null để từ chối đăng nhập
+            return done(null, false, { message: 'Email không phải là admin' });
+
+        } catch (error) {
+            console.error('Lỗi Google OAuth:', error);
+            return done(error, null);
         }
-
-        // Không tìm thấy admin với email này
-        // Trả về null để từ chối đăng nhập
-        return done(null, false, { message: 'Email không phải là admin' });
-
-    } catch (error) {
-        console.error('Lỗi Google OAuth:', error);
-        return done(error, null);
-    }
-}));
+    }));
 
 module.exports = passport;
