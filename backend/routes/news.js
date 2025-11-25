@@ -1,8 +1,78 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const multer = require('multer');
+const path = require('path');
 
-// Lấy tất cả tin tức (có phân trang)
+// Cấu hình multer để upload ảnh
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../images'));
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'news-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|gif|webp/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Chỉ chấp nhận file ảnh!'));
+        }
+    }
+});
+
+// Middleware kiểm tra admin
+const requireAdmin = (req, res, next) => {
+    if (req.session && req.session.admin) {
+        next();
+    } else {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+};
+
+// API cho Admin - Lấy tất cả tin tức (bao gồm cả ẩn)
+router.get('/admin/all', requireAdmin, async (req, res) => {
+    try {
+        const [news] = await db.query(`
+            SELECT 
+                t.ma_tin_tuc,
+                t.tieu_de,
+                t.tom_tat,
+                t.noi_dung,
+                t.anh_dai_dien,
+                t.ngay_dang,
+                t.luot_xem,
+                t.trang_thai,
+                a.ten_hien_thi as tac_gia
+            FROM tin_tuc t
+            LEFT JOIN admin a ON t.ma_admin_dang = a.ma_admin
+            ORDER BY t.ngay_dang DESC
+        `);
+
+        res.json({
+            success: true,
+            data: news
+        });
+
+    } catch (error) {
+        console.error('Lỗi lấy tin tức admin:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
+// Lấy tất cả tin tức (có phân trang) - chỉ tin đã đăng
 router.get('/', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -243,20 +313,12 @@ router.get('/search/query', async (req, res) => {
     }
 });
 
-// Middleware kiểm tra admin
-const requireAdmin = (req, res, next) => {
-    if (req.session && req.session.admin) {
-        next();
-    } else {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-};
-
 // Thêm tin tức mới (Admin)
-router.post('/', requireAdmin, async (req, res) => {
+router.post('/', requireAdmin, upload.single('anh_dai_dien'), async (req, res) => {
     try {
-        const { tieu_de, tom_tat, noi_dung, anh_dai_dien, tac_gia, trang_thai } = req.body;
+        const { tieu_de, tom_tat, noi_dung, trang_thai } = req.body;
         const ma_admin_dang = req.session.admin?.ma_admin || null;
+        const anh_dai_dien = req.file ? `images/${req.file.filename}` : null;
         
         const [result] = await db.query(
             `INSERT INTO tin_tuc (tieu_de, tom_tat, noi_dung, anh_dai_dien, ma_admin_dang, trang_thai, ngay_dang, luot_xem) 
@@ -272,17 +334,26 @@ router.post('/', requireAdmin, async (req, res) => {
 });
 
 // Cập nhật tin tức (Admin)
-router.put('/:id', requireAdmin, async (req, res) => {
+router.put('/:id', requireAdmin, upload.single('anh_dai_dien'), async (req, res) => {
     try {
-        const { tieu_de, tom_tat, noi_dung, anh_dai_dien, trang_thai } = req.body;
+        const { tieu_de, tom_tat, noi_dung, trang_thai } = req.body;
+        const anh_dai_dien = req.file ? `images/${req.file.filename}` : null;
         
-        const [result] = await db.query(
-            `UPDATE tin_tuc 
-             SET tieu_de = ?, tom_tat = ?, noi_dung = ?, 
-                 anh_dai_dien = COALESCE(?, anh_dai_dien), trang_thai = ?
-             WHERE ma_tin_tuc = ?`,
-            [tieu_de, tom_tat, noi_dung, anh_dai_dien, trang_thai, req.params.id]
-        );
+        let query, params;
+        if (anh_dai_dien) {
+            query = `UPDATE tin_tuc 
+                     SET tieu_de = ?, tom_tat = ?, noi_dung = ?, 
+                         anh_dai_dien = ?, trang_thai = ?
+                     WHERE ma_tin_tuc = ?`;
+            params = [tieu_de, tom_tat, noi_dung, anh_dai_dien, trang_thai, req.params.id];
+        } else {
+            query = `UPDATE tin_tuc 
+                     SET tieu_de = ?, tom_tat = ?, noi_dung = ?, trang_thai = ?
+                     WHERE ma_tin_tuc = ?`;
+            params = [tieu_de, tom_tat, noi_dung, trang_thai, req.params.id];
+        }
+        
+        const [result] = await db.query(query, params);
         
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy tin tức' });

@@ -81,9 +81,8 @@
                         <input type="text" id="search" placeholder="Tìm kiếm bài viết..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
                         <select id="status-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="dang">Đã đăng</option>
-                            <option value="nhap">Nháp</option>
-                            <option value="an">Đã ẩn</option>
+                            <option value="1">Đã đăng</option>
+                            <option value="0">Đã ẩn</option>
                         </select>
                         <input type="date" id="date-filter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
                         <button onclick="applyFilters()" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">
@@ -120,15 +119,14 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tác giả</label>
-                        <input type="text" id="tac_gia" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tóm tắt</label>
+                        <textarea id="tom_tat" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Tóm tắt ngắn gọn nội dung bài viết..."></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái *</label>
                         <select id="trang_thai" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="nhap">Nháp</option>
-                            <option value="dang">Đăng</option>
-                            <option value="an">Ẩn</option>
+                            <option value="1">Đăng</option>
+                            <option value="0">Ẩn</option>
                         </select>
                     </div>
                 </div>
@@ -162,7 +160,10 @@
 
         async function loadNews() {
             try {
-                const response = await fetch(`${API_URL}/news`);
+                // Sử dụng API admin để lấy tất cả tin tức (bao gồm cả ẩn)
+                const response = await fetch(`${API_URL}/news/admin/all`, {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 newsList = data.data || [];
                 renderNews(newsList);
@@ -193,7 +194,7 @@
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition">
                     <div class="flex">
                         <div class="w-48 h-32 flex-shrink-0">
-                            <img src="${API_URL.replace('/api', '')}/images/${news.anh_dai_dien || 'default.jpg'}" 
+                            <img src="${API_URL.replace('/api', '')}/${news.anh_dai_dien || 'images/default.jpg'}" 
                                  alt="${news.tieu_de}" 
                                  class="w-full h-full object-cover"
                                  onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
@@ -202,26 +203,24 @@
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <h4 class="font-bold text-lg mb-2 line-clamp-1">${news.tieu_de}</h4>
-                                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${news.noi_dung ? news.noi_dung.substring(0, 150) + '...' : 'Chưa có nội dung'}</p>
+                                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${news.tom_tat || (news.noi_dung ? news.noi_dung.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 'Chưa có nội dung')}</p>
                                     <div class="flex items-center space-x-4 text-sm text-gray-500">
                                         <span><i class="fas fa-user mr-1"></i>${news.tac_gia || 'Admin'}</span>
-                                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(news.ngay_tao)}</span>
+                                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(news.ngay_dang)}</span>
                                         <span><i class="fas fa-eye mr-1"></i>${news.luot_xem || 0} lượt xem</span>
                                     </div>
                                 </div>
                                 <div class="ml-4 flex flex-col items-end space-y-2">
                                     <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                                        news.trang_thai === 'dang' ? 'bg-green-100 text-green-700' :
-                                        news.trang_thai === 'nhap' ? 'bg-yellow-100 text-yellow-700' :
-                                        'bg-gray-100 text-gray-700'
+                                        news.trang_thai == 1 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                                     }">
-                                        ${news.trang_thai === 'dang' ? 'Đã đăng' : news.trang_thai === 'nhap' ? 'Nháp' : 'Đã ẩn'}
+                                        ${news.trang_thai == 1 ? 'Đã đăng' : 'Đã ẩn'}
                                     </span>
                                     <div class="flex space-x-2">
-                                        <button onclick="editNews(${news.ma_tin})" class="px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition text-sm">
+                                        <button onclick="editNews(${news.ma_tin_tuc})" class="px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition text-sm">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button onclick="deleteNews(${news.ma_tin})" class="px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition text-sm">
+                                        <button onclick="deleteNews(${news.ma_tin_tuc})" class="px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition text-sm">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -237,6 +236,7 @@
             document.getElementById('modal-title').textContent = 'Thêm bài viết mới';
             document.getElementById('news-form').reset();
             document.getElementById('news-id').value = '';
+            document.getElementById('trang_thai').value = '1';
             document.getElementById('news-modal').classList.remove('hidden');
         }
 
@@ -245,15 +245,15 @@
         }
 
         async function editNews(id) {
-            const news = newsList.find(n => n.ma_tin === id);
+            const news = newsList.find(n => n.ma_tin_tuc === id);
             if (!news) return;
 
             document.getElementById('modal-title').textContent = 'Chỉnh sửa bài viết';
-            document.getElementById('news-id').value = news.ma_tin;
+            document.getElementById('news-id').value = news.ma_tin_tuc;
             document.getElementById('tieu_de').value = news.tieu_de || '';
-            document.getElementById('tac_gia').value = news.tac_gia || '';
+            document.getElementById('tom_tat').value = news.tom_tat || '';
             document.getElementById('noi_dung').value = news.noi_dung || '';
-            document.getElementById('trang_thai').value = news.trang_thai || 'nhap';
+            document.getElementById('trang_thai').value = news.trang_thai != null ? news.trang_thai : 1;
             document.getElementById('news-modal').classList.remove('hidden');
         }
 
@@ -285,7 +285,7 @@
             const id = document.getElementById('news-id').value;
             
             formData.append('tieu_de', document.getElementById('tieu_de').value);
-            formData.append('tac_gia', document.getElementById('tac_gia').value || 'Admin');
+            formData.append('tom_tat', document.getElementById('tom_tat').value || '');
             formData.append('noi_dung', document.getElementById('noi_dung').value);
             formData.append('trang_thai', document.getElementById('trang_thai').value);
             
@@ -319,6 +319,7 @@
         });
 
         function formatDate(date) {
+            if (!date) return 'N/A';
             return new Date(date).toLocaleDateString('vi-VN');
         }
 
@@ -328,7 +329,7 @@
 
             let filtered = newsList.filter(n => {
                 const matchSearch = n.tieu_de.toLowerCase().includes(search);
-                const matchStatus = !status || n.trang_thai === status;
+                const matchStatus = status === '' || n.trang_thai == status;
                 return matchSearch && matchStatus;
             });
 
