@@ -11,6 +11,41 @@ const requireAdmin = (req, res, next) => {
     }
 };
 
+// Thống kê đặt bàn - PHẢI ĐẶT TRƯỚC /:id
+router.get('/stats', requireAdmin, async (req, res) => {
+    try {
+        // Tổng số đặt bàn
+        const [totalCount] = await db.query(`SELECT COUNT(*) as total FROM dat_ban`);
+        
+        // Đặt bàn hôm nay
+        const [todayCount] = await db.query(`
+            SELECT COUNT(*) as count FROM dat_ban WHERE DATE(ngay_dat) = CURDATE()
+        `);
+
+        // Đặt bàn theo trạng thái
+        const [statusStats] = await db.query(`
+            SELECT trang_thai, COUNT(*) as count FROM dat_ban GROUP BY trang_thai
+        `);
+
+        // Đặt bàn tuần này
+        const [weekStats] = await db.query(`
+            SELECT COUNT(*) as count FROM dat_ban 
+            WHERE YEARWEEK(ngay_dat, 1) = YEARWEEK(CURDATE(), 1)
+        `);
+
+        res.json({
+            success: true,
+            totalReservations: totalCount[0].total,
+            today: todayCount[0].count,
+            thisWeek: weekStats[0].count,
+            byStatus: statusStats
+        });
+    } catch (error) {
+        console.error('Error fetching reservation stats:', error);
+        res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê' });
+    }
+});
+
 // Lấy tất cả đặt bàn (Admin)
 router.get('/', requireAdmin, async (req, res) => {
     try {
@@ -129,47 +164,6 @@ router.delete('/:id', requireAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Lỗi khi xóa đặt bàn'
-        });
-    }
-});
-
-// Thống kê đặt bàn
-router.get('/stats/summary', requireAdmin, async (req, res) => {
-    try {
-        // Tổng số đặt bàn hôm nay
-        const [todayCount] = await db.query(`
-            SELECT COUNT(*) as count 
-            FROM dat_ban 
-            WHERE DATE(ngay_dat) = CURDATE()
-        `);
-
-        // Đặt bàn theo trạng thái
-        const [statusStats] = await db.query(`
-            SELECT trang_thai, COUNT(*) as count
-            FROM dat_ban
-            GROUP BY trang_thai
-        `);
-
-        // Đặt bàn tuần này
-        const [weekStats] = await db.query(`
-            SELECT COUNT(*) as count
-            FROM dat_ban
-            WHERE YEARWEEK(ngay_dat, 1) = YEARWEEK(CURDATE(), 1)
-        `);
-
-        res.json({
-            success: true,
-            data: {
-                today: todayCount[0].count,
-                thisWeek: weekStats[0].count,
-                byStatus: statusStats
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching reservation stats:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Lỗi khi lấy thống kê'
         });
     }
 });
