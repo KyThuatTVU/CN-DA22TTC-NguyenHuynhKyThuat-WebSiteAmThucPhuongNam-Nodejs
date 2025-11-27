@@ -122,13 +122,26 @@
 
         async function loadNews() {
             try {
+                console.log('Loading news from:', `${API_URL}/news/admin/all`);
                 const response = await fetch(`${API_URL}/news/admin/all`, { credentials: 'include' });
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.error('Unauthorized - redirecting to login');
+                        window.location.href = 'dang-nhap-admin.html?error=unauthorized';
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('News data:', data);
                 newsList = data.data || [];
                 renderNews(newsList);
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('news-container').innerHTML = `<div class="text-center py-12"><i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i><p class="text-slate-500">Không thể tải dữ liệu</p></div>`;
+                console.error('Error loading news:', error);
+                document.getElementById('news-container').innerHTML = `<div class="text-center py-12"><i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i><p class="text-slate-500">Không thể tải dữ liệu: ${error.message}</p></div>`;
             }
         }
 
@@ -217,6 +230,7 @@
             renderNews(filtered);
         }
 
+        // Load data khi trang sẵn sàng
         loadNews();
     </script>
 </body>

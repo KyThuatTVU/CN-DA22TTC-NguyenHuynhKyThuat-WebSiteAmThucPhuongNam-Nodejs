@@ -223,18 +223,24 @@ router.post('/', requireAdmin, upload.array('images', 10), async (req, res) => {
     }
 });
 
-// Cập nhật thông tin ảnh (Admin)
-router.put('/:id', requireAdmin, async (req, res) => {
+// Cập nhật thông tin ảnh (Admin) - hỗ trợ upload ảnh mới
+router.put('/:id', requireAdmin, upload.single('image'), async (req, res) => {
     try {
-        const { duong_dan_anh, loai_anh, mo_ta } = req.body;
+        const { loai_anh, mo_ta } = req.body;
+        const newImage = req.file ? req.file.filename : null;
         
-        const [result] = await db.query(
-            `UPDATE album_anh 
-             SET duong_dan_anh = COALESCE(?, duong_dan_anh), 
-                 loai_anh = ?, mo_ta = ?
-             WHERE ma_album = ?`,
-            [duong_dan_anh, loai_anh, mo_ta, req.params.id]
-        );
+        let query, params;
+        if (newImage) {
+            // Có ảnh mới
+            query = `UPDATE album_anh SET duong_dan_anh = ?, loai_anh = ?, mo_ta = ? WHERE ma_album = ?`;
+            params = [newImage, loai_anh, mo_ta || '', req.params.id];
+        } else {
+            // Không có ảnh mới
+            query = `UPDATE album_anh SET loai_anh = ?, mo_ta = ? WHERE ma_album = ?`;
+            params = [loai_anh, mo_ta || '', req.params.id];
+        }
+        
+        const [result] = await db.query(query, params);
         
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy ảnh' });

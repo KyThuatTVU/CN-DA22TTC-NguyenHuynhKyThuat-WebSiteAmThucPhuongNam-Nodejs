@@ -214,4 +214,68 @@ router.get('/reservations-by-time', requireAdmin, async (req, res) => {
     }
 });
 
+// Thống kê tin tức - Top bài viết có lượt xem cao nhất
+router.get('/news-views', requireAdmin, async (req, res) => {
+    try {
+        const [newsData] = await db.query(`
+            SELECT 
+                ma_tin_tuc,
+                tieu_de,
+                luot_xem,
+                ngay_dang,
+                trang_thai
+            FROM tin_tuc
+            WHERE trang_thai = 1
+            ORDER BY luot_xem DESC
+            LIMIT 10
+        `);
+
+        // Tổng lượt xem
+        const [totalViews] = await db.query(`
+            SELECT COALESCE(SUM(luot_xem), 0) as total FROM tin_tuc
+        `);
+
+        // Tổng số bài viết
+        const [totalNews] = await db.query(`
+            SELECT COUNT(*) as total FROM tin_tuc WHERE trang_thai = 1
+        `);
+
+        res.json({
+            success: true,
+            data: newsData,
+            totalViews: totalViews[0].total,
+            totalNews: totalNews[0].total
+        });
+    } catch (error) {
+        console.error('Error fetching news views:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+// Thống kê lượt xem tin tức theo tháng
+router.get('/news-views-monthly', requireAdmin, async (req, res) => {
+    try {
+        // Lấy số bài viết đăng theo tháng và tổng lượt xem
+        const [monthlyData] = await db.query(`
+            SELECT 
+                YEAR(ngay_dang) as nam,
+                MONTH(ngay_dang) as thang,
+                COUNT(*) as so_bai_viet,
+                COALESCE(SUM(luot_xem), 0) as tong_luot_xem
+            FROM tin_tuc
+            WHERE ngay_dang >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY YEAR(ngay_dang), MONTH(ngay_dang)
+            ORDER BY nam ASC, thang ASC
+        `);
+
+        res.json({
+            success: true,
+            data: monthlyData
+        });
+    } catch (error) {
+        console.error('Error fetching monthly news views:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
 module.exports = router;

@@ -236,7 +236,7 @@
                         </div>
 
                         <!-- Row 4: Reservations + Recent Orders -->
-                        <div class="grid grid-cols-2 gap-5">
+                        <div class="grid grid-cols-2 gap-5 mb-6">
                             <div class="chart-card">
                                 <p class="chart-title"><i class="fas fa-clock text-amber-500 mr-2"></i>Đặt bàn theo khung giờ</p>
                                 <div style="height: 200px;"><canvas id="reservationChart"></canvas></div>
@@ -244,6 +244,24 @@
                             <div class="chart-card">
                                 <p class="chart-title"><i class="fas fa-list-alt text-indigo-500 mr-2"></i>Đơn hàng gần đây</p>
                                 <div id="recent-orders" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: News Stats -->
+                        <div class="grid grid-cols-3 gap-5">
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-newspaper text-pink-500 mr-2"></i>Lượt xem bài viết theo tháng</p>
+                                <div style="height: 200px;"><canvas id="newsViewsChart"></canvas></div>
+                            </div>
+                            <div class="chart-card col-span-2">
+                                <div class="flex items-center justify-between mb-4">
+                                    <p class="chart-title mb-0"><i class="fas fa-eye text-rose-500 mr-2"></i>Top bài viết được xem nhiều nhất</p>
+                                    <div class="flex items-center space-x-4 text-sm">
+                                        <span class="text-slate-500">Tổng: <span id="total-news" class="font-bold text-slate-700">0</span> bài</span>
+                                        <span class="text-slate-500">Lượt xem: <span id="total-views" class="font-bold text-pink-600">0</span></span>
+                                    </div>
+                                </div>
+                                <div id="top-news" class="space-y-2" style="max-height: 200px; overflow-y: auto;"></div>
                             </div>
                         </div>
                     </div>
@@ -300,7 +318,7 @@
     <script>
         // API_URL đã được khai báo trong admin-layout.js
         const API_BASE = API_URL; // Alias để tương thích
-        let gaugeChart, revenueChart, ordersChart, customerChart, reservationChart;
+        let gaugeChart, revenueChart, ordersChart, customerChart, reservationChart, newsViewsChart;
         
         document.addEventListener('DOMContentLoaded', function() {
             initAllCharts();
@@ -349,18 +367,42 @@
                 data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: [15, 45, 20, 25, 60, 35], backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'], borderRadius: 8 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
+
+            // News Views Chart
+            newsViewsChart = new Chart(document.getElementById('newsViewsChart').getContext('2d'), {
+                type: 'line',
+                data: { 
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], 
+                    datasets: [{ 
+                        label: 'Lượt xem', 
+                        data: new Array(12).fill(0), 
+                        borderColor: '#ec4899', 
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)', 
+                        borderWidth: 3, 
+                        fill: true, 
+                        tension: 0.4, 
+                        pointRadius: 5, 
+                        pointBackgroundColor: '#ec4899', 
+                        pointBorderColor: '#fff', 
+                        pointBorderWidth: 2 
+                    }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
+            });
         }
 
         async function loadDashboardData() {
             try {
                 // Load tất cả dữ liệu song song
-                const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes] = await Promise.all([
+                const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes, newsViewsRes, newsViewsMonthlyRes] = await Promise.all([
                     fetch(`${API_BASE}/orders/stats`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/customers/stats`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/reservations/stats`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/stats/revenue-monthly`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/stats/customers-monthly`, { credentials: 'include' }).catch(() => null),
-                    fetch(`${API_BASE}/stats/reservations-by-time`, { credentials: 'include' }).catch(() => null)
+                    fetch(`${API_BASE}/stats/reservations-by-time`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/news-views`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/news-views-monthly`, { credentials: 'include' }).catch(() => null)
                 ]);
 
                 // KPI Cards
@@ -405,6 +447,24 @@
                     const data = await reservationsByTimeRes.json();
                     if (data.success && data.data) {
                         updateReservationChart(data.data);
+                    }
+                }
+
+                // Top bài viết và tổng lượt xem
+                if (newsViewsRes && newsViewsRes.ok) {
+                    const data = await newsViewsRes.json();
+                    if (data.success) {
+                        document.getElementById('total-news').textContent = data.totalNews || 0;
+                        document.getElementById('total-views').textContent = formatNumber(data.totalViews || 0);
+                        renderTopNews(data.data || []);
+                    }
+                }
+
+                // Biểu đồ lượt xem tin tức theo tháng
+                if (newsViewsMonthlyRes && newsViewsMonthlyRes.ok) {
+                    const data = await newsViewsMonthlyRes.json();
+                    if (data.success && data.data) {
+                        updateNewsViewsChart(data.data);
                     }
                 }
 
@@ -456,6 +516,47 @@
 
             reservationChart.data.datasets[0].data = slotData;
             reservationChart.update();
+        }
+
+        function updateNewsViewsChart(data) {
+            const monthlyData = new Array(12).fill(0);
+            const currentYear = new Date().getFullYear();
+            
+            data.forEach(item => {
+                if (item.nam === currentYear && item.thang >= 1 && item.thang <= 12) {
+                    monthlyData[item.thang - 1] = item.tong_luot_xem || 0;
+                }
+            });
+
+            newsViewsChart.data.datasets[0].data = monthlyData;
+            newsViewsChart.update();
+        }
+
+        function renderTopNews(newsData) {
+            const container = document.getElementById('top-news');
+            if (!newsData || newsData.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-4">Chưa có bài viết</p>';
+                return;
+            }
+            const maxViews = Math.max(...newsData.map(n => n.luot_xem || 0));
+            container.innerHTML = newsData.map((news, i) => `
+                <div class="product-row">
+                    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800 truncate" title="${news.tieu_de}">${news.tieu_de}</p>
+                        <div class="w-full bg-slate-100 rounded-full h-2 mt-1">
+                            <div class="bg-gradient-to-r from-pink-500 to-rose-600 h-2 rounded-full transition-all" style="width: ${maxViews > 0 ? (news.luot_xem/maxViews)*100 : 0}%"></div>
+                        </div>
+                    </div>
+                    <span class="text-sm font-semibold text-pink-600 ml-3">${formatNumber(news.luot_xem || 0)}</span>
+                </div>
+            `).join('');
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
         }
 
         function updateGaugeChart(actual, target) {
