@@ -11,6 +11,35 @@ const requireAdmin = (req, res, next) => {
     }
 };
 
+// Thống kê khách hàng cho Dashboard - PHẢI ĐẶT TRƯỚC /:id
+router.get('/stats', requireAdmin, async (req, res) => {
+    try {
+        // Tổng số khách hàng
+        const [totalCustomers] = await db.query(`SELECT COUNT(*) as total FROM nguoi_dung`);
+        
+        // Khách hàng mới tháng này
+        const [newThisMonth] = await db.query(`
+            SELECT COUNT(*) as count FROM nguoi_dung 
+            WHERE MONTH(ngay_tao) = MONTH(CURDATE()) AND YEAR(ngay_tao) = YEAR(CURDATE())
+        `);
+        
+        // Khách hàng active
+        const [activeCustomers] = await db.query(`
+            SELECT COUNT(*) as count FROM nguoi_dung WHERE trang_thai = 1
+        `);
+
+        res.json({
+            success: true,
+            totalCustomers: totalCustomers[0].total,
+            newThisMonth: newThisMonth[0].count,
+            activeCustomers: activeCustomers[0].count
+        });
+    } catch (error) {
+        console.error('Error fetching customer stats:', error);
+        res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê' });
+    }
+});
+
 // Lấy danh sách khách hàng
 router.get('/', requireAdmin, async (req, res) => {
     try {

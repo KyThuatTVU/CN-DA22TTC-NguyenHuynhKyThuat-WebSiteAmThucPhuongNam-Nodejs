@@ -111,4 +111,107 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
     }
 });
 
+// Top 10 món ăn bán chạy
+router.get('/top-products', requireAdmin, async (req, res) => {
+    try {
+        const [topProducts] = await db.query(`
+            SELECT m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, COALESCE(SUM(ct.so_luong), 0) as da_ban
+            FROM mon_an m
+            LEFT JOIN chi_tiet_don_hang ct ON m.ma_mon = ct.ma_mon
+            LEFT JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang AND dh.trang_thai = 'delivered'
+            GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien
+            ORDER BY da_ban DESC
+            LIMIT 10
+        `);
+
+        res.json({
+            success: true,
+            data: topProducts
+        });
+    } catch (error) {
+        console.error('Error fetching top products:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+// Doanh thu theo tháng (12 tháng gần nhất)
+router.get('/revenue-monthly', requireAdmin, async (req, res) => {
+    try {
+        const [revenueData] = await db.query(`
+            SELECT 
+                YEAR(thoi_gian_tao) as nam,
+                MONTH(thoi_gian_tao) as thang,
+                COALESCE(SUM(tong_tien), 0) as doanh_thu
+            FROM don_hang
+            WHERE trang_thai = 'delivered'
+              AND thoi_gian_tao >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY YEAR(thoi_gian_tao), MONTH(thoi_gian_tao)
+            ORDER BY nam ASC, thang ASC
+        `);
+
+        res.json({
+            success: true,
+            data: revenueData
+        });
+    } catch (error) {
+        console.error('Error fetching monthly revenue:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+// Khách hàng mới theo tháng (12 tháng gần nhất)
+router.get('/customers-monthly', requireAdmin, async (req, res) => {
+    try {
+        const [customerData] = await db.query(`
+            SELECT 
+                YEAR(ngay_tao) as nam,
+                MONTH(ngay_tao) as thang,
+                COUNT(*) as so_luong
+            FROM nguoi_dung
+            WHERE ngay_tao >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY YEAR(ngay_tao), MONTH(ngay_tao)
+            ORDER BY nam ASC, thang ASC
+        `);
+
+        res.json({
+            success: true,
+            data: customerData
+        });
+    } catch (error) {
+        console.error('Error fetching monthly customers:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+// Đặt bàn theo khung giờ
+router.get('/reservations-by-time', requireAdmin, async (req, res) => {
+    try {
+        const [reservationData] = await db.query(`
+            SELECT 
+                CASE 
+                    WHEN HOUR(gio_den) >= 10 AND HOUR(gio_den) < 12 THEN '10-12h'
+                    WHEN HOUR(gio_den) >= 12 AND HOUR(gio_den) < 14 THEN '12-14h'
+                    WHEN HOUR(gio_den) >= 14 AND HOUR(gio_den) < 16 THEN '14-16h'
+                    WHEN HOUR(gio_den) >= 16 AND HOUR(gio_den) < 18 THEN '16-18h'
+                    WHEN HOUR(gio_den) >= 18 AND HOUR(gio_den) < 20 THEN '18-20h'
+                    WHEN HOUR(gio_den) >= 20 AND HOUR(gio_den) < 22 THEN '20-22h'
+                    ELSE 'Khác'
+                END as khung_gio,
+                COUNT(*) as so_luong
+            FROM dat_ban
+            WHERE trang_thai != 'cancelled'
+            GROUP BY khung_gio
+            ORDER BY FIELD(khung_gio, '10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h', 'Khác')
+        `);
+
+        res.json({
+            success: true,
+            data: reservationData
+        });
+    } catch (error) {
+        console.error('Error fetching reservations by time:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
 module.exports = router;

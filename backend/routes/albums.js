@@ -1,6 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const multer = require('multer');
+const path = require('path');
+
+// Cấu hình multer để upload ảnh
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../images'));
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'album-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|gif|webp/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Chỉ chấp nhận file ảnh!'));
+        }
+    }
+});
 
 // Lấy tất cả album (có phân trang)
 router.get('/', async (req, res) => {
@@ -169,18 +196,27 @@ const requireAdmin = (req, res, next) => {
     }
 };
 
-// Thêm ảnh vào album (Admin)
-router.post('/', requireAdmin, async (req, res) => {
+// Thêm ảnh vào album (Admin) - hỗ trợ upload nhiều ảnh
+router.post('/', requireAdmin, upload.array('images', 10), async (req, res) => {
     try {
-        const { duong_dan_anh, loai_anh, mo_ta } = req.body;
+        const { loai_anh, mo_ta } = req.body;
+        const files = req.files;
         
-        const [result] = await db.query(
-            `INSERT INTO album_anh (duong_dan_anh, loai_anh, mo_ta, ngay_tao) 
-             VALUES (?, ?, ?, NOW())`,
-            [duong_dan_anh, loai_anh || 'khac', mo_ta || '']
-        );
+        if (!files || files.length === 0) {
+            return res.status(400).json({ success: false, message: 'Vui lòng chọn ít nhất 1 ảnh' });
+        }
         
-        res.json({ success: true, message: 'Thêm ảnh thành công', id: result.insertId });
+        const insertedIds = [];
+        for (const file of files) {
+            const [result] = await db.query(
+                `INSERT INTO album_anh (duong_dan_anh, loai_anh, mo_ta, ngay_tao) 
+                 VALUES (?, ?, ?, NOW())`,
+                [file.filename, loai_anh || 'khac', mo_ta || '']
+            );
+            insertedIds.push(result.insertId);
+        }
+        
+        res.json({ success: true, message: `Thêm ${files.length} ảnh thành công`, ids: insertedIds });
     } catch (error) {
         console.error('Error adding album:', error);
         res.status(500).json({ success: false, message: error.message });

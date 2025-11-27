@@ -8,165 +8,104 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .kpi-card {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1a1a2e;
-        }
-        .kpi-label {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-        .kpi-compare {
-            font-size: 0.75rem;
-            display: flex;
-            gap: 8px;
-        }
-        .kpi-compare span {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-        .up { color: #10b981; }
-        .down { color: #ef4444; }
-        .chart-container {
-            position: relative;
-            height: 120px;
-            width: 120px;
-        }
-        .donut-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-        .donut-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1a1a2e;
-        }
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .sidebar-active {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            color: white !important;
-        }
-        .filter-btn {
-            padding: 6px 16px;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .filter-btn.active {
-            background: #0d9488;
-            color: white;
-        }
-        .filter-btn:not(.active) {
-            background: #e5e7eb;
-            color: #374151;
-        }
-        .metric-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .metric-badge.teal { background: #0d9488; color: white; }
-        .metric-badge.orange { background: #f97316; color: white; }
-        .metric-badge.red { background: #ef4444; color: white; }
-        .metric-badge.blue { background: #3b82f6; color: white; }
+        body { background: #f0f4f8; }
+        .sidebar { background: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%); }
+        .sidebar-item { color: #94a3b8; transition: all 0.2s; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .sidebar-item.active { background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; }
+        .kpi-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(30,58,95,0.08); }
+        .kpi-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: #1e3a5f; }
+        .kpi-label { font-size: 0.875rem; color: #64748b; margin-bottom: 4px; }
+        .kpi-compare { font-size: 0.75rem; color: #64748b; }
+        .kpi-compare .up { color: #10b981; }
+        .kpi-compare .down { color: #ef4444; }
+        .chart-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(30,58,95,0.08); }
+        .chart-title { font-size: 1rem; font-weight: 600; color: #1e3a5f; margin-bottom: 20px; }
+        .filter-section { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(30,58,95,0.08); }
+        .filter-group { margin-bottom: 20px; }
+        .filter-label { font-size: 0.75rem; font-weight: 600; color: #1e3a5f; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-btn { padding: 8px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid #e2e8f0; }
+        .filter-btn.active { background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border-color: transparent; }
+        .filter-btn:not(.active) { background: #f8fafc; color: #475569; }
+        .filter-btn:hover:not(.active) { background: #e2e8f0; }
+        .header-bar { background: linear-gradient(90deg, #1e3a5f 0%, #2d4a6f 100%); color: #fff; padding: 16px 28px; }
+        .product-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .product-row:last-child { border-bottom: none; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #64748b; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+        .admin-card { background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-radius: 12px; padding: 16px; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-white shadow-lg flex-shrink-0 transition-all duration-300">
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 transition-all duration-300">
             <div class="h-full flex flex-col">
                 <!-- Logo -->
-                <div class="p-4 border-b bg-gradient-to-r from-orange-500 to-orange-600">
+                <div class="p-5 border-b border-white/10">
                     <div class="flex items-center space-x-3">
-                        <img src="../images/Green Simple Clean Vegan Food Logo.png" alt="Logo Phương Nam" class="w-10 h-10 rounded-lg object-contain bg-white p-1">
+                        <img src="../images/Green Simple Clean Vegan Food Logo.png" alt="Logo" class="w-11 h-11 rounded-xl object-contain bg-white p-1">
                         <div>
-                            <h1 class="font-bold text-lg text-white">Phương Nam</h1>
-                            <p class="text-xs text-orange-100">Hệ thống quản trị</p>
+                            <h1 class="font-bold text-white text-lg">Phương Nam</h1>
+                            <p class="text-xs text-blue-300">Hệ thống quản trị</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Navigation -->
-                <nav class="flex-1 overflow-y-auto p-3">
-                    <div class="mb-4">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Menu chính</p>
-                        <div class="space-y-1">
-                            <a href="dashboard.html" class="sidebar-active flex items-center space-x-3 px-3 py-2.5 rounded-lg transition">
-                                <i class="fas fa-chart-pie w-5"></i>
-                                <span class="font-medium">Tổng quan</span>
-                            </a>
-                            <a href="products.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-utensils w-5"></i>
-                                <span>Món ăn</span>
-                            </a>
-                            <a href="orders.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-shopping-cart w-5"></i>
-                                <span>Đơn hàng</span>
-                            </a>
-                            <a href="reservations.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-calendar-check w-5"></i>
-                                <span>Đặt bàn</span>
-                            </a>
-                            <a href="customers.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-users w-5"></i>
-                                <span>Khách hàng</span>
-                            </a>
-                        </div>
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Menu chính</p>
+                    <div class="space-y-1">
+                        <a href="dashboard.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-chart-pie w-5"></i><span class="text-sm font-medium">Tổng quan</span>
+                        </a>
+                        <a href="products.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-utensils w-5"></i><span class="text-sm">Món ăn</span>
+                        </a>
+                        <a href="orders.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-shopping-cart w-5"></i><span class="text-sm">Đơn hàng</span>
+                        </a>
+                        <a href="reservations.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-calendar-check w-5"></i><span class="text-sm">Đặt bàn</span>
+                        </a>
+                        <a href="customers.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-users w-5"></i><span class="text-sm">Khách hàng</span>
+                        </a>
                     </div>
-                    <div class="mb-4">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Nội dung</p>
-                        <div class="space-y-1">
-                            <a href="news.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-newspaper w-5"></i>
-                                <span>Tin tức</span>
-                            </a>
-                            <a href="albums.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-images w-5"></i>
-                                <span>Album ảnh</span>
-                            </a>
-                        </div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-3">Nội dung</p>
+                    <div class="space-y-1">
+                        <a href="news.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-newspaper w-5"></i><span class="text-sm">Tin tức</span>
+                        </a>
+                        <a href="albums.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-images w-5"></i><span class="text-sm">Album ảnh</span>
+                        </a>
                     </div>
-                    <div>
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Hệ thống</p>
-                        <div class="space-y-1">
-                            <a href="settings.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition">
-                                <i class="fas fa-cog w-5"></i>
-                                <span>Cài đặt</span>
-                            </a>
-                        </div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-3">Hệ thống</p>
+                    <div class="space-y-1">
+                        <a href="settings.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-cog w-5"></i><span class="text-sm">Cài đặt</span>
+                        </a>
                     </div>
                 </nav>
 
-                <!-- User Profile -->
-                <div class="p-3 border-t">
-                    <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                        <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=ea580c&color=fff" alt="Admin" class="w-10 h-10 rounded-full">
-                        <div class="flex-1 min-w-0">
-                            <p id="admin-name" class="font-semibold text-sm text-gray-800 truncate">Admin</p>
-                            <p class="text-xs text-gray-500">Quản trị viên</p>
+                <!-- Admin Profile Card -->
+                <div class="p-4 border-t border-white/10">
+                    <div class="admin-card">
+                        <div class="flex items-center space-x-3">
+                            <img id="admin-avatar" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="Admin" class="w-12 h-12 rounded-full border-2 border-blue-400">
+                            <div class="flex-1 min-w-0">
+                                <p id="admin-name" class="font-semibold text-sm text-white truncate">Đang tải...</p>
+                                <p id="admin-email" class="text-xs text-blue-300 truncate">admin@example.com</p>
+                            </div>
                         </div>
-                        <button onclick="logout()" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" title="Đăng xuất">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
+                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/20">
+                            <span class="text-xs text-blue-300"><i class="fab fa-google mr-1"></i>Google Account</span>
+                            <button onclick="logout()" class="text-xs text-red-400 hover:text-red-300 transition flex items-center">
+                                <i class="fas fa-sign-out-alt mr-1"></i>Đăng xuất
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -174,42 +113,28 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Top Bar -->
-            <header class="bg-white shadow-sm">
-                <div class="flex items-center justify-between px-6 py-4">
-                    <div class="flex items-center space-x-4">
-                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-bars text-xl"></i>
-                        </button>
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-                            <p class="text-sm text-gray-500">Tổng quan hệ thống</p>
-                        </div>
+            <!-- Header Bar -->
+            <header class="header-bar flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+                    <div>
+                        <h2 class="text-xl font-bold">Dashboard</h2>
+                        <p class="text-sm text-blue-200">Báo cáo tổng quan nhà hàng</p>
                     </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <!-- AI Chatbot Button -->
-                        <button onclick="toggleAIChatbot()" class="relative px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-md flex items-center space-x-2">
-                            <i class="fas fa-robot"></i>
-                            <span class="hidden md:inline font-medium">AI Phân tích</span>
-                        </button>
-                        
-                        <button class="relative text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">3</span>
-                        </button>
-                        
-                        <a href="../index.html" target="_blank" class="text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-external-link-alt text-xl"></i>
-                        </a>
-                        
-                        <!-- Admin Info in Header -->
-                        <div class="hidden lg:flex items-center space-x-3 pl-4 border-l">
-                            <img id="admin-avatar-header" src="https://ui-avatars.com/api/?name=Admin&background=ea580c&color=fff" alt="Admin" class="w-10 h-10 rounded-full border-2 border-orange-300">
-                            <div>
-                                <p id="admin-name-header" class="font-bold text-sm text-gray-800">Admin</p>
-                                <p class="text-xs text-gray-500">Quản trị viên</p>
-                            </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="relative text-white hover:text-blue-200 transition">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">3</span>
+                    </button>
+                    <a href="../index.html" target="_blank" class="text-white hover:text-blue-200 transition" title="Xem website">
+                        <i class="fas fa-external-link-alt text-lg"></i>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-3 pl-4 border-l border-white/20">
+                        <img id="admin-avatar-header" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="Admin" class="w-10 h-10 rounded-full border-2 border-blue-400">
+                        <div>
+                            <p id="admin-name-header" class="font-semibold text-sm text-white">Admin</p>
+                            <p class="text-xs text-blue-200">Quản trị viên</p>
                         </div>
                     </div>
                 </div>
@@ -217,121 +142,150 @@
 
             <!-- Dashboard Content -->
             <main class="flex-1 overflow-y-auto p-6">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-dollar-sign text-2xl"></i>
+                <div class="flex gap-6">
+                    <!-- Main Content Area -->
+                    <div class="flex-1">
+                        <!-- KPI Cards -->
+                        <div class="grid grid-cols-4 gap-5 mb-6">
+                            <div class="kpi-card">
+                                <div class="flex items-center gap-4">
+                                    <div class="kpi-icon bg-gradient-to-br from-blue-500 to-blue-600">
+                                        <i class="fas fa-dollar-sign text-white text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="kpi-label">Tổng doanh thu</p>
+                                        <p class="kpi-value" id="total-revenue">0đ</p>
+                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 12.5%</span></p>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Hôm nay</span>
-                        </div>
-                        <p class="text-3xl font-bold mb-1" id="revenue-today">0đ</p>
-                        <p class="text-sm opacity-90">Doanh thu</p>
-                        <div class="mt-3 flex items-center text-sm">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                            <span>12% so với hôm qua</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-shopping-cart text-2xl"></i>
+                            <div class="kpi-card">
+                                <div class="flex items-center gap-4">
+                                    <div class="kpi-icon bg-gradient-to-br from-emerald-500 to-emerald-600">
+                                        <i class="fas fa-shopping-cart text-white text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="kpi-label">Số đơn hàng</p>
+                                        <p class="kpi-value" id="total-orders">0</p>
+                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 8.2%</span></p>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Mới</span>
-                        </div>
-                        <p class="text-3xl font-bold mb-1" id="orders-count">0</p>
-                        <p class="text-sm opacity-90">Đơn hàng</p>
-                        <div class="mt-3 flex items-center text-sm">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                            <span>8% so với hôm qua</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-calendar-check text-2xl"></i>
+                            <div class="kpi-card">
+                                <div class="flex items-center gap-4">
+                                    <div class="kpi-icon bg-gradient-to-br from-amber-500 to-amber-600">
+                                        <i class="fas fa-users text-white text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="kpi-label">Khách hàng</p>
+                                        <p class="kpi-value" id="total-customers">0</p>
+                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 5.3%</span></p>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Hôm nay</span>
-                        </div>
-                        <p class="text-3xl font-bold mb-1" id="reservations-count">0</p>
-                        <p class="text-sm opacity-90">Đặt bàn</p>
-                        <div class="mt-3 flex items-center text-sm">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                            <span>15% so với hôm qua</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-white bg-opacity-30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-users text-2xl"></i>
+                            <div class="kpi-card">
+                                <div class="flex items-center gap-4">
+                                    <div class="kpi-icon bg-gradient-to-br from-purple-500 to-purple-600">
+                                        <i class="fas fa-calendar-check text-white text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="kpi-label">Đặt bàn</p>
+                                        <p class="kpi-value" id="total-reservations">0</p>
+                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 15.1%</span></p>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">Tháng này</span>
                         </div>
-                        <p class="text-3xl font-bold mb-1" id="customers-count">0</p>
-                        <p class="text-sm opacity-90">Khách hàng mới</p>
-                        <div class="mt-3 flex items-center text-sm">
-                            <i class="fas fa-arrow-down mr-1"></i>
-                            <span>5% so với tháng trước</span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-bold mb-4">Doanh thu 7 ngày qua</h3>
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-bold mb-4">Đơn hàng theo trạng thái</h3>
-                        <canvas id="ordersChart"></canvas>
-                    </div>
-                </div>
+                        <!-- Row 2: Gauge + Revenue Chart -->
+                        <div class="grid grid-cols-3 gap-5 mb-6">
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-bullseye text-blue-500 mr-2"></i>Tỷ lệ hoàn thành mục tiêu</p>
+                                <div style="height: 160px; position: relative;">
+                                    <canvas id="gaugeChart"></canvas>
+                                    <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); text-align: center;">
+                                        <p class="text-3xl font-bold text-blue-600" id="gauge-value">0%</p>
+                                        <p class="text-xs text-gray-500">Doanh thu tháng</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-card col-span-2">
+                                <p class="chart-title"><i class="fas fa-chart-bar text-emerald-500 mr-2"></i>Doanh thu 12 tháng gần nhất</p>
+                                <div style="height: 200px;"><canvas id="revenueChart"></canvas></div>
+                                <div class="flex justify-center gap-8 mt-3">
+                                    <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"></div> Doanh thu</div>
+                                    <div class="legend-item"><div class="legend-dot" style="background:#e2e8f0"></div> Mục tiêu</div>
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Recent Orders & Top Products -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Recent Orders -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold">Đơn hàng gần đây</h3>
-                            <a href="orders.html" class="text-orange-600 hover:text-orange-700 text-sm font-medium">Xem tất cả →</a>
+                        <!-- Row 3: Orders + Top Products + Customers -->
+                        <div class="grid grid-cols-3 gap-5 mb-6">
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-pie-chart text-purple-500 mr-2"></i>Đơn hàng theo trạng thái</p>
+                                <div style="height: 200px;"><canvas id="ordersChart"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-fire text-orange-500 mr-2"></i>Top 10 món ăn bán chạy</p>
+                                <div id="top-products" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
+                            </div>
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-user-plus text-cyan-500 mr-2"></i>Khách hàng mới theo tháng</p>
+                                <div style="height: 200px;"><canvas id="customerChart"></canvas></div>
+                            </div>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr class="border-b">
-                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Mã đơn</th>
-                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Khách hàng</th>
-                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Tổng tiền</th>
-                                        <th class="text-left py-3 text-gray-600 font-medium text-sm">Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-orders">
-                                    <tr>
-                                        <td colspan="4" class="text-center py-8 text-gray-500">
-                                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                                            <p>Đang tải...</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                        <!-- Row 4: Reservations + Recent Orders -->
+                        <div class="grid grid-cols-2 gap-5">
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-clock text-amber-500 mr-2"></i>Đặt bàn theo khung giờ</p>
+                                <div style="height: 200px;"><canvas id="reservationChart"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-list-alt text-indigo-500 mr-2"></i>Đơn hàng gần đây</p>
+                                <div id="recent-orders" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Top Products -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold">Món ăn bán chạy</h3>
-                            <a href="products.html" class="text-orange-600 hover:text-orange-700 text-sm font-medium">Xem tất cả →</a>
-                        </div>
-                        <div id="top-products" class="space-y-4">
-                            <div class="text-center py-8 text-gray-500">
-                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                                <p>Đang tải...</p>
+                    <!-- Filter Sidebar -->
+                    <div class="w-52 flex-shrink-0">
+                        <div class="filter-section sticky top-0">
+                            <div class="filter-group">
+                                <p class="filter-label">Năm</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="filter-btn" data-year="2023">2023</button>
+                                    <button class="filter-btn active" data-year="2024">2024</button>
+                                    <button class="filter-btn" data-year="2025">2025</button>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <p class="filter-label">Tháng</p>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <button class="filter-btn" data-month="0">All</button>
+                                    <button class="filter-btn" data-month="1">1</button>
+                                    <button class="filter-btn" data-month="2">2</button>
+                                    <button class="filter-btn" data-month="3">3</button>
+                                    <button class="filter-btn" data-month="4">4</button>
+                                    <button class="filter-btn" data-month="5">5</button>
+                                    <button class="filter-btn" data-month="6">6</button>
+                                    <button class="filter-btn" data-month="7">7</button>
+                                    <button class="filter-btn" data-month="8">8</button>
+                                    <button class="filter-btn" data-month="9">9</button>
+                                    <button class="filter-btn" data-month="10">10</button>
+                                    <button class="filter-btn active" data-month="11">11</button>
+                                    <button class="filter-btn" data-month="12">12</button>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <p class="filter-label">Trạng thái đơn</p>
+                                <div class="flex flex-col gap-2">
+                                    <button class="filter-btn active" data-status="all">Tất cả</button>
+                                    <button class="filter-btn" data-status="pending">Chờ xử lý</button>
+                                    <button class="filter-btn" data-status="confirmed">Đã xác nhận</button>
+                                    <button class="filter-btn" data-status="completed">Hoàn thành</button>
+                                    <button class="filter-btn" data-status="cancelled">Đã hủy</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -340,225 +294,273 @@
         </div>
     </div>
 
-    <!-- AI Chatbot Window -->
-    <div id="ai-chatbot" class="fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl transform translate-y-full opacity-0 transition-all duration-300 z-50 overflow-hidden border border-gray-200">
-        <!-- Chatbot Header -->
-        <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                    <i class="fas fa-robot text-purple-600 text-xl"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-white">AI Phân Tích Doanh Thu</h3>
-                    <p class="text-xs text-purple-200">Trợ lý thông minh</p>
-                </div>
-            </div>
-            <button onclick="toggleAIChatbot()" class="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full transition">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="p-4 bg-purple-50 border-b">
-            <p class="text-xs text-gray-600 mb-2 font-medium">Phân tích nhanh:</p>
-            <div class="flex flex-wrap gap-2">
-                <button onclick="askAI('Phân tích doanh thu tháng này')" class="px-3 py-1.5 bg-white text-purple-600 rounded-full text-xs font-medium hover:bg-purple-100 transition shadow-sm">
-                    <i class="fas fa-chart-line mr-1"></i> Doanh thu
-                </button>
-                <button onclick="askAI('Món ăn bán chạy nhất')" class="px-3 py-1.5 bg-white text-purple-600 rounded-full text-xs font-medium hover:bg-purple-100 transition shadow-sm">
-                    <i class="fas fa-fire mr-1"></i> Bán chạy
-                </button>
-                <button onclick="askAI('Đề xuất cải thiện')" class="px-3 py-1.5 bg-white text-purple-600 rounded-full text-xs font-medium hover:bg-purple-100 transition shadow-sm">
-                    <i class="fas fa-lightbulb mr-1"></i> Đề xuất
-                </button>
-            </div>
-        </div>
-
-        <!-- Chat Messages -->
-        <div id="ai-messages" class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            <!-- Welcome Message -->
-            <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-robot text-white text-sm"></i>
-                </div>
-                <div class="flex-1">
-                    <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm">
-                        <p class="text-sm text-gray-800 leading-relaxed">
-                            👋 Xin chào! Tôi là trợ lý AI của bạn. Tôi có thể giúp bạn:
-                        </p>
-                        <ul class="mt-2 space-y-1 text-sm text-gray-700">
-                            <li>📊 Phân tích doanh thu và xu hướng</li>
-                            <li>🎯 Đề xuất chiến lược kinh doanh</li>
-                            <li>📈 Dự đoán nhu cầu khách hàng</li>
-                            <li>💡 Tối ưu hóa menu và giá cả</li>
-                        </ul>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1 ml-2">Vừa xong</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Input -->
-        <div class="p-4 bg-white border-t">
-            <div class="flex items-center space-x-2">
-                <input 
-                    type="text" 
-                    id="ai-input" 
-                    placeholder="Hỏi AI về doanh thu, chiến lược..." 
-                    class="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                    onkeypress="if(event.key === 'Enter') sendAIMessage()"
-                >
-                <button onclick="sendAIMessage()" class="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md flex items-center justify-center">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script src="check-auth.js"></script>
     <script src="admin-layout.js"></script>
-    <script src="dashboard-loader.js"></script>
+
     <script>
-        // API_URL is already defined in admin-layout.js
-        // toggleSidebar and logout are already defined in admin-layout.js
-
-        // Load dashboard data
-        // All dashboard data loading is now handled by dashboard-loader.js
-        // This ensures real-time data from API instead of mock/fake data
+        // API_URL đã được khai báo trong admin-layout.js
+        const API_BASE = API_URL; // Alias để tương thích
+        let gaugeChart, revenueChart, ordersChart, customerChart, reservationChart;
         
-        // Active nav link is handled by admin-layout.js
+        document.addEventListener('DOMContentLoaded', function() {
+            initAllCharts();
+            loadDashboardData();
+            initFilters();
+        });
 
-        // ===== AI CHATBOT FUNCTIONS =====
-        
-        // Toggle AI Chatbot
-        function toggleAIChatbot() {
-            const chatbot = document.getElementById('ai-chatbot');
-            const isHidden = chatbot.classList.contains('translate-y-full');
-            
-            if (isHidden) {
-                chatbot.classList.remove('translate-y-full', 'opacity-0');
-                chatbot.classList.add('translate-y-0', 'opacity-100');
-            } else {
-                chatbot.classList.add('translate-y-full', 'opacity-0');
-                chatbot.classList.remove('translate-y-0', 'opacity-100');
+        function initAllCharts() {
+            // Gauge Chart
+            gaugeChart = new Chart(document.getElementById('gaugeChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { datasets: [{ data: [0, 100], backgroundColor: ['#3b82f6', '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            });
+
+            // Revenue Chart
+            revenueChart = new Chart(document.getElementById('revenueChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                    datasets: [
+                        { label: 'Doanh thu', data: [45, 52, 48, 61, 55, 67, 72, 68, 75, 82, 78, 85], backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 },
+                        { label: 'Mục tiêu', data: [50, 55, 55, 60, 60, 70, 75, 75, 80, 85, 85, 90], backgroundColor: '#e2e8f0', borderRadius: 6, barPercentage: 0.6 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + 'tr' } } } }
+            });
+
+            // Orders Chart
+            ordersChart = new Chart(document.getElementById('ordersChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Hoàn thành', 'Đang xử lý', 'Chờ xác nhận', 'Đã hủy'], datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'], borderWidth: 3, borderColor: '#fff' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } } } }
+            });
+
+            // Customer Chart
+            customerChart = new Chart(document.getElementById('customerChart').getContext('2d'), {
+                type: 'line',
+                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
+            });
+
+            // Reservation Chart
+            reservationChart = new Chart(document.getElementById('reservationChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: [15, 45, 20, 25, 60, 35], backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'], borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
+            });
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load tất cả dữ liệu song song
+                const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes] = await Promise.all([
+                    fetch(`${API_BASE}/orders/stats`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/customers/stats`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/reservations/stats`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/revenue-monthly`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/customers-monthly`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/reservations-by-time`, { credentials: 'include' }).catch(() => null)
+                ]);
+
+                // KPI Cards
+                if (ordersRes && ordersRes.ok) {
+                    const data = await ordersRes.json();
+                    if (data.success !== false) {
+                        document.getElementById('total-revenue').textContent = formatCurrency(data.totalRevenue || 0) + 'đ';
+                        document.getElementById('total-orders').textContent = data.totalOrders || 0;
+                        updateGaugeChart(data.totalRevenue || 0, 100000000);
+                        updateOrdersChart(data.byStatus || []);
+                    }
+                }
+
+                if (customersRes && customersRes.ok) {
+                    const data = await customersRes.json();
+                    if (data.success !== false) document.getElementById('total-customers').textContent = data.totalCustomers || 0;
+                }
+
+                if (reservationsRes && reservationsRes.ok) {
+                    const data = await reservationsRes.json();
+                    if (data.success !== false) document.getElementById('total-reservations').textContent = data.totalReservations || 0;
+                }
+
+                // Biểu đồ doanh thu theo tháng
+                if (revenueMonthlyRes && revenueMonthlyRes.ok) {
+                    const data = await revenueMonthlyRes.json();
+                    if (data.success && data.data) {
+                        updateRevenueChart(data.data);
+                    }
+                }
+
+                // Biểu đồ khách hàng mới theo tháng
+                if (customersMonthlyRes && customersMonthlyRes.ok) {
+                    const data = await customersMonthlyRes.json();
+                    if (data.success && data.data) {
+                        updateCustomerChart(data.data);
+                    }
+                }
+
+                // Biểu đồ đặt bàn theo khung giờ
+                if (reservationsByTimeRes && reservationsByTimeRes.ok) {
+                    const data = await reservationsByTimeRes.json();
+                    if (data.success && data.data) {
+                        updateReservationChart(data.data);
+                    }
+                }
+
+                // Load top products và recent orders
+                await renderTopProducts();
+                await renderRecentOrders();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                await renderTopProducts();
+                await renderRecentOrders();
             }
         }
 
-        // Quick Ask AI
-        function askAI(question) {
-            document.getElementById('ai-input').value = question;
-            sendAIMessage();
+        function updateRevenueChart(data) {
+            // Tạo mảng 12 tháng với giá trị 0
+            const monthlyData = new Array(12).fill(0);
+            const currentYear = new Date().getFullYear();
+            
+            data.forEach(item => {
+                if (item.nam === currentYear && item.thang >= 1 && item.thang <= 12) {
+                    monthlyData[item.thang - 1] = Math.round((item.doanh_thu || 0) / 1000000); // Chuyển sang triệu
+                }
+            });
+
+            revenueChart.data.datasets[0].data = monthlyData;
+            revenueChart.update();
         }
 
-        // Send AI Message
-        function sendAIMessage() {
-            const input = document.getElementById('ai-input');
-            const message = input.value.trim();
+        function updateCustomerChart(data) {
+            const monthlyData = new Array(12).fill(0);
+            const currentYear = new Date().getFullYear();
             
-            if (!message) return;
-            
-            // Add user message
-            addUserMessage(message);
-            input.value = '';
-            
-            // Simulate AI thinking
-            setTimeout(() => {
-                addAIResponse(message);
-            }, 1000);
+            data.forEach(item => {
+                if (item.nam === currentYear && item.thang >= 1 && item.thang <= 12) {
+                    monthlyData[item.thang - 1] = item.so_luong || 0;
+                }
+            });
+
+            customerChart.data.datasets[0].data = monthlyData;
+            customerChart.update();
         }
 
-        // Add User Message
-        function addUserMessage(message) {
-            const messagesContainer = document.getElementById('ai-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex items-start space-x-3 justify-end';
-            messageDiv.innerHTML = `
-                <div class="flex-1 text-right">
-                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl rounded-tr-none p-4 shadow-sm inline-block max-w-xs">
-                        <p class="text-sm leading-relaxed">${message}</p>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1 mr-2">Vừa xong</p>
-                </div>
-            `;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        function updateReservationChart(data) {
+            const timeSlots = ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'];
+            const slotData = timeSlots.map(slot => {
+                const found = data.find(d => d.khung_gio === slot);
+                return found ? found.so_luong : 0;
+            });
+
+            reservationChart.data.datasets[0].data = slotData;
+            reservationChart.update();
         }
 
-        // Add AI Response (Mock responses)
-        function addAIResponse(userMessage) {
-            const messagesContainer = document.getElementById('ai-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex items-start space-x-3';
-            
-            let response = getAIResponse(userMessage);
-            
-            messageDiv.innerHTML = `
-                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-robot text-white text-sm"></i>
-                </div>
-                <div class="flex-1">
-                    <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm">
-                        <p class="text-sm text-gray-800 leading-relaxed">${response}</p>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1 ml-2">Vừa xong</p>
-                </div>
-            `;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        function updateGaugeChart(actual, target) {
+            const percentage = Math.min(100, Math.round((actual / target) * 100));
+            gaugeChart.data.datasets[0].data = [percentage, 100 - percentage];
+            gaugeChart.update();
+            document.getElementById('gauge-value').textContent = percentage + '%';
         }
 
-        // Get AI Response (Mock intelligent responses)
-        function getAIResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            if (lowerMessage.includes('doanh thu')) {
-                return `📊 <strong>Phân tích doanh thu:</strong><br><br>
-                    Đang phân tích dữ liệu thực tế từ hệ thống...<br><br>
-                    💡 <strong>Lưu ý:</strong> Tính năng AI phân tích dữ liệu thực tế đang được phát triển.`;
-            }
-            
-            if (lowerMessage.includes('bán chạy') || lowerMessage.includes('món ăn')) {
-                return `🔥 <strong>Món ăn bán chạy:</strong><br><br>
-                    Đang phân tích dữ liệu thực tế từ hệ thống...<br><br>
-                    💡 <strong>Lưu ý:</strong> Bạn có thể xem danh sách món bán chạy ngay trên dashboard này.`;
-            }
-            
-            if (lowerMessage.includes('đề xuất') || lowerMessage.includes('cải thiện')) {
-                return `💡 <strong>Đề xuất chiến lược:</strong><br><br>
-                    Tính năng AI phân tích và đề xuất chiến lược dựa trên dữ liệu thực tế đang được phát triển.<br><br>
-                    Hiện tại bạn có thể xem các thống kê chi tiết trên dashboard để đưa ra quyết định.`;
-            }
-            
-            if (lowerMessage.includes('khách hàng')) {
-                return `👥 <strong>Phân tích khách hàng:</strong><br><br>
-                    Đang phân tích dữ liệu thực tế từ hệ thống...<br><br>
-                    💡 <strong>Gợi ý:</strong> Vào mục "Khách hàng" để xem chi tiết danh sách và thông tin khách hàng.`;
-            }
-            
-            if (lowerMessage.includes('xu hướng') || lowerMessage.includes('dự đoán')) {
-                return `📈 <strong>Dự đoán xu hướng:</strong><br><br>
-                    Tính năng dự đoán xu hướng bằng AI đang được phát triển.<br><br>
-                    💡 <strong>Hiện tại:</strong> Bạn có thể xem biểu đồ doanh thu 7 ngày gần nhất trên dashboard.`;
-            }
-            
-            if (lowerMessage.includes('chi phí') || lowerMessage.includes('lợi nhuận')) {
-                return `💰 <strong>Phân tích lợi nhuận:</strong><br><br>
-                    Tính năng phân tích chi phí và lợi nhuận chi tiết đang được phát triển.<br><br>
-                    💡 <strong>Hiện tại:</strong> Bạn có thể xem tổng doanh thu trên dashboard.`;
-            }
-            
-            // Default response
-            return `🤖 Tôi hiểu bạn muốn biết về "${message}".<br><br>
-                Tôi có thể giúp bạn phân tích:<br>
-                • 📊 Doanh thu và xu hướng<br>
-                • 🔥 Món ăn bán chạy<br>
-                • 👥 Hành vi khách hàng<br>
-                • 💡 Đề xuất chiến lược<br>
-                • 📈 Dự đoán tương lai<br><br>
-                Hãy hỏi tôi cụ thể hơn nhé!`;
+        function updateOrdersChart(statusData) {
+            const statusMap = { delivered: 0, preparing: 0, confirmed: 0, pending: 0, cancelled: 0 };
+            statusData.forEach(s => { statusMap[s.trang_thai] = s.count; });
+            ordersChart.data.datasets[0].data = [statusMap.delivered, statusMap.preparing + statusMap.confirmed, statusMap.pending, statusMap.cancelled];
+            ordersChart.update();
         }
 
-        // Admin info will be loaded by admin-layout.js
+        async function renderTopProducts() {
+            const container = document.getElementById('top-products');
+            try {
+                const response = await fetch(`${API_BASE}/stats/top-products`, { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data && data.data.length > 0) {
+                        const products = data.data;
+                        const maxSold = Math.max(...products.map(p => p.da_ban || 0));
+                        container.innerHTML = products.map((p, i) => `
+                            <div class="product-row">
+                                <span class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-800 truncate">${p.ten_mon}</p>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 mt-1">
+                                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all" style="width: ${maxSold > 0 ? (p.da_ban/maxSold)*100 : 0}%"></div>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-semibold text-blue-600 ml-3">${p.da_ban || 0}</span>
+                            </div>
+                        `).join('');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading top products:', error);
+            }
+            container.innerHTML = '<p class="text-center text-gray-500 py-4">Chưa có dữ liệu</p>';
+        }
+
+        async function renderRecentOrders() {
+            const container = document.getElementById('recent-orders');
+            const statusColors = { delivered: 'bg-emerald-100 text-emerald-700', confirmed: 'bg-blue-100 text-blue-700', preparing: 'bg-blue-100 text-blue-700', pending: 'bg-amber-100 text-amber-700', cancelled: 'bg-red-100 text-red-700' };
+            const statusText = { delivered: 'Hoàn thành', confirmed: 'Đã xác nhận', preparing: 'Đang chuẩn bị', pending: 'Chờ xác nhận', cancelled: 'Đã hủy' };
+            
+            try {
+                const response = await fetch(`${API_BASE}/orders/all?limit=5`, { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data && data.data.length > 0) {
+                        container.innerHTML = data.data.map(o => `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition">
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-800">#DH${String(o.ma_don_hang).padStart(6, '0')} - ${o.ten_khach_hang || o.ten_khach_vang_lai || 'Khách hàng'}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">${formatTimeAgo(o.thoi_gian_tao)}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-blue-600">${formatCurrency(o.tong_tien || 0)}đ</p>
+                                    <span class="text-xs px-2 py-1 rounded-full ${statusColors[o.trang_thai] || 'bg-gray-100 text-gray-700'} font-medium">${statusText[o.trang_thai] || o.trang_thai}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+            }
+            container.innerHTML = '<p class="text-center text-gray-500 py-4">Chưa có đơn hàng</p>';
+        }
+
+        function formatTimeAgo(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Vừa xong';
+            if (diffMins < 60) return `${diffMins} phút trước`;
+            if (diffHours < 24) return `${diffHours} giờ trước`;
+            if (diffDays < 7) return `${diffDays} ngày trước`;
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function formatCurrency(value) { return new Intl.NumberFormat('vi-VN').format(value); }
+
+        function initFilters() {
+            document.querySelectorAll('.filter-group').forEach(group => {
+                group.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        loadDashboardData();
+                    });
+                });
+            });
+        }
     </script>
 </body>
 </html>

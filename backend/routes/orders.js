@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 
+// Middleware kiểm tra admin session
+const requireAdmin = (req, res, next) => {
+    if (req.session && req.session.admin) {
+        next();
+    } else {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+};
+
 // Map database status to frontend status
 const mapOrderStatus = (dbStatus) => {
     const statusMap = {
@@ -329,13 +338,59 @@ router.post('/create', authenticateToken, async (req, res) => {
 // IMPORTANT: Specific routes MUST come BEFORE parameterized routes (/:id)
 // Otherwise Express will match /my-orders as /:id with id="my-orders"
 
-// Admin: Lấy tất cả đơn hàng (không cần token, dùng session)
-router.get('/all', async (req, res) => {
+// Thống kê đơn hàng cho Dashboard (Admin)
+router.get('/stats', requireAdmin, async (req, res) => {
     try {
-        // Kiểm tra session admin (nếu cần)
-        // if (!req.session || !req.session.admin) {
-        //     return res.status(401).json({ success: false, message: 'Unauthorized' });
-        // }
+        // Tổng số đơn hàng
+        const [totalOrders] = await db.query(`SELECT COUNT(*) as total FROM don_hang`);
+        
+        // Tổng doanh thu (chỉ tính đơn hoàn thành)
+        const [totalRevenue] = await db.query(`
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang WHERE trang_thai = 'delivered'
+        `);
+        
+        // Tổng số lượng món đã bán
+        const [totalQuantity] = await db.query(`
+            SELECT COALESCE(SUM(ct.so_luong), 0) as total 
+            FROM chi_tiet_don_hang ct
+            JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang
+            WHERE dh.trang_thai = 'delivered'
+        `);
+        
+        // Đơn hàng hôm nay
+        const [todayOrders] = await db.query(`
+            SELECT COUNT(*) as count FROM don_hang WHERE DATE(thoi_gian_tao) = CURDATE()
+        `);
+        
+        // Doanh thu hôm nay
+        const [todayRevenue] = await db.query(`
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+            WHERE DATE(thoi_gian_tao) = CURDATE() AND trang_thai = 'delivered'
+        `);
+        
+        // Đơn hàng theo trạng thái
+        const [statusStats] = await db.query(`
+            SELECT trang_thai, COUNT(*) as count FROM don_hang GROUP BY trang_thai
+        `);
+
+        res.json({
+            success: true,
+            totalOrders: totalOrders[0].total,
+            totalRevenue: totalRevenue[0].total,
+            totalQuantity: totalQuantity[0].total,
+            todayOrders: todayOrders[0].count,
+            todayRevenue: todayRevenue[0].total,
+            byStatus: statusStats
+        });
+    } catch (error) {
+        console.error('Error fetching order stats:', error);
+        res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê' });
+    }
+});
+
+// Admin: Lấy tất cả đơn hàng (dùng session)
+router.get('/all', requireAdmin, async (req, res) => {
+    try {
 
         const { trang_thai, limit = 50, offset = 0 } = req.query;
 
@@ -636,7 +691,7 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
 });
 
 // Admin: Cập nhật trạng thái đơn hàng
-router.put('/:orderId/status', async (req, res) => {
+router.put('/:orderId/status', requireAdmin, async (req, res) => {
     try {
         const { orderId } = req.params;
         const { trang_thai_don_hang } = req.body;

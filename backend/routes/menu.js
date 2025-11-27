@@ -1,6 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const multer = require('multer');
+const path = require('path');
+
+// Cấu hình multer để upload ảnh
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../images'));
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|gif|webp/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Chỉ chấp nhận file ảnh!'));
+        }
+    }
+});
 
 // Lấy tất cả món ăn với tìm kiếm và lọc
 router.get('/', async (req, res) => {
@@ -104,9 +131,10 @@ const requireAdmin = (req, res, next) => {
 };
 
 // Thêm món ăn mới (Admin)
-router.post('/', requireAdmin, async (req, res) => {
+router.post('/', requireAdmin, upload.single('anh_mon'), async (req, res) => {
   try {
-    const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon } = req.body;
+    const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai } = req.body;
+    const anh_mon = req.file ? req.file.filename : null;
     
     const [result] = await db.query(
       `INSERT INTO mon_an (ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon) 
@@ -122,9 +150,10 @@ router.post('/', requireAdmin, async (req, res) => {
 });
 
 // Cập nhật món ăn (Admin)
-router.put('/:id', requireAdmin, async (req, res) => {
+router.put('/:id', requireAdmin, upload.single('anh_mon'), async (req, res) => {
   try {
-    const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon } = req.body;
+    const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai } = req.body;
+    const anh_mon = req.file ? req.file.filename : null;
     
     const [result] = await db.query(
       `UPDATE mon_an 
