@@ -84,9 +84,16 @@ function displayAlbums(albums) {
     const categoryName = getCategoryName(currentFilter);
     
     galleryContainer.innerHTML = albums.map(album => {
-        const imagePath = album.duong_dan_anh.startsWith('http') 
-            ? album.duong_dan_anh 
-            : `http://localhost:3000/images/albums/${album.duong_dan_anh}`;
+        // Xử lý đường dẫn ảnh - ảnh được lưu trong /images/ không phải /images/albums/
+        let imagePath;
+        if (album.duong_dan_anh.startsWith('http')) {
+            imagePath = album.duong_dan_anh;
+        } else if (album.duong_dan_anh.startsWith('/images/') || album.duong_dan_anh.startsWith('images/')) {
+            imagePath = `http://localhost:3000/${album.duong_dan_anh.replace(/^\//, '')}`;
+        } else {
+            // Chỉ có tên file
+            imagePath = `http://localhost:3000/images/${album.duong_dan_anh}`;
+        }
         
         const category = CATEGORY_MAP[album.loai_anh] || 'all';
         
