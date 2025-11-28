@@ -101,6 +101,9 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
+// Giới hạn số lượng tối đa mỗi món
+const MAX_QUANTITY_PER_ITEM = 10;
+
 // Thêm món vào giỏ hàng
 router.post('/add', authenticateToken, async (req, res) => {
     try {
@@ -112,6 +115,14 @@ router.post('/add', authenticateToken, async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Dữ liệu không hợp lệ'
+            });
+        }
+
+        // Kiểm tra số lượng không vượt quá giới hạn
+        if (so_luong > MAX_QUANTITY_PER_ITEM) {
+            return res.status(400).json({
+                success: false,
+                message: `Mỗi món chỉ được đặt tối đa ${MAX_QUANTITY_PER_ITEM} phần`
             });
         }
 
@@ -163,8 +174,16 @@ router.post('/add', authenticateToken, async (req, res) => {
         );
 
         if (existingItems.length > 0) {
-            // Cập nhật số lượng
+            // Cập nhật số lượng - kiểm tra giới hạn
             const newQuantity = existingItems[0].so_luong + so_luong;
+            
+            if (newQuantity > MAX_QUANTITY_PER_ITEM) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Mỗi món chỉ được đặt tối đa ${MAX_QUANTITY_PER_ITEM} phần. Hiện tại bạn đã có ${existingItems[0].so_luong} phần trong giỏ.`
+                });
+            }
+            
             await db.query(
                 'UPDATE chi_tiet_gio_hang SET so_luong = ? WHERE ma_chi_tiet = ?',
                 [newQuantity, existingItems[0].ma_chi_tiet]
@@ -203,6 +222,14 @@ router.put('/update', authenticateToken, async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Dữ liệu không hợp lệ'
+            });
+        }
+
+        // Kiểm tra giới hạn số lượng tối đa
+        if (so_luong > MAX_QUANTITY_PER_ITEM) {
+            return res.status(400).json({
+                success: false,
+                message: `Mỗi món chỉ được đặt tối đa ${MAX_QUANTITY_PER_ITEM} phần`
             });
         }
 

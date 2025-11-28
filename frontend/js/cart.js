@@ -3,6 +3,9 @@ if (typeof window.API_URL === 'undefined') {
     window.API_URL = 'http://localhost:3000/api';
 }
 
+// Giới hạn số lượng tối đa mỗi món
+const MAX_QUANTITY_PER_ITEM = 10;
+
 // Cart management functions
 class CartManager {
     constructor() {
@@ -12,6 +15,7 @@ class CartManager {
             tong_tien: 0,
             so_luong: 0
         };
+        this.maxQuantityPerItem = MAX_QUANTITY_PER_ITEM;
         this.init();
     }
 
@@ -108,6 +112,15 @@ class CartManager {
                 return;
             }
 
+            // Kiểm tra số lượng hiện tại trong giỏ
+            const existingItem = this.cart.items.find(item => item.ma_mon === ma_mon);
+            const currentQty = existingItem ? existingItem.so_luong : 0;
+            
+            if (currentQty + so_luong > this.maxQuantityPerItem) {
+                this.showNotification(`Mỗi món chỉ được đặt tối đa ${this.maxQuantityPerItem} phần. Hiện tại bạn đã có ${currentQty} phần trong giỏ.`, 'warning');
+                return;
+            }
+
             const response = await this.apiCall('/cart/add', {
                 method: 'POST',
                 body: JSON.stringify({ ma_mon, so_luong })
@@ -127,6 +140,12 @@ class CartManager {
     // Update cart item quantity
     async updateCartItem(ma_chi_tiet, so_luong) {
         try {
+            // Kiểm tra giới hạn số lượng
+            if (so_luong > this.maxQuantityPerItem) {
+                this.showNotification(`Mỗi món chỉ được đặt tối đa ${this.maxQuantityPerItem} phần`, 'warning');
+                return;
+            }
+
             const response = await this.apiCall('/cart/update', {
                 method: 'PUT',
                 body: JSON.stringify({ ma_chi_tiet, so_luong })
@@ -355,10 +374,13 @@ class CartManager {
                                 </button>
                                 <span class="w-10 text-center font-semibold text-gray-800">${item.so_luong}</span>
                                 <button onclick="cartManager.updateCartItem(${item.ma_chi_tiet}, ${item.so_luong + 1})"
-                                        class="w-8 h-8 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors">
+                                        class="w-8 h-8 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors ${item.so_luong >= this.maxQuantityPerItem ? 'opacity-50 cursor-not-allowed' : ''}"
+                                        ${item.so_luong >= this.maxQuantityPerItem ? 'disabled' : ''}
+                                        title="${item.so_luong >= this.maxQuantityPerItem ? 'Đã đạt giới hạn tối đa ' + this.maxQuantityPerItem + ' phần' : ''}">
                                     <i class="fas fa-plus text-sm text-gray-600"></i>
                                 </button>
                             </div>
+                            ${item.so_luong >= this.maxQuantityPerItem ? '<span class="text-xs text-orange-600 ml-1">Tối đa</span>' : ''}
                             <button onclick="cartManager.removeFromCart(${item.ma_chi_tiet})"
                                     class="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition-colors"
                                     title="Xóa khỏi giỏ hàng">
