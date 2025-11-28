@@ -341,21 +341,59 @@ router.post('/create', authenticateToken, async (req, res) => {
 // Thống kê đơn hàng cho Dashboard (Admin)
 router.get('/stats', requireAdmin, async (req, res) => {
     try {
-        // Tổng số đơn hàng
-        const [totalOrders] = await db.query(`SELECT COUNT(*) as total FROM don_hang`);
+        const { year, month, status } = req.query;
         
-        // Tổng doanh thu (chỉ tính đơn hoàn thành)
+        // Build WHERE clause cho filter
+        let whereClause = '1=1';
+        let whereClauseDelivered = "trang_thai = 'delivered'";
+        const params = [];
+        const paramsDelivered = [];
+
+        if (year) {
+            whereClause += ' AND YEAR(thoi_gian_tao) = ?';
+            whereClauseDelivered += ' AND YEAR(thoi_gian_tao) = ?';
+            params.push(parseInt(year));
+            paramsDelivered.push(parseInt(year));
+        }
+
+        if (month && parseInt(month) > 0) {
+            whereClause += ' AND MONTH(thoi_gian_tao) = ?';
+            whereClauseDelivered += ' AND MONTH(thoi_gian_tao) = ?';
+            params.push(parseInt(month));
+            paramsDelivered.push(parseInt(month));
+        }
+
+        if (status && status !== 'all') {
+            whereClause += ' AND trang_thai = ?';
+            params.push(status);
+        }
+
+        // Tổng số đơn hàng (theo filter)
+        const [totalOrders] = await db.query(`SELECT COUNT(*) as total FROM don_hang WHERE ${whereClause}`, params);
+        
+        // Tổng doanh thu (chỉ tính đơn hoàn thành, theo filter năm/tháng)
         const [totalRevenue] = await db.query(`
-            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang WHERE trang_thai = 'delivered'
-        `);
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang WHERE ${whereClauseDelivered}
+        `, paramsDelivered);
         
         // Tổng số lượng món đã bán
+        let quantityWhere = "dh.trang_thai = 'delivered'";
+        const quantityParams = [];
+        if (year) {
+            quantityWhere += ' AND YEAR(dh.thoi_gian_tao) = ?';
+            quantityParams.push(parseInt(year));
+        }
+        if (month && parseInt(month) > 0) {
+            quantityWhere += ' AND MONTH(dh.thoi_gian_tao) = ?';
+            quantityParams.push(parseInt(month));
+        }
+        
         const [totalQuantity] = await db.query(`
             SELECT COALESCE(SUM(ct.so_luong), 0) as total 
             FROM chi_tiet_don_hang ct
             JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang
-            WHERE dh.trang_thai = 'delivered'
-        `);
+            WHERE ${quantityWhere}
+        `, quantityParams);
         
         // Đơn hàng hôm nay
         const [todayOrders] = await db.query(`
@@ -368,10 +406,21 @@ router.get('/stats', requireAdmin, async (req, res) => {
             WHERE DATE(thoi_gian_tao) = CURDATE() AND trang_thai = 'delivered'
         `);
         
-        // Đơn hàng theo trạng thái
+        // Đơn hàng theo trạng thái (theo filter năm/tháng)
+        let statusWhere = '1=1';
+        const statusParams = [];
+        if (year) {
+            statusWhere += ' AND YEAR(thoi_gian_tao) = ?';
+            statusParams.push(parseInt(year));
+        }
+        if (month && parseInt(month) > 0) {
+            statusWhere += ' AND MONTH(thoi_gian_tao) = ?';
+            statusParams.push(parseInt(month));
+        }
+        
         const [statusStats] = await db.query(`
-            SELECT trang_thai, COUNT(*) as count FROM don_hang GROUP BY trang_thai
-        `);
+            SELECT trang_thai, COUNT(*) as count FROM don_hang WHERE ${statusWhere} GROUP BY trang_thai
+        `, statusParams);
 
         res.json({
             success: true,
@@ -380,7 +429,8 @@ router.get('/stats', requireAdmin, async (req, res) => {
             totalQuantity: totalQuantity[0].total,
             todayOrders: todayOrders[0].count,
             todayRevenue: todayRevenue[0].total,
-            byStatus: statusStats
+            byStatus: statusStats,
+            filters: { year, month, status }
         });
     } catch (error) {
         console.error('Error fetching order stats:', error);
@@ -391,8 +441,9 @@ router.get('/stats', requireAdmin, async (req, res) => {
 // Admin: Lấy tất cả đơn hàng (dùng session)
 router.get('/all', requireAdmin, async (req, res) => {
     try {
-
-        const { trang_thai, limit = 50, offset = 0 } = req.query;
+        const { trang_thai, status, limit = 50, offset = 0 } = req.query;
+        // Support both 'trang_thai' and 'status' params
+        const filterStatus = status || trang_thai;
 
         let query = `
             SELECT 
@@ -411,9 +462,9 @@ router.get('/all', requireAdmin, async (req, res) => {
 
         const params = [];
 
-        if (trang_thai) {
+        if (filterStatus) {
             query += ` AND dh.trang_thai = ?`;
-            params.push(trang_thai);
+            params.push(filterStatus);
         }
 
         query += ` GROUP BY dh.ma_don_hang

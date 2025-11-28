@@ -319,4 +319,219 @@ router.get('/my-review/:productId', authenticateToken, async (req, res) => {
   }
 });
 
+// ==================== ADMIN ROUTES ====================
+
+// Lấy tất cả đánh giá (Admin)
+router.get('/admin/all', async (req, res) => {
+  try {
+    const { status, search, product_id } = req.query;
+    
+    let query = `
+      SELECT dg.ma_danh_gia, dg.ma_mon, dg.ma_nguoi_dung, dg.so_sao, dg.binh_luan, 
+             dg.ngay_danh_gia, dg.trang_thai, dg.hinh_anh,
+             nd.ten_nguoi_dung, nd.email, nd.anh_dai_dien,
+             ma.ten_mon
+      FROM danh_gia_san_pham dg
+      JOIN nguoi_dung nd ON dg.ma_nguoi_dung = nd.ma_nguoi_dung
+      JOIN mon_an ma ON dg.ma_mon = ma.ma_mon
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (status) {
+      query += ' AND dg.trang_thai = ?';
+      params.push(status);
+    }
+
+    if (product_id) {
+      query += ' AND dg.ma_mon = ?';
+      params.push(parseInt(product_id));
+    }
+
+    if (search) {
+      query += ' AND (nd.ten_nguoi_dung LIKE ? OR dg.binh_luan LIKE ? OR ma.ten_mon LIKE ?)';
+      const searchTerm = `%${search}%`;
+      params.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    query += ' ORDER BY dg.ngay_danh_gia DESC';
+
+    const [reviews] = await db.query(query, params);
+
+    // Parse images
+    const reviewsWithImages = reviews.map(r => ({
+      ...r,
+      images: r.hinh_anh ? JSON.parse(r.hinh_anh) : []
+    }));
+
+    // Thống kê trạng thái
+    const [stats] = await db.query(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN trang_thai = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN trang_thai = 'approved' THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN trang_thai = 'rejected' THEN 1 ELSE 0 END) as rejected,
+        AVG(so_sao) as average_rating,
+        SUM(CASE WHEN so_sao = 5 THEN 1 ELSE 0 END) as star_5,
+        SUM(CASE WHEN so_sao = 4 THEN 1 ELSE 0 END) as star_4,
+        SUM(CASE WHEN so_sao = 3 THEN 1 ELSE 0 END) as star_3,
+        SUM(CASE WHEN so_sao = 2 THEN 1 ELSE 0 END) as star_2,
+        SUM(CASE WHEN so_sao = 1 THEN 1 ELSE 0 END) as star_1
+      FROM danh_gia_san_pham
+    `);
+
+    // Thống kê theo ngày (30 ngày gần nhất)
+    const [dailyStats] = await db.query(`
+      SELECT DATE(ngay_danh_gia) as date, COUNT(*) as count
+      FROM danh_gia_san_pham
+      WHERE ngay_danh_gia >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+      GROUP BY DATE(ngay_danh_gia)
+      ORDER BY date ASC
+    `);
+
+    // Top sản phẩm được đánh giá nhiều nhất
+    const [topProducts] = await db.query(`
+      SELECT ma.ten_mon, COUNT(*) as review_count, AVG(dg.so_sao) as avg_rating
+      FROM danh_gia_san_pham dg
+      JOIN mon_an ma ON dg.ma_mon = ma.ma_mon
+      GROUP BY dg.ma_mon, ma.ten_mon
+      ORDER BY review_count DESC
+      LIMIT 5
+    `);
+
+    res.json({
+      success: true,
+      data: reviewsWithImages,
+      stats: {
+        ...stats[0],
+        starDistribution: {
+          5: stats[0].star_5 || 0,
+          4: stats[0].star_4 || 0,
+          3: stats[0].star_3 || 0,
+          2: stats[0].star_2 || 0,
+          1: stats[0].star_1 || 0
+        }
+      },
+      dailyStats,
+      topProducts
+    });
+  } catch (error) {
+    console.error('Error fetching admin reviews:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Cập nhật trạng thái đánh giá (Admin - duyệt/khóa)
+router.put('/admin/:reviewId/status', async (req, res) => {
+  try {
+    const reviewId = parseInt(req.params.reviewId);
+    const { trang_thai } = req.body;
+
+    if (!['pending', 'approved', 'rejected'].includes(trang_thai)) {
+      return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ' });
+    }
+
+    const [existing] = await db.query('SELECT ma_danh_gia FROM danh_gia_san_pham WHERE ma_danh_gia = ?', [reviewId]);
+    if (existing.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy đánh giá' });
+    }
+
+    await db.query('UPDATE danh_gia_san_pham SET trang_thai = ? WHERE ma_danh_gia = ?', [trang_thai, reviewId]);
+
+    const statusText = { pending: 'chờ duyệt', approved: 'đã duyệt', rejected: 'đã khóa' };
+    res.json({ success: true, message: `Đánh giá đã được chuyển sang trạng thái ${statusText[trang_thai]}` });
+  } catch (error) {
+    console.error('Error updating review status:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Xóa đánh giá (Admin)
+router.delete('/admin/:reviewId', async (req, res) => {
+  try {
+    const reviewId = parseInt(req.params.reviewId);
+
+    // Lấy thông tin ảnh trước khi xóa
+    const [existing] = await db.query('SELECT hinh_anh FROM danh_gia_san_pham WHERE ma_danh_gia = ?', [reviewId]);
+    if (existing.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy đánh giá' });
+    }
+
+    // Xóa ảnh nếu có
+    if (existing[0].hinh_anh) {
+      const images = JSON.parse(existing[0].hinh_anh);
+      images.forEach(imgPath => {
+        const fullPath = path.join(__dirname, '..', imgPath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      });
+    }
+
+    await db.query('DELETE FROM danh_gia_san_pham WHERE ma_danh_gia = ?', [reviewId]);
+
+    res.json({ success: true, message: 'Đã xóa đánh giá thành công' });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Xóa nhiều đánh giá (Admin)
+router.post('/admin/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'Danh sách ID không hợp lệ' });
+    }
+
+    // Lấy thông tin ảnh trước khi xóa
+    const [reviews] = await db.query('SELECT hinh_anh FROM danh_gia_san_pham WHERE ma_danh_gia IN (?)', [ids]);
+    
+    // Xóa ảnh
+    reviews.forEach(review => {
+      if (review.hinh_anh) {
+        const images = JSON.parse(review.hinh_anh);
+        images.forEach(imgPath => {
+          const fullPath = path.join(__dirname, '..', imgPath);
+          if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+          }
+        });
+      }
+    });
+
+    await db.query('DELETE FROM danh_gia_san_pham WHERE ma_danh_gia IN (?)', [ids]);
+
+    res.json({ success: true, message: `Đã xóa ${ids.length} đánh giá` });
+  } catch (error) {
+    console.error('Error bulk deleting reviews:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Cập nhật trạng thái nhiều đánh giá (Admin)
+router.post('/admin/bulk-status', async (req, res) => {
+  try {
+    const { ids, trang_thai } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'Danh sách ID không hợp lệ' });
+    }
+
+    if (!['pending', 'approved', 'rejected'].includes(trang_thai)) {
+      return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ' });
+    }
+
+    await db.query('UPDATE danh_gia_san_pham SET trang_thai = ? WHERE ma_danh_gia IN (?)', [trang_thai, ids]);
+
+    const statusText = { pending: 'chờ duyệt', approved: 'đã duyệt', rejected: 'đã khóa' };
+    res.json({ success: true, message: `Đã cập nhật ${ids.length} đánh giá sang trạng thái ${statusText[trang_thai]}` });
+  } catch (error) {
+    console.error('Error bulk updating review status:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

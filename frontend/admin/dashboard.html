@@ -72,6 +72,9 @@
                         <a href="customers.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
                             <i class="fas fa-users w-5"></i><span class="text-sm">Khách hàng</span>
                         </a>
+                        <a href="reviews.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-star w-5"></i><span class="text-sm">Đánh giá</span>
+                        </a>
                     </div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-3">Nội dung</p>
                     <div class="space-y-1">
@@ -247,7 +250,30 @@
                             </div>
                         </div>
 
-                        <!-- Row 5: News Stats -->
+                        <!-- Row 5: Reviews Stats -->
+                        <div class="grid grid-cols-3 gap-5 mb-6">
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-star text-yellow-500 mr-2"></i>Phân bố đánh giá sao</p>
+                                <div style="height: 180px;"><canvas id="reviewStarChart"></canvas></div>
+                                <div class="text-center mt-2">
+                                    <p class="text-sm text-slate-500">Điểm trung bình</p>
+                                    <p class="text-2xl font-bold text-yellow-500" id="avg-rating">0.0 <i class="fas fa-star text-lg"></i></p>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <p class="chart-title"><i class="fas fa-chart-pie text-emerald-500 mr-2"></i>Trạng thái đánh giá</p>
+                                <div style="height: 200px;"><canvas id="reviewStatusChart"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="flex items-center justify-between mb-4">
+                                    <p class="chart-title mb-0"><i class="fas fa-trophy text-orange-500 mr-2"></i>Top món được đánh giá</p>
+                                    <a href="reviews.html" class="text-xs text-blue-500 hover:text-blue-700">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+                                </div>
+                                <div id="top-reviewed-products" class="space-y-2" style="max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Row 6: News Stats -->
                         <div class="grid grid-cols-3 gap-5">
                             <div class="chart-card">
                                 <p class="chart-title"><i class="fas fa-newspaper text-pink-500 mr-2"></i>Lượt xem bài viết theo tháng</p>
@@ -318,7 +344,7 @@
     <script>
         // API_URL đã được khai báo trong admin-layout.js
         const API_BASE = API_URL; // Alias để tương thích
-        let gaugeChart, revenueChart, ordersChart, customerChart, reservationChart, newsViewsChart;
+        let gaugeChart, revenueChart, ordersChart, customerChart, reservationChart, newsViewsChart, reviewStarChart, reviewStatusChart;
         
         document.addEventListener('DOMContentLoaded', function() {
             initAllCharts();
@@ -389,12 +415,59 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
+
+            // Review Star Distribution Chart
+            reviewStarChart = new Chart(document.getElementById('reviewStarChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['5 sao', '4 sao', '3 sao', '2 sao', '1 sao'],
+                    datasets: [{
+                        label: 'Số lượng',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'],
+                        borderRadius: 6,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Review Status Chart
+            reviewStatusChart = new Chart(document.getElementById('reviewStatusChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Đã duyệt', 'Chờ duyệt', 'Đã khóa'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 3,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } }
+                    }
+                }
+            });
         }
 
         async function loadDashboardData() {
             try {
                 // Load tất cả dữ liệu song song
-                const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes, newsViewsRes, newsViewsMonthlyRes] = await Promise.all([
+                const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes, newsViewsRes, newsViewsMonthlyRes, reviewsRes] = await Promise.all([
                     fetch(`${API_BASE}/orders/stats`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/customers/stats`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/reservations/stats`, { credentials: 'include' }).catch(() => null),
@@ -402,7 +475,8 @@
                     fetch(`${API_BASE}/stats/customers-monthly`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/stats/reservations-by-time`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/stats/news-views`, { credentials: 'include' }).catch(() => null),
-                    fetch(`${API_BASE}/stats/news-views-monthly`, { credentials: 'include' }).catch(() => null)
+                    fetch(`${API_BASE}/stats/news-views-monthly`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/reviews/admin/all`, { credentials: 'include' }).catch(() => null)
                 ]);
 
                 // KPI Cards
@@ -468,6 +542,14 @@
                     }
                 }
 
+                // Thống kê đánh giá
+                if (reviewsRes && reviewsRes.ok) {
+                    const data = await reviewsRes.json();
+                    if (data.success) {
+                        updateReviewCharts(data.stats, data.topProducts);
+                    }
+                }
+
                 // Load top products và recent orders
                 await renderTopProducts();
                 await renderRecentOrders();
@@ -530,6 +612,56 @@
 
             newsViewsChart.data.datasets[0].data = monthlyData;
             newsViewsChart.update();
+        }
+
+        function updateReviewCharts(stats, topProducts) {
+            // Update star distribution chart
+            if (stats && stats.starDistribution && reviewStarChart) {
+                const dist = stats.starDistribution;
+                reviewStarChart.data.datasets[0].data = [dist[5] || 0, dist[4] || 0, dist[3] || 0, dist[2] || 0, dist[1] || 0];
+                reviewStarChart.update();
+            }
+
+            // Update average rating
+            const avgRating = parseFloat(stats?.average_rating || 0).toFixed(1);
+            document.getElementById('avg-rating').innerHTML = `${avgRating} <i class="fas fa-star text-lg"></i>`;
+
+            // Update status chart
+            if (stats && reviewStatusChart) {
+                reviewStatusChart.data.datasets[0].data = [stats.approved || 0, stats.pending || 0, stats.rejected || 0];
+                reviewStatusChart.update();
+            }
+
+            // Render top reviewed products
+            renderTopReviewedProducts(topProducts);
+        }
+
+        function renderTopReviewedProducts(products) {
+            const container = document.getElementById('top-reviewed-products');
+            if (!products || products.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-4">Chưa có dữ liệu</p>';
+                return;
+            }
+
+            const maxCount = Math.max(...products.map(p => p.review_count || 0));
+            container.innerHTML = products.map((p, i) => {
+                const avgRating = parseFloat(p.avg_rating || 0).toFixed(1);
+                return `
+                    <div class="product-row">
+                        <span class="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800 truncate" title="${p.ten_mon}">${p.ten_mon}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style="width: ${maxCount > 0 ? (p.review_count/maxCount)*100 : 0}%"></div>
+                                </div>
+                                <span class="text-xs text-yellow-600"><i class="fas fa-star"></i> ${avgRating}</span>
+                            </div>
+                        </div>
+                        <span class="text-sm font-semibold text-orange-600 ml-2">${p.review_count}</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         function renderTopNews(newsData) {
@@ -651,16 +783,125 @@
 
         function formatCurrency(value) { return new Intl.NumberFormat('vi-VN').format(value); }
 
+        // Lấy giá trị filter hiện tại
+        function getFilterValues() {
+            const yearBtn = document.querySelector('.filter-btn[data-year].active');
+            const monthBtn = document.querySelector('.filter-btn[data-month].active');
+            const statusBtn = document.querySelector('.filter-btn[data-status].active');
+            
+            return {
+                year: yearBtn ? parseInt(yearBtn.dataset.year) : new Date().getFullYear(),
+                month: monthBtn ? parseInt(monthBtn.dataset.month) : 0, // 0 = All
+                status: statusBtn ? statusBtn.dataset.status : 'all'
+            };
+        }
+
         function initFilters() {
             document.querySelectorAll('.filter-group').forEach(group => {
                 group.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
-                        loadDashboardData();
+                        
+                        // Lấy filter values và load lại data
+                        const filters = getFilterValues();
+                        console.log('Filters changed:', filters);
+                        loadDashboardDataWithFilters(filters);
                     });
                 });
             });
+        }
+
+        async function loadDashboardDataWithFilters(filters) {
+            try {
+                // Build query params
+                const params = new URLSearchParams();
+                if (filters.year) params.append('year', filters.year);
+                if (filters.month && filters.month > 0) params.append('month', filters.month);
+                if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+                
+                const queryString = params.toString() ? `?${params.toString()}` : '';
+
+                // Load dữ liệu với filter
+                const [ordersRes, revenueMonthlyRes] = await Promise.all([
+                    fetch(`${API_BASE}/orders/stats${queryString}`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/revenue-monthly${queryString}`, { credentials: 'include' }).catch(() => null)
+                ]);
+
+                // Cập nhật KPI Cards
+                if (ordersRes && ordersRes.ok) {
+                    const data = await ordersRes.json();
+                    if (data.success !== false) {
+                        document.getElementById('total-revenue').textContent = formatCurrency(data.totalRevenue || 0) + 'đ';
+                        document.getElementById('total-orders').textContent = data.totalOrders || 0;
+                        updateGaugeChart(data.totalRevenue || 0, 100000000);
+                        updateOrdersChart(data.byStatus || []);
+                    }
+                }
+
+                // Cập nhật biểu đồ doanh thu
+                if (revenueMonthlyRes && revenueMonthlyRes.ok) {
+                    const data = await revenueMonthlyRes.json();
+                    if (data.success && data.data) {
+                        updateRevenueChartWithYear(data.data, filters.year);
+                    }
+                }
+
+                // Load lại recent orders với filter status
+                await renderRecentOrdersWithFilter(filters.status);
+
+            } catch (error) {
+                console.error('Error loading filtered data:', error);
+            }
+        }
+
+        function updateRevenueChartWithYear(data, year) {
+            const monthlyData = new Array(12).fill(0);
+            
+            data.forEach(item => {
+                if (item.nam === year && item.thang >= 1 && item.thang <= 12) {
+                    monthlyData[item.thang - 1] = Math.round((item.doanh_thu || 0) / 1000000);
+                }
+            });
+
+            revenueChart.data.datasets[0].data = monthlyData;
+            revenueChart.update();
+        }
+
+        async function renderRecentOrdersWithFilter(status) {
+            const container = document.getElementById('recent-orders');
+            const statusColors = { delivered: 'bg-emerald-100 text-emerald-700', confirmed: 'bg-blue-100 text-blue-700', preparing: 'bg-blue-100 text-blue-700', pending: 'bg-amber-100 text-amber-700', cancelled: 'bg-red-100 text-red-700' };
+            const statusText = { delivered: 'Hoàn thành', confirmed: 'Đã xác nhận', preparing: 'Đang chuẩn bị', pending: 'Chờ xác nhận', cancelled: 'Đã hủy' };
+            
+            try {
+                let url = `${API_BASE}/orders/all?limit=5`;
+                if (status && status !== 'all') {
+                    url += `&status=${status}`;
+                }
+                
+                const response = await fetch(url, { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data && data.data.length > 0) {
+                        container.innerHTML = data.data.map(o => `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition">
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-800">#DH${String(o.ma_don_hang).padStart(6, '0')} - ${o.ten_khach_hang || o.ten_khach_vang_lai || 'Khách hàng'}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">${formatTimeAgo(o.thoi_gian_tao)}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-blue-600">${formatCurrency(o.tong_tien || 0)}đ</p>
+                                    <span class="text-xs px-2 py-1 rounded-full ${statusColors[o.trang_thai] || 'bg-gray-100 text-gray-700'} font-medium">${statusText[o.trang_thai] || o.trang_thai}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+            }
+            container.innerHTML = '<p class="text-center text-gray-500 py-4">Không có đơn hàng phù hợp</p>';
         }
     </script>
 </body>
