@@ -138,8 +138,10 @@ document.addEventListener('DOMContentLoaded', function () {
         renderCheckoutItems();
     }
 
-    // Prefill user info if logged in
-    prefillUserInfo();
+    // Prefill user info if logged in (chạy sau khi address selectors đã init)
+    setTimeout(() => {
+        prefillUserInfo();
+    }, 500);
 
     // Attach submit button handler
     const submitBtn = document.getElementById('submit-order-btn');
@@ -351,6 +353,9 @@ async function submitOrder(event) {
                         // KHÔNG xóa giỏ hàng ở đây - chỉ xóa khi thanh toán thành công
                         // Cart sẽ được xóa trong trang dat-hang-thanh-cong.html
 
+                        // Lưu địa chỉ giao hàng để prefill lần sau
+                        saveLastShippingAddress(orderData);
+
                         // Redirect to payment gateway
                         window.location.href = paymentResult.data.paymentUrl;
                     } else {
@@ -382,6 +387,9 @@ async function submitOrder(event) {
                     console.error('Error marking cart as ordered:', error);
                 }
 
+                // Lưu địa chỉ giao hàng để prefill lần sau
+                saveLastShippingAddress(orderData);
+
                 // Xóa localStorage cart backup
                 localStorage.removeItem('cart');
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -404,28 +412,289 @@ async function submitOrder(event) {
 }
 
 // Prefill user information
-function prefillUserInfo() {
+async function prefillUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const lastShipping = getLastShippingAddress();
+    
+    console.log('📋 Prefilling user info:', user);
+    console.log('📦 Last shipping address:', lastShipping);
 
-    if (user.ten_nguoi_dung) {
-        const nameInput = document.querySelector('input[type="text"][placeholder*="Nguyễn Văn A"]');
-        if (nameInput) nameInput.value = user.ten_nguoi_dung;
+    // Ưu tiên dùng địa chỉ giao hàng đã lưu, nếu không có thì dùng thông tin user
+    const prefillData = lastShipping || user;
+
+    // Prefill họ tên
+    const nameInput = document.querySelector('input[type="text"][placeholder*="Nguyễn Văn A"]');
+    if (nameInput) {
+        nameInput.value = lastShipping?.ten_nguoi_nhan || user.ten_nguoi_dung || '';
     }
 
-    if (user.so_dien_thoai) {
-        const phoneInput = document.querySelector('input[type="tel"]');
-        if (phoneInput) phoneInput.value = user.so_dien_thoai;
+    // Prefill số điện thoại
+    const phoneInput = document.querySelector('input[type="tel"]');
+    if (phoneInput) {
+        phoneInput.value = lastShipping?.so_dien_thoai || user.so_dien_thoai || '';
     }
 
-    if (user.email) {
-        const emailInput = document.querySelector('input[type="email"]');
-        if (emailInput) emailInput.value = user.email;
+    // Prefill email
+    const emailInput = document.querySelector('input[type="email"]');
+    if (emailInput) {
+        emailInput.value = lastShipping?.email || user.email || '';
     }
 
-    if (user.dia_chi) {
-        const addressInput = document.querySelector('input[type="text"][placeholder*="Số nhà"]');
-        if (addressInput) addressInput.value = user.dia_chi;
+    // Prefill địa chỉ chi tiết
+    const addressInput = document.querySelector('input[type="text"][placeholder*="Số nhà"]');
+    if (addressInput) {
+        addressInput.value = lastShipping?.dia_chi || user.dia_chi || '';
     }
+
+    // Prefill địa chỉ tỉnh/huyện/xã
+    if (lastShipping && lastShipping.tinh_thanh) {
+        // Có địa chỉ giao hàng đã lưu đầy đủ
+        await prefillAddressSelectors(lastShipping);
+    } else {
+        // Thử tìm tỉnh/huyện từ địa chỉ text của user
+        const addressText = lastShipping?.dia_chi || user.dia_chi || '';
+        if (addressText) {
+            await findAndSelectAddressFromText(addressText);
+        }
+    }
+}
+
+// Prefill địa chỉ từ thông tin user đã lưu
+async function prefillAddressSelectors(user) {
+    const provinceSelect = document.querySelector('select[name="province"]');
+    const districtSelect = document.querySelector('select[name="district"]');
+    const wardSelect = document.querySelector('select[name="ward"]');
+
+    if (!provinceSelect || !districtSelect) return;
+
+    // Đợi provinces được load xong
+    await waitForProvinces(provinceSelect);
+
+    // Nếu user có tinh_thanh, tìm và chọn tỉnh
+    if (user.tinh_thanh) {
+        const provinceOption = findOptionByText(provinceSelect, user.tinh_thanh);
+        if (provinceOption) {
+            provinceSelect.value = provinceOption.value;
+            console.log('✅ Auto-selected province:', user.tinh_thanh);
+            
+            // Trigger change event để load districts
+            provinceSelect.dispatchEvent(new Event('change'));
+            
+            // Đợi districts được load
+            await waitForOptions(districtSelect);
+
+            // Nếu user có quan_huyen, tìm và chọn huyện
+            if (user.quan_huyen) {
+                const districtOption = findOptionByText(districtSelect, user.quan_huyen);
+                if (districtOption) {
+                    districtSelect.value = districtOption.value;
+                    console.log('✅ Auto-selected district:', user.quan_huyen);
+                    
+                    // Trigger change event để load wards
+                    districtSelect.dispatchEvent(new Event('change'));
+                    
+                    // Đợi wards được load
+                    if (wardSelect) {
+                        await waitForOptions(wardSelect);
+
+                        // Nếu user có phuong_xa, tìm và chọn xã
+                        if (user.phuong_xa) {
+                            const wardOption = findOptionByText(wardSelect, user.phuong_xa);
+                            if (wardOption) {
+                                wardSelect.value = wardOption.value;
+                                console.log('✅ Auto-selected ward:', user.phuong_xa);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Đợi provinces được load vào select
+function waitForProvinces(select, timeout = 5000) {
+    return new Promise((resolve) => {
+        const startTime = Date.now();
+        const checkInterval = setInterval(() => {
+            // Kiểm tra có options nào không phải "Đang tải" hoặc "Chọn"
+            const hasRealOptions = Array.from(select.options).some(opt => 
+                opt.value && !opt.textContent.includes('Đang tải')
+            );
+            
+            if (hasRealOptions || Date.now() - startTime > timeout) {
+                clearInterval(checkInterval);
+                resolve();
+            }
+        }, 100);
+    });
+}
+
+// Đợi options được load vào select
+function waitForOptions(select, timeout = 3000) {
+    return new Promise((resolve) => {
+        const startTime = Date.now();
+        const checkInterval = setInterval(() => {
+            const isLoading = select.options[0]?.textContent.includes('Đang tải');
+            const hasOptions = select.options.length > 1;
+            
+            if ((!isLoading && hasOptions) || Date.now() - startTime > timeout) {
+                clearInterval(checkInterval);
+                // Thêm delay nhỏ để đảm bảo DOM đã cập nhật
+                setTimeout(resolve, 100);
+            }
+        }, 100);
+    });
+}
+
+// Tìm option theo text (fuzzy match)
+function findOptionByText(select, searchText) {
+    if (!searchText) return null;
+    
+    const normalizedSearch = normalizeVietnamese(searchText.toLowerCase());
+    
+    for (const option of select.options) {
+        const optionText = normalizeVietnamese(option.textContent.toLowerCase());
+        // Exact match hoặc contains
+        if (optionText === normalizedSearch || 
+            optionText.includes(normalizedSearch) || 
+            normalizedSearch.includes(optionText)) {
+            return option;
+        }
+    }
+    return null;
+}
+
+// Chuẩn hóa tiếng Việt để so sánh
+function normalizeVietnamese(str) {
+    return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .trim();
+}
+
+// Tìm và chọn tỉnh/huyện từ địa chỉ text (ví dụ: "Cầu Kè" → Trà Vinh)
+async function findAndSelectAddressFromText(addressText) {
+    if (!addressText) return;
+    
+    console.log('🔍 Trying to find province/district from address:', addressText);
+    
+    const provinceSelect = document.querySelector('select[name="province"]');
+    const districtSelect = document.querySelector('select[name="district"]');
+    
+    if (!provinceSelect || !districtSelect) return;
+    
+    // Đợi provinces được load
+    await waitForProvinces(provinceSelect);
+    
+    const normalizedAddress = normalizeVietnamese(addressText.toLowerCase());
+    
+    // Danh sách huyện phổ biến và tỉnh tương ứng (có thể mở rộng)
+    const districtToProvince = {
+        'cau ke': { province: 'Trà Vinh', district: 'Cầu Kè' },
+        'cang long': { province: 'Trà Vinh', district: 'Càng Long' },
+        'chau thanh': { province: 'Trà Vinh', district: 'Châu Thành' },
+        'tra cu': { province: 'Trà Vinh', district: 'Trà Cú' },
+        'tieu can': { province: 'Trà Vinh', district: 'Tiểu Cần' },
+        'duyen hai': { province: 'Trà Vinh', district: 'Duyên Hải' },
+        'vinh long': { province: 'Vĩnh Long', district: null },
+        'long ho': { province: 'Vĩnh Long', district: 'Long Hồ' },
+        'mang thit': { province: 'Vĩnh Long', district: 'Mang Thít' },
+        'vung liem': { province: 'Vĩnh Long', district: 'Vũng Liêm' },
+        'tam binh': { province: 'Vĩnh Long', district: 'Tam Bình' },
+        'binh minh': { province: 'Vĩnh Long', district: 'Bình Minh' },
+        'tra on': { province: 'Vĩnh Long', district: 'Trà Ôn' },
+        'binh tan': { province: 'Vĩnh Long', district: 'Bình Tân' }
+    };
+    
+    // Tìm trong mapping
+    let foundProvince = null;
+    let foundDistrict = null;
+    
+    for (const [key, value] of Object.entries(districtToProvince)) {
+        if (normalizedAddress.includes(key)) {
+            foundProvince = value.province;
+            foundDistrict = value.district;
+            console.log(`✅ Found match: "${key}" → ${foundProvince}, ${foundDistrict}`);
+            break;
+        }
+    }
+    
+    // Nếu không tìm thấy trong mapping, thử tìm trực tiếp trong tên tỉnh
+    if (!foundProvince) {
+        for (const option of provinceSelect.options) {
+            const optionText = normalizeVietnamese(option.textContent.toLowerCase());
+            if (normalizedAddress.includes(optionText) || optionText.includes(normalizedAddress)) {
+                foundProvince = option.textContent;
+                console.log(`✅ Found province directly: ${foundProvince}`);
+                break;
+            }
+        }
+    }
+    
+    // Chọn tỉnh nếu tìm thấy
+    if (foundProvince) {
+        const provinceOption = findOptionByText(provinceSelect, foundProvince);
+        if (provinceOption) {
+            provinceSelect.value = provinceOption.value;
+            console.log('✅ Auto-selected province:', foundProvince);
+            
+            // Trigger change để load districts
+            provinceSelect.dispatchEvent(new Event('change'));
+            
+            // Đợi districts load
+            await waitForOptions(districtSelect);
+            
+            // Chọn huyện nếu tìm thấy
+            if (foundDistrict) {
+                const districtOption = findOptionByText(districtSelect, foundDistrict);
+                if (districtOption) {
+                    districtSelect.value = districtOption.value;
+                    console.log('✅ Auto-selected district:', foundDistrict);
+                    
+                    // Trigger change để load wards
+                    districtSelect.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    }
+}
+
+// Lưu địa chỉ giao hàng cuối cùng để prefill lần sau
+function saveLastShippingAddress(orderData) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.ma_nguoi_dung) return;
+
+    const shippingAddress = {
+        ten_nguoi_nhan: orderData.ten_nguoi_nhan,
+        so_dien_thoai: orderData.so_dien_thoai,
+        email: orderData.email,
+        dia_chi: orderData.dia_chi,
+        tinh_thanh: orderData.tinh_thanh,
+        quan_huyen: orderData.quan_huyen,
+        phuong_xa: orderData.phuong_xa
+    };
+
+    localStorage.setItem(`shipping_${user.ma_nguoi_dung}`, JSON.stringify(shippingAddress));
+    console.log('💾 Saved shipping address for next order:', shippingAddress);
+}
+
+// Lấy địa chỉ giao hàng đã lưu
+function getLastShippingAddress() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.ma_nguoi_dung) return null;
+
+    const saved = localStorage.getItem(`shipping_${user.ma_nguoi_dung}`);
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
 }
 
 // Show notification - use auth.js notification if available

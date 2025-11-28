@@ -200,14 +200,7 @@ async function initAddressSelectors() {
 
     console.log('✅ Loaded', provinces.length, 'provinces into select box');
 
-    // Auto-select Vĩnh Long if exists
-    const vinhLongOption = Array.from(provinceSelect.options).find(opt => 
-        opt.textContent.includes('Vĩnh Long')
-    );
-    if (vinhLongOption) {
-        provinceSelect.value = vinhLongOption.value;
-        await updateDistricts(vinhLongOption.value);
-    }
+    // KHÔNG auto-select tỉnh mặc định - để checkout.js prefill từ user data
 
     // Province change handler
     provinceSelect.addEventListener('change', async function() {
@@ -279,6 +272,16 @@ async function initAddressSelectors() {
         }
     }
 }
+
+// Export functions for use in other scripts
+window.addressAPI = {
+    loadProvinces,
+    loadDistricts,
+    loadWards,
+    getProvinces: () => vietnamProvinces,
+    getDistricts: (provinceCode) => vietnamDistricts[provinceCode] || [],
+    getWards: (districtCode) => vietnamWards[districtCode] || []
+};
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
