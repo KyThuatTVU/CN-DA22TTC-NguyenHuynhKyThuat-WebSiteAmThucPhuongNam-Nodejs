@@ -41,15 +41,18 @@ const authenticateToken = (req, res, next) => {
 // Tạo payment request MoMo
 router.post('/momo/create-payment', authenticateToken, async (req, res) => {
     try {
-        const { orderId, amount, orderInfo } = req.body;
+        const { orderId, amount: rawAmount, orderInfo } = req.body;
 
         // Validate
-        if (!orderId || !amount) {
+        if (!orderId || !rawAmount) {
             return res.status(400).json({
                 success: false,
                 message: 'Thiếu thông tin đơn hàng'
             });
         }
+
+        // MoMo yêu cầu amount là số nguyên
+        const amount = Math.round(parseFloat(rawAmount));
 
         // Kiểm tra đơn hàng
         const [orderRows] = await db.query(
@@ -81,12 +84,12 @@ router.post('/momo/create-payment', authenticateToken, async (req, res) => {
 
         console.log('🔐 MoMo Signature:', signature);
 
-        // Tạo request body
+        // Tạo request body - amount phải là số nguyên
         const requestBody = {
             partnerCode: momoConfig.partnerCode,
             accessKey: momoConfig.accessKey,
             requestId: requestId,
-            amount: amount.toString(),
+            amount: amount,
             orderId: requestId,
             orderInfo: orderInfo || `Thanh toan don hang ${orderId}`,
             redirectUrl: momoConfig.redirectUrl,
@@ -243,7 +246,7 @@ router.post('/momo/retry-payment/:orderId', authenticateToken, async (req, res) 
 
         // Tạo request ID mới
         const requestId = `${orderId}_${Date.now()}`;
-        const amount = order.tong_tien;
+        const amount = Math.round(parseFloat(order.tong_tien)); // MoMo yêu cầu số nguyên
         const orderInfo = `Thanh toan lai don hang ${orderId}`;
 
         // Tạo raw signature
@@ -260,7 +263,7 @@ router.post('/momo/retry-payment/:orderId', authenticateToken, async (req, res) 
             partnerCode: momoConfig.partnerCode,
             accessKey: momoConfig.accessKey,
             requestId: requestId,
-            amount: amount.toString(),
+            amount: amount, // MoMo yêu cầu số nguyên, không phải string
             orderId: requestId,
             orderInfo: orderInfo,
             redirectUrl: momoConfig.redirectUrl,

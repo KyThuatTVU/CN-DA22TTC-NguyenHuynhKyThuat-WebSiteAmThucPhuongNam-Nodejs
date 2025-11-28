@@ -269,29 +269,44 @@
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
             // Clear cart after successful payment
-            // Chỉ xóa giỏ hàng khi đã vào trang thành công
             const urlParams = new URLSearchParams(window.location.search);
             const payment = urlParams.get('payment');
             const status = urlParams.get('status');
+            const orderId = getOrderId();
 
-            // Nếu thanh toán VNPay thành công, xóa giỏ hàng
-            if (payment === 'vnpay' && status === 'success') {
-                console.log('✅ VNPay payment successful, clearing cart...');
-                if (typeof cartManager !== 'undefined') {
-                    cartManager.clearCart();
-                } else {
-                    localStorage.removeItem('cart');
+            // Xóa giỏ hàng khi đặt hàng thành công
+            if (orderId) {
+                console.log('✅ Order successful, marking cart as ordered...');
+                try {
+                    const token = getToken();
+                    if (token) {
+                        // Gọi API để đánh dấu giỏ hàng đã đặt (tạo giỏ mới cho user)
+                        const response = await fetch(`${API_URL}/cart/mark-ordered`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        const result = await response.json();
+                        console.log('📦 Mark cart ordered result:', result);
+                        
+                        // Reload cart trong cartManager để cập nhật UI
+                        if (typeof cartManager !== 'undefined') {
+                            await cartManager.loadCart();
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error marking cart as ordered:', error);
                 }
-            }
-            // Nếu không phải VNPay (COD, bank transfer, etc.) cũng xóa giỏ hàng
-            else if (!payment || payment === 'cod' || payment === 'bank' || payment === 'qr' || payment === 'card') {
-                console.log('✅ Order successful, clearing cart...');
-                if (typeof cartManager !== 'undefined') {
-                    cartManager.clearCart();
-                } else {
-                    localStorage.removeItem('cart');
+                
+                // Xóa localStorage cart backup
+                localStorage.removeItem('cart');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.ma_nguoi_dung) {
+                    localStorage.removeItem(`cart_${user.ma_nguoi_dung}`);
                 }
             }
 

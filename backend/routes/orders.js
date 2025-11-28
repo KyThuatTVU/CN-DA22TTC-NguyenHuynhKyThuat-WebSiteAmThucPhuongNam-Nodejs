@@ -300,9 +300,7 @@ router.post('/create', authenticateToken, async (req, res) => {
         }
 
         // KHÔNG đánh dấu cart = "ordered" ở đây vì user chưa thanh toán
-        // Cart sẽ được xử lý sau khi thanh toán thành công:
-        // - VNPay: trong vnpay-return callback
-        // - COD/khác: trong trang dat-hang-thanh-cong.html khi frontend clear cart
+        // Cart sẽ được xử lý sau khi thanh toán thành công trong trang dat-hang-thanh-cong.html
 
         // GIỮ NGUYÊN cart = "active" để nếu thanh toán thất bại, user vẫn còn món
 
@@ -819,7 +817,7 @@ router.put('/:orderId/cancel', authenticateToken, async (req, res) => {
             [orderId]
         );
 
-        // Không cho phép hủy nếu đã thanh toán thành công (đặc biệt là VNPay)
+        // Không cho phép hủy nếu đã thanh toán thành công
         if (paymentRows.length > 0) {
             const payment = paymentRows[0];
             if (payment.trang_thai === 'success' || payment.trang_thai === 'completed') {

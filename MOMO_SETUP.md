@@ -1,10 +1,10 @@
 # 🎯 Hướng dẫn tích hợp MoMo Payment
 
-## ✅ Ưu điểm MoMo so với VNPay
+## ✅ Ưu điểm MoMo
 
 - ✅ **Phổ biến nhất VN**: 40+ triệu người dùng
 - ✅ **API đơn giản**: Dễ tích hợp, tài liệu rõ ràng
-- ✅ **Sandbox ổn định**: Không có bug như VNPay
+- ✅ **Sandbox ổn định**: Test dễ dàng
 - ✅ **Hỗ trợ tốt**: Response nhanh, nhiều kênh hỗ trợ
 - ✅ **Phí hợp lý**: 1.5% - 2.5% mỗi giao dịch
 - ✅ **Đăng ký nhanh**: Miễn phí, duyệt trong 1-2 ngày

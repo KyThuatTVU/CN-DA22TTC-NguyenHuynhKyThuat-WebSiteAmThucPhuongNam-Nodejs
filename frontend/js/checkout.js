@@ -340,8 +340,7 @@ async function submitOrder(event) {
                         body: JSON.stringify({
                             orderId: orderId,
                             amount: totalAmount,
-                            orderInfo: `Thanh toan don hang ${orderId}`,
-                            bankCode: '' // Leave empty to show bank selection at VNPay
+                            orderInfo: `Thanh toan don hang ${orderId}`
                         })
                     });
 
@@ -362,14 +361,32 @@ async function submitOrder(event) {
                     showNotification('Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại.', 'error');
                 }
             } else {
-                // Other payment methods
+                // Other payment methods (COD, bank, etc.)
                 showNotification('Đặt hàng thành công!', 'success');
 
-                // Clear cart
-                if (typeof cartManager !== 'undefined') {
-                    await cartManager.clearCart();
-                } else {
-                    localStorage.removeItem('cart');
+                // Đánh dấu giỏ hàng đã đặt (tạo giỏ mới cho user)
+                try {
+                    await fetch(`${API_URL}/cart/mark-ordered`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    // Reload cart để cập nhật UI
+                    if (typeof cartManager !== 'undefined') {
+                        await cartManager.loadCart();
+                    }
+                } catch (error) {
+                    console.error('Error marking cart as ordered:', error);
+                }
+
+                // Xóa localStorage cart backup
+                localStorage.removeItem('cart');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.ma_nguoi_dung) {
+                    localStorage.removeItem(`cart_${user.ma_nguoi_dung}`);
                 }
 
                 // Redirect to success page
