@@ -264,7 +264,74 @@ router.get('/related/:id', async (req, res) => {
   }
 });
 
-// Lấy chi tiết món ăn
+// Middleware kiểm tra admin (đặt trước các route cần auth)
+const requireAdmin = (req, res, next) => {
+  if (req.session && req.session.admin) {
+    next();
+  } else {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+};
+
+// Toggle trạng thái hiển thị món ăn (Admin) - ĐẶT TRƯỚC /:id
+router.patch('/:id/toggle-status', requireAdmin, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    // Lấy trạng thái hiện tại
+    const [current] = await db.query('SELECT trang_thai FROM mon_an WHERE ma_mon = ?', [productId]);
+    
+    if (current.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
+    }
+    
+    // Toggle trạng thái (0 -> 1, 1 -> 0)
+    const newStatus = current[0].trang_thai == 1 ? 0 : 1;
+    
+    await db.query('UPDATE mon_an SET trang_thai = ? WHERE ma_mon = ?', [newStatus, productId]);
+    
+    res.json({ 
+      success: true, 
+      message: newStatus == 1 ? 'Đã bật hiển thị món ăn' : 'Đã tắt hiển thị món ăn',
+      data: { trang_thai: newStatus }
+    });
+  } catch (error) {
+    console.error('Error toggling product status:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Cập nhật số lượng tồn kho (Admin) - ĐẶT TRƯỚC /:id
+router.patch('/:id/stock', requireAdmin, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { so_luong_ton } = req.body;
+    
+    if (so_luong_ton === undefined || so_luong_ton < 0) {
+      return res.status(400).json({ success: false, message: 'Số lượng không hợp lệ' });
+    }
+    
+    const [result] = await db.query(
+      'UPDATE mon_an SET so_luong_ton = ? WHERE ma_mon = ?', 
+      [so_luong_ton, productId]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Cập nhật số lượng thành công',
+      data: { so_luong_ton }
+    });
+  } catch (error) {
+    console.error('Error updating stock:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Lấy chi tiết món ăn - ĐẶT SAU các route có path cụ thể hơn
 router.get('/:id', async (req, res) => {
   try {
     const [rows] = await db.query(`
@@ -282,15 +349,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
-// Middleware kiểm tra admin
-const requireAdmin = (req, res, next) => {
-  if (req.session && req.session.admin) {
-    next();
-  } else {
-    res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-};
 
 // Thêm món ăn mới (Admin)
 router.post('/', requireAdmin, upload.single('anh_mon'), async (req, res) => {
@@ -348,64 +406,6 @@ router.delete('/:id', requireAdmin, async (req, res) => {
     res.json({ success: true, message: 'Xóa món ăn thành công' });
   } catch (error) {
     console.error('Error deleting product:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Toggle trạng thái hiển thị món ăn (Admin)
-router.patch('/:id/toggle-status', requireAdmin, async (req, res) => {
-  try {
-    const productId = req.params.id;
-    
-    // Lấy trạng thái hiện tại
-    const [current] = await db.query('SELECT trang_thai FROM mon_an WHERE ma_mon = ?', [productId]);
-    
-    if (current.length === 0) {
-      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
-    }
-    
-    // Toggle trạng thái (0 -> 1, 1 -> 0)
-    const newStatus = current[0].trang_thai == 1 ? 0 : 1;
-    
-    await db.query('UPDATE mon_an SET trang_thai = ? WHERE ma_mon = ?', [newStatus, productId]);
-    
-    res.json({ 
-      success: true, 
-      message: newStatus == 1 ? 'Đã bật hiển thị món ăn' : 'Đã tắt hiển thị món ăn',
-      data: { trang_thai: newStatus }
-    });
-  } catch (error) {
-    console.error('Error toggling product status:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Cập nhật số lượng tồn kho (Admin)
-router.patch('/:id/stock', requireAdmin, async (req, res) => {
-  try {
-    const productId = req.params.id;
-    const { so_luong_ton } = req.body;
-    
-    if (so_luong_ton === undefined || so_luong_ton < 0) {
-      return res.status(400).json({ success: false, message: 'Số lượng không hợp lệ' });
-    }
-    
-    const [result] = await db.query(
-      'UPDATE mon_an SET so_luong_ton = ? WHERE ma_mon = ?', 
-      [so_luong_ton, productId]
-    );
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
-    }
-    
-    res.json({ 
-      success: true, 
-      message: 'Cập nhật số lượng thành công',
-      data: { so_luong_ton }
-    });
-  } catch (error) {
-    console.error('Error updating stock:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
