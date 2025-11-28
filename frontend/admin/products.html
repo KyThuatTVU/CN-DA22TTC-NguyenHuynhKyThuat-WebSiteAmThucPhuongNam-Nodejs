@@ -88,8 +88,10 @@
                         </select>
                         <select id="status-filter" class="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="con_hang">Còn hàng</option>
-                            <option value="het_hang">Hết hàng</option>
+                            <option value="hien_thi">Đang hiển thị</option>
+                            <option value="an">Đã ẩn</option>
+                            <option value="het_hang">Hết hàng (SL = 0)</option>
+                            <option value="sap_het">Sắp hết (SL ≤ 5)</option>
                         </select>
                         <button onclick="applyFilters()" class="bg-slate-800 text-white px-4 py-2.5 rounded-xl hover:bg-slate-900 transition flex items-center justify-center">
                             <i class="fas fa-filter mr-2"></i>Lọc
@@ -185,7 +187,8 @@
 
         async function loadProducts() {
             try {
-                const response = await fetch(`${API_URL}/menu`);
+                // Admin load tất cả món ăn (kể cả đã ẩn) với showAll=true
+                const response = await fetch(`${API_URL}/menu?showAll=true`, { credentials: 'include' });
                 const data = await response.json();
                 products = data.data || [];
                 renderProducts(products);
@@ -206,18 +209,38 @@
                 if (!imagePath.startsWith('http') && !imagePath.startsWith('/images/')) imagePath = '/images/' + imagePath.replace(/^\/+/, '');
                 const imageUrl = imagePath.startsWith('http') ? imagePath : `http://localhost:3000${imagePath}`;
                 const isActive = product.trang_thai == 1 || product.trang_thai === 'con_hang';
+                const stockWarning = product.so_luong_ton <= 5 && product.so_luong_ton > 0;
+                const outOfStock = product.so_luong_ton <= 0;
                 return `
-                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition border border-slate-100">
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition border border-slate-100 ${!isActive ? 'opacity-60' : ''}">
                         <div class="relative h-48">
-                            <img src="${imageUrl}" alt="${product.ten_mon}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                            <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${isActive ? 'Còn hàng' : 'Hết hàng'}</span>
+                            <img src="${imageUrl}" alt="${product.ten_mon}" class="w-full h-full object-cover ${!isActive ? 'grayscale' : ''}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                            <div class="absolute top-3 left-3 right-3 flex justify-between items-start">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                                    ${isActive ? '<i class="fas fa-eye mr-1"></i>Đang hiển thị' : '<i class="fas fa-eye-slash mr-1"></i>Đã ẩn'}
+                                </span>
+                                ${outOfStock ? '<span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-800 text-white">Hết hàng</span>' : 
+                                  stockWarning ? '<span class="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Sắp hết</span>' : ''}
+                            </div>
                         </div>
                         <div class="p-5">
                             <h4 class="font-bold text-lg mb-2 text-slate-800 line-clamp-1">${product.ten_mon}</h4>
                             <p class="text-sm text-slate-500 mb-3 line-clamp-2">${product.mo_ta_chi_tiet || product.mo_ta || 'Chưa có mô tả'}</p>
-                            <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center justify-between mb-3">
                                 <p class="text-blue-600 font-bold text-lg">${formatPrice(product.gia_tien || product.gia || 0)}</p>
-                                <p class="text-sm text-slate-500"><i class="fas fa-box mr-1"></i>${product.so_luong_ton || 0}</p>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="updateStock(${product.ma_mon}, ${product.so_luong_ton || 0})" class="text-sm ${outOfStock ? 'text-red-600' : stockWarning ? 'text-amber-600' : 'text-slate-500'} hover:underline">
+                                        <i class="fas fa-box mr-1"></i>${product.so_luong_ton || 0}
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Toggle Switch -->
+                            <div class="flex items-center justify-between mb-4 p-3 bg-slate-50 rounded-xl">
+                                <span class="text-sm text-slate-600">Hiển thị cho khách</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" ${isActive ? 'checked' : ''} onchange="toggleProductStatus(${product.ma_mon}, this.checked)">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
                             </div>
                             <div class="flex space-x-2">
                                 <button onclick="editProduct(${product.ma_mon})" class="flex-1 bg-blue-50 text-blue-600 py-2.5 rounded-xl hover:bg-blue-100 transition text-sm font-medium"><i class="fas fa-edit mr-1"></i>Sửa</button>
@@ -281,11 +304,93 @@
                 const matchSearch = p.ten_mon.toLowerCase().includes(search) || (p.mo_ta_chi_tiet && p.mo_ta_chi_tiet.toLowerCase().includes(search));
                 const matchCategory = !category || p.ma_danh_muc == category;
                 let matchStatus = true;
-                if (status === 'con_hang') matchStatus = p.trang_thai == 1;
-                else if (status === 'het_hang') matchStatus = p.trang_thai == 0;
+                if (status === 'hien_thi') matchStatus = p.trang_thai == 1;
+                else if (status === 'an') matchStatus = p.trang_thai == 0;
+                else if (status === 'het_hang') matchStatus = (p.so_luong_ton || 0) <= 0;
+                else if (status === 'sap_het') matchStatus = (p.so_luong_ton || 0) > 0 && (p.so_luong_ton || 0) <= 5;
                 return matchSearch && matchCategory && matchStatus;
             });
             renderProducts(filtered);
+        }
+
+        // Toggle trạng thái hiển thị món ăn
+        async function toggleProductStatus(productId, isActive) {
+            try {
+                const response = await fetch(`${API_URL}/menu/${productId}/toggle-status`, {
+                    method: 'PATCH',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Cập nhật local data
+                    const product = products.find(p => p.ma_mon === productId);
+                    if (product) {
+                        product.trang_thai = data.data.trang_thai;
+                    }
+                    // Hiển thị thông báo nhỏ
+                    showToast(data.message, 'success');
+                } else {
+                    showToast('Có lỗi xảy ra: ' + data.message, 'error');
+                    loadProducts(); // Reload để sync lại
+                }
+            } catch (error) {
+                console.error('Error toggling status:', error);
+                showToast('Có lỗi xảy ra!', 'error');
+                loadProducts();
+            }
+        }
+
+        // Cập nhật số lượng tồn kho
+        async function updateStock(productId, currentStock) {
+            const newStock = prompt(`Nhập số lượng tồn kho mới cho món này:\n(Hiện tại: ${currentStock})`, currentStock);
+            if (newStock === null) return; // User cancelled
+            
+            const stockNum = parseInt(newStock);
+            if (isNaN(stockNum) || stockNum < 0) {
+                showToast('Số lượng không hợp lệ!', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/menu/${productId}/stock`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ so_luong_ton: stockNum })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Cập nhật local data
+                    const product = products.find(p => p.ma_mon === productId);
+                    if (product) {
+                        product.so_luong_ton = stockNum;
+                    }
+                    renderProducts(products);
+                    showToast('Cập nhật số lượng thành công!', 'success');
+                } else {
+                    showToast('Có lỗi xảy ra: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating stock:', error);
+                showToast('Có lỗi xảy ra!', 'error');
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 transition-all transform translate-y-0 ${
+                type === 'success' ? 'bg-emerald-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-slate-800 text-white'
+            }`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         loadCategories();

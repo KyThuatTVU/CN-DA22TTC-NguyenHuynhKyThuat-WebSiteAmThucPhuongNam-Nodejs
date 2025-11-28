@@ -163,13 +163,10 @@ function renderProductDetail() {
     const badgesContainer = document.getElementById('image-badges');
     let badges = '';
     
+    // Chỉ hiển thị badge "Hết hàng", ẩn badge "Sắp hết" với người dùng
     if (currentProduct.trang_thai === 0 || currentProduct.so_luong_ton === 0) {
         badges += `<span class="badge-tag bg-gray-800 text-white px-4 py-2 rounded-full text-sm font-semibold">
             <i class="fas fa-times-circle mr-1"></i>Hết hàng
-        </span>`;
-    } else if (currentProduct.so_luong_ton < 10) {
-        badges += `<span class="badge-tag bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-            <i class="fas fa-exclamation-triangle mr-1"></i>Sắp hết
         </span>`;
     }
     
@@ -193,11 +190,11 @@ function renderProductDetail() {
         productPrice.textContent = formatPrice(parseFloat(currentProduct.gia_tien));
     }
     
-    // Stock
-    const stockQuantity = document.getElementById('stock-quantity');
-    const stockUnit = document.getElementById('stock-unit');
-    if (stockQuantity) stockQuantity.textContent = currentProduct.so_luong_ton;
-    if (stockUnit) stockUnit.textContent = currentProduct.don_vi_tinh;
+    // Stock - Ẩn với người dùng, chỉ dùng nội bộ để kiểm tra
+    // const stockQuantity = document.getElementById('stock-quantity');
+    // const stockUnit = document.getElementById('stock-unit');
+    // if (stockQuantity) stockQuantity.textContent = currentProduct.so_luong_ton;
+    // if (stockUnit) stockUnit.textContent = currentProduct.don_vi_tinh;
     
     // Description
     const description = currentProduct.mo_ta_chi_tiet || 'Món ăn đặc sắc với hương vị đậm đà, được chế biến từ nguyên liệu tươi ngon, đảm bảo vệ sinh an toàn thực phẩm.';

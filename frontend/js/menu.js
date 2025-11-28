@@ -207,10 +207,6 @@ function renderMenuProducts() {
                         ? `<span class="badge-status text-white px-3 py-1.5 rounded-full text-xs font-semibold">
                             <i class="fas fa-times-circle mr-1"></i>Hết hàng
                            </span>` 
-                        : product.so_luong_ton < 10 
-                        ? `<span class="badge-status bg-yellow-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
-                            <i class="fas fa-exclamation-triangle mr-1"></i>Sắp hết
-                           </span>`
                         : ''}
                     ${product.ten_danh_muc 
                         ? `<span class="category-badge text-orange-600 px-3 py-1.5 rounded-full text-xs font-semibold">
@@ -246,10 +242,6 @@ function renderMenuProducts() {
                         ${generateStars(Number(product.avg_rating) || 0)}
                     </div>
                     <span class="text-gray-500 text-sm ml-2 font-medium">(${Number(product.total_reviews) || 0})</span>
-                    <span class="text-gray-300 mx-2">•</span>
-                    <span class="text-gray-500 text-xs">
-                        <i class="fas fa-box-open mr-1"></i>${product.so_luong_ton} ${product.don_vi_tinh}
-                    </span>
                 </div>
                 
                 <!-- Price & Action -->
