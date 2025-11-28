@@ -325,142 +325,150 @@
                 </div>
             </div>
 
-            <!-- Danh sách món ăn -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-
-                <!-- Dish Card 1 -->
-                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                    <div class="relative bg-gray-50">
-                        <img src="images/mau1.jpg" alt="Cá lóc nướng trui"
-                            class="w-full h-48 sm:h-56 md:h-64 object-contain">
-                        <span
-                            class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-orange-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium">-20%</span>
-                        <button
-                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
-                            <i class="far fa-heart text-sm sm:text-base"></i>
-                        </button>
-                    </div>
+            <!-- Danh sách món ăn - Load động từ API -->
+            <div id="featured-dishes-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+                <!-- Loading skeleton -->
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-gray-200 h-48 sm:h-56 md:h-64"></div>
                     <div class="p-3 sm:p-4">
-                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Trái cây Hoa quả sơn</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 text-xs sm:text-sm">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(128)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-orange-600 font-bold text-lg sm:text-xl">200.000đ</span>
-                                <span class="text-gray-400 line-through text-xs sm:text-sm ml-1 sm:ml-2">250.000đ</span>
-                            </div>
-                            <button onclick="addToCart(1)"
-                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
-                                <i class="fas fa-plus text-sm sm:text-base"></i>
-                            </button>
-                        </div>
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+                        <div class="h-5 bg-gray-200 rounded w-1/2"></div>
                     </div>
                 </div>
-
-                <!-- Dish Card 2 -->
-                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                    <div class="relative bg-gray-50">
-                        <img src="images/mau2.jpg" alt="Lẩu mắm" class="w-full h-48 sm:h-56 md:h-64 object-contain">
-                        <button
-                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
-                            <i class="far fa-heart text-sm sm:text-base"></i>
-                        </button>
-                    </div>
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-gray-200 h-48 sm:h-56 md:h-64"></div>
                     <div class="p-3 sm:p-4">
-                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Cà nướng Tây Bắc</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 text-xs sm:text-sm">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(95)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-orange-600 font-bold text-lg sm:text-xl">350.000đ</span>
-                            </div>
-                            <button onclick="addToCart(2)"
-                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
-                                <i class="fas fa-plus text-sm sm:text-base"></i>
-                            </button>
-                        </div>
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+                        <div class="h-5 bg-gray-200 rounded w-1/2"></div>
                     </div>
                 </div>
-
-                <!-- Dish Card 3 -->
-                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                    <div class="relative bg-gray-50">
-                        <img src="images/mau3.jpg" alt="Gỏi cuốn" class="w-full h-48 sm:h-56 md:h-64 object-contain">
-                        <span
-                            class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-orange-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium">-15%</span>
-                        <button
-                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
-                            <i class="far fa-heart text-sm sm:text-base"></i>
-                        </button>
-                    </div>
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-gray-200 h-48 sm:h-56 md:h-64"></div>
                     <div class="p-3 sm:p-4">
-                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Cơm chiên cá mặn</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 text-xs sm:text-sm">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(67)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-orange-600 font-bold text-lg sm:text-xl">85.000đ</span>
-                                <span class="text-gray-400 line-through text-xs sm:text-sm ml-1 sm:ml-2">100.000đ</span>
-                            </div>
-                            <button onclick="addToCart(3)"
-                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
-                                <i class="fas fa-plus text-sm sm:text-base"></i>
-                            </button>
-                        </div>
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+                        <div class="h-5 bg-gray-200 rounded w-1/2"></div>
                     </div>
                 </div>
-
-                <!-- Dish Card 4 -->
-                <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                    <div class="relative bg-gray-50">
-                        <img src="images/mau4.jpg" alt="Bánh xèo" class="w-full h-48 sm:h-56 md:h-64 object-contain">
-                        <button
-                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
-                            <i class="far fa-heart text-sm sm:text-base"></i>
-                        </button>
-                    </div>
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-gray-200 h-48 sm:h-56 md:h-64"></div>
                     <div class="p-3 sm:p-4">
-                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800">Mâm đồ nguội miền Tây</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 text-xs sm:text-sm">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs sm:text-sm ml-2">(145)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-orange-600 font-bold text-lg sm:text-xl">120.000đ</span>
-                            </div>
-                            <button onclick="addToCart(4)"
-                                class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
-                                <i class="fas fa-plus text-sm sm:text-base"></i>
-                            </button>
-                        </div>
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+                        <div class="h-5 bg-gray-200 rounded w-1/2"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <script>
+        // Render stars based on rating
+        function renderStarsHome(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i - 0.5 <= rating) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        // Load top selling dishes from API
+        async function loadFeaturedDishes() {
+            const container = document.getElementById('featured-dishes-container');
+            try {
+                const response = await fetch('http://localhost:3000/api/menu/top-selling?limit=4');
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    // Debug: Log rating data
+                    console.log('📊 Top selling dishes with ratings:');
+                    result.data.forEach(d => {
+                        console.log(`  - ${d.ten_mon}: avg_rating=${d.avg_rating} (type: ${typeof d.avg_rating}), total_reviews=${d.total_reviews}`);
+                    });
+                    
+                    container.innerHTML = result.data.map(dish => {
+                        let imagePath = dish.anh_mon || 'default-food.jpg';
+                        if (!imagePath.startsWith('http') && !imagePath.startsWith('/images/')) {
+                            imagePath = '/images/' + imagePath.replace(/^\/+/, '');
+                        }
+                        const imageUrl = imagePath.startsWith('http') ? imagePath : `http://localhost:3000${imagePath}`;
+                        const price = new Intl.NumberFormat('vi-VN').format(dish.gia_tien);
+                        
+                        return `
+                            <div class="card-hover bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                                <a href="chitietmonan.html?id=${dish.ma_mon}" class="block">
+                                    <div class="relative bg-gray-50">
+                                        <img src="${imageUrl}" alt="${dish.ten_mon}"
+                                            class="w-full h-48 sm:h-56 md:h-64 object-cover"
+                                            onerror="this.src='images/default-food.jpg'">
+                                        <span class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-green-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium">
+                                            <i class="fas fa-fire mr-1"></i>Bán chạy
+                                        </span>
+                                        <button onclick="event.preventDefault(); event.stopPropagation();"
+                                            class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition">
+                                            <i class="far fa-heart text-sm sm:text-base"></i>
+                                        </button>
+                                    </div>
+                                </a>
+                                <div class="p-3 sm:p-4">
+                                    <a href="chitietmonan.html?id=${dish.ma_mon}">
+                                        <h3 class="font-medium text-base sm:text-lg mb-2 text-gray-800 hover:text-orange-600 transition">${dish.ten_mon}</h3>
+                                    </a>
+                                    <div class="flex items-center mb-2">
+                                        <div class="text-yellow-400 text-xs sm:text-sm">
+                                            ${renderStarsHome(Number(dish.avg_rating) || 0)}
+                                        </div>
+                                        <span class="text-gray-500 text-xs sm:text-sm ml-2">(${Number(dish.total_reviews) || 0} đánh giá)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-orange-600 font-bold text-lg sm:text-xl">${price}đ</span>
+                                        </div>
+                                        <button onclick="addToCartFromFeatured(${dish.ma_mon}, '${dish.ten_mon.replace(/'/g, "\\'")}', ${dish.gia_tien}, '${imageUrl}')"
+                                            class="bg-orange-500 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-orange-600 transition">
+                                            <i class="fas fa-plus text-sm sm:text-base"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<p class="col-span-4 text-center text-gray-500 py-8">Chưa có dữ liệu món ăn bán chạy</p>';
+                }
+            } catch (error) {
+                console.error('Error loading featured dishes:', error);
+                container.innerHTML = '<p class="col-span-4 text-center text-gray-500 py-8">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>';
+            }
+        }
+
+        // Add to cart from featured section
+        function addToCartFromFeatured(id, name, price, image) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id, name, price, image, quantity: 1 });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            showNotification('Đã thêm vào giỏ hàng!', 'success');
+        }
+
+        // Load on page ready
+        document.addEventListener('DOMContentLoaded', loadFeaturedDishes);
+    </script>
 
 
 

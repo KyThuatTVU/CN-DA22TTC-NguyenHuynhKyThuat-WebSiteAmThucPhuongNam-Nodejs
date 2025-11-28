@@ -81,6 +81,7 @@ const momoPaymentRoutes = require('./routes/momo-payment');
 const customerRoutes = require('./routes/customers');
 const statsRoutes = require('./routes/stats');
 const reservationRoutes = require('./routes/reservations');
+const reviewRoutes = require('./routes/reviews');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -94,6 +95,7 @@ app.use('/api/payment', momoPaymentRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // 404 handler for API routes - return JSON instead of HTML
 app.use('/api/*', (req, res) => {

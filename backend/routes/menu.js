@@ -35,9 +35,12 @@ router.get('/', async (req, res) => {
     const { search, category, minPrice, maxPrice, sortBy } = req.query;
     
     let query = `
-      SELECT m.*, d.ten_danh_muc 
+      SELECT m.*, d.ten_danh_muc,
+             COALESCE(AVG(dg.so_sao), 0) as avg_rating,
+             COUNT(DISTINCT dg.ma_danh_gia) as total_reviews
       FROM mon_an m 
       LEFT JOIN danh_muc d ON m.ma_danh_muc = d.ma_danh_muc
+      LEFT JOIN danh_gia_san_pham dg ON m.ma_mon = dg.ma_mon AND dg.trang_thai = 'approved'
       WHERE 1=1
     `;
     const params = [];
@@ -63,6 +66,10 @@ router.get('/', async (req, res) => {
       query += ` AND m.gia_tien <= ?`;
       params.push(maxPrice);
     }
+    
+    // Group by để tính AVG rating
+    query += ` GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet, 
+               m.so_luong_ton, m.don_vi_tinh, m.trang_thai, m.ma_danh_muc, d.ten_danh_muc`;
     
     // Sorting
     switch(sortBy) {
@@ -92,12 +99,162 @@ router.get('/', async (req, res) => {
 // Lấy món ăn theo danh mục
 router.get('/category/:id', async (req, res) => {
   try {
-    const [rows] = await db.query(
-      'SELECT * FROM mon_an WHERE ma_danh_muc = ?',
-      [req.params.id]
-    );
+    const [rows] = await db.query(`
+      SELECT m.*, d.ten_danh_muc,
+             COALESCE(AVG(dg.so_sao), 0) as avg_rating,
+             COUNT(DISTINCT dg.ma_danh_gia) as total_reviews
+      FROM mon_an m
+      LEFT JOIN danh_muc d ON m.ma_danh_muc = d.ma_danh_muc
+      LEFT JOIN danh_gia_san_pham dg ON m.ma_mon = dg.ma_mon AND dg.trang_thai = 'approved'
+      WHERE m.ma_danh_muc = ?
+      GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet, 
+               m.so_luong_ton, m.don_vi_tinh, m.trang_thai, m.ma_danh_muc, d.ten_danh_muc
+    `, [req.params.id]);
     res.json({ success: true, data: rows });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Lấy top món ăn bán chạy nhất (public - không cần auth)
+router.get('/top-selling', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 4;
+    
+    const [topProducts] = await db.query(`
+      SELECT m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet,
+             COALESCE(SUM(ct.so_luong), 0) as da_ban,
+             COALESCE(AVG(dg.so_sao), 0) as avg_rating,
+             COUNT(DISTINCT dg.ma_danh_gia) as total_reviews
+      FROM mon_an m
+      LEFT JOIN chi_tiet_don_hang ct ON m.ma_mon = ct.ma_mon
+      LEFT JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang
+      LEFT JOIN danh_gia_san_pham dg ON m.ma_mon = dg.ma_mon AND dg.trang_thai = 'approved'
+      GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet
+      ORDER BY da_ban DESC
+      LIMIT ?
+    `, [limit]);
+
+    res.json({ success: true, data: topProducts });
+  } catch (error) {
+    console.error('Error fetching top selling products:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Gợi ý món ăn liên quan (Machine Learning - Collaborative Filtering)
+// Dựa trên các món thường được mua cùng nhau trong cùng đơn hàng
+router.get('/related/:id', async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    const limit = parseInt(req.query.limit) || 4;
+
+    // Lấy thông tin món hiện tại để biết danh mục
+    const [currentProduct] = await db.query(
+      'SELECT ma_danh_muc FROM mon_an WHERE ma_mon = ?',
+      [productId]
+    );
+
+    if (currentProduct.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
+    }
+
+    const categoryId = currentProduct[0].ma_danh_muc;
+
+    // Collaborative Filtering: Tìm các món thường được mua cùng
+    // Bước 1: Tìm các đơn hàng có chứa món hiện tại
+    // Bước 2: Đếm tần suất các món khác xuất hiện trong các đơn hàng đó
+    const [relatedByOrders] = await db.query(`
+      SELECT 
+        m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet,
+        m.so_luong_ton, m.trang_thai, m.ma_danh_muc,
+        COUNT(ct2.ma_mon) as frequency,
+        'bought_together' as recommendation_type,
+        COALESCE(AVG(dg.so_sao), 0) as avg_rating
+      FROM chi_tiet_don_hang ct1
+      JOIN chi_tiet_don_hang ct2 ON ct1.ma_don_hang = ct2.ma_don_hang AND ct1.ma_mon != ct2.ma_mon
+      JOIN mon_an m ON ct2.ma_mon = m.ma_mon
+      LEFT JOIN danh_gia_san_pham dg ON m.ma_mon = dg.ma_mon AND dg.trang_thai = 'approved'
+      WHERE ct1.ma_mon = ?
+      GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet, m.so_luong_ton, m.trang_thai, m.ma_danh_muc
+      ORDER BY frequency DESC
+      LIMIT ?
+    `, [productId, limit]);
+
+    let recommendations = relatedByOrders;
+
+    // Nếu không đủ dữ liệu từ collaborative filtering, bổ sung bằng:
+    // 1. Món cùng danh mục bán chạy
+    // 2. Món bán chạy nhất
+    if (recommendations.length < limit) {
+      const existingIds = recommendations.map(r => r.ma_mon);
+      existingIds.push(productId); // Loại bỏ món hiện tại
+      
+      const placeholders = existingIds.map(() => '?').join(',');
+      const remaining = limit - recommendations.length;
+
+      // Lấy món cùng danh mục bán chạy
+      const [sameCategoryProducts] = await db.query(`
+        SELECT 
+          m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet,
+          m.so_luong_ton, m.trang_thai, m.ma_danh_muc,
+          COALESCE(SUM(ct.so_luong), 0) as frequency,
+          'same_category' as recommendation_type,
+          COALESCE(AVG(dg.so_sao), 0) as avg_rating
+        FROM mon_an m
+        LEFT JOIN chi_tiet_don_hang ct ON m.ma_mon = ct.ma_mon
+        LEFT JOIN danh_gia_san_pham dg ON m.ma_mon = dg.ma_mon AND dg.trang_thai = 'approved'
+        WHERE m.ma_danh_muc = ? AND m.ma_mon NOT IN (${placeholders})
+        GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet, m.so_luong_ton, m.trang_thai, m.ma_danh_muc
+        ORDER BY frequency DESC
+        LIMIT ?
+      `, [categoryId, ...existingIds, remaining]);
+
+      recommendations = [...recommendations, ...sameCategoryProducts];
+    }
+
+    // Nếu vẫn không đủ, lấy món bán chạy nhất
+    if (recommendations.length < limit) {
+      const existingIds = recommendations.map(r => r.ma_mon);
+      existingIds.push(productId);
+      
+      const placeholders = existingIds.map(() => '?').join(',');
+      const remaining = limit - recommendations.length;
+
+      const [topSellingProducts] = await db.query(`
+        SELECT 
+          m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet,
+          m.so_luong_ton, m.trang_thai, m.ma_danh_muc,
+          COALESCE(SUM(ct.so_luong), 0) as frequency,
+          'top_selling' as recommendation_type,
+          COALESCE(AVG(dg.so_sao), 0) as avg_rating
+        FROM mon_an m
+        LEFT JOIN chi_tiet_don_hang ct ON m.ma_mon = ct.ma_mon
+        LEFT JOIN danh_gia_san_pham dg ON m.ma_mon = dg.ma_mon AND dg.trang_thai = 'approved'
+        WHERE m.ma_mon NOT IN (${placeholders})
+        GROUP BY m.ma_mon, m.ten_mon, m.anh_mon, m.gia_tien, m.mo_ta_chi_tiet, m.so_luong_ton, m.trang_thai, m.ma_danh_muc
+        ORDER BY frequency DESC
+        LIMIT ?
+      `, [...existingIds, remaining]);
+
+      recommendations = [...recommendations, ...topSellingProducts];
+    }
+
+    res.json({ 
+      success: true, 
+      data: recommendations,
+      meta: {
+        productId,
+        totalRecommendations: recommendations.length,
+        types: {
+          bought_together: recommendations.filter(r => r.recommendation_type === 'bought_together').length,
+          same_category: recommendations.filter(r => r.recommendation_type === 'same_category').length,
+          top_selling: recommendations.filter(r => r.recommendation_type === 'top_selling').length
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching related products:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });

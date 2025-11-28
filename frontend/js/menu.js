@@ -43,6 +43,13 @@ async function fetchMenuProducts(categoryId = null) {
         
         if (result.success) {
             allProducts = result.data;
+            
+            // Debug: Log rating data
+            console.log('📊 Menu products with ratings:');
+            allProducts.slice(0, 5).forEach(p => {
+                console.log(`  - ${p.ten_mon}: avg_rating=${p.avg_rating}, total_reviews=${p.total_reviews}`);
+            });
+            
             applyFiltersAndSort();
             
             // Simulate loading for smooth transition
@@ -236,9 +243,9 @@ function renderMenuProducts() {
                 <!-- Rating -->
                 <div class="flex items-center mb-3">
                     <div class="text-yellow-400 text-sm">
-                        ${generateStars(4.5)}
+                        ${generateStars(Number(product.avg_rating) || 0)}
                     </div>
-                    <span class="text-gray-500 text-sm ml-2 font-medium">(${Math.floor(Math.random() * 100) + 20})</span>
+                    <span class="text-gray-500 text-sm ml-2 font-medium">(${Number(product.total_reviews) || 0})</span>
                     <span class="text-gray-300 mx-2">•</span>
                     <span class="text-gray-500 text-xs">
                         <i class="fas fa-box-open mr-1"></i>${product.so_luong_ton} ${product.don_vi_tinh}
