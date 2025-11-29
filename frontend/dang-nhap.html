@@ -7,29 +7,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/modern-style.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full">
             <!-- Logo -->
-<div class="text-center mb-8">
-    <a href="index.html" class="inline-flex items-center space-x-3">
+<div class="text-center mb-6 sm:mb-8">
+    <a href="index.html" class="inline-flex items-center space-x-2 sm:space-x-3">
         <!-- Logo hình -->
-        <img src="images/Green Simple Clean Vegan Food Logo.png" alt="Phương Nam Logo" class="w-14 h-14 rounded-full border-2 border-orange-600 shadow-md object-cover">
+        <img src="images/Green Simple Clean Vegan Food Logo.png" alt="Phương Nam Logo" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-orange-600 shadow-md object-cover">
 
         <div class="text-left">
-            <h1 class="font-dancing text-3xl font-bold text-gray-800">Phương Nam</h1>
-            <p class="text-sm text-gray-600">Vĩnh Long</p>
+            <h1 class="font-dancing text-2xl sm:text-3xl font-bold text-gray-800">Phương Nam</h1>
+            <p class="text-xs sm:text-sm text-gray-600">Vĩnh Long</p>
         </div>
     </a>
 </div>
 
             <!-- Login Card -->
-            <div class="bg-white rounded-2xl shadow-xl p-8">
-                <h2 class="text-3xl font-bold text-center mb-2">Đăng Nhập</h2>
-                <p class="text-gray-600 text-center mb-8">Chào mừng bạn trở lại!</p>
+            <div class="bg-white rounded-2xl shadow-xl p-5 sm:p-8">
+                <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">Đăng Nhập</h2>
+                <p class="text-gray-600 text-center mb-6 sm:mb-8 text-sm sm:text-base">Chào mừng bạn trở lại!</p>
 
-                <form id="login-form" class="space-y-6">
+                <form id="login-form" class="space-y-4 sm:space-y-6">
                     <!-- Email -->
                     <div>
                         <label class="block text-sm font-medium mb-2">Email</label>
@@ -38,7 +39,7 @@
                                 <i class="fas fa-envelope text-gray-400"></i>
                             </div>
                             <input type="email" id="email" name="email" required 
-                                   class="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:border-orange-600" 
+                                   class="w-full pl-10 pr-4 py-2.5 sm:py-3 border rounded-lg focus:outline-none focus:border-orange-600 text-base" 
                                    placeholder="email@example.com">
                         </div>
                     </div>
@@ -51,7 +52,7 @@
                                 <i class="fas fa-lock text-gray-400"></i>
                             </div>
                             <input type="password" id="password" name="mat_khau" required 
-                                   class="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:border-orange-600" 
+                                   class="w-full pl-10 pr-12 py-2.5 sm:py-3 border rounded-lg focus:outline-none focus:border-orange-600 text-base" 
                                    placeholder="Nhập mật khẩu">
                             <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                 <i id="password-icon" class="fas fa-eye text-gray-400"></i>
@@ -60,7 +61,7 @@
                     </div>
 
                     <!-- Remember & Forgot -->
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
                         <label class="flex items-center">
                             <input type="checkbox" class="w-4 h-4 text-orange-600 rounded">
                             <span class="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
@@ -73,12 +74,12 @@
                     <!-- Login Button -->
                     <button type="submit" 
                             style="display: block !important; visibility: visible !important; opacity: 1 !important;"
-                            class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-lg font-medium text-lg hover:from-orange-700 hover:to-red-700 transition shadow-lg">
+                            class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-2.5 sm:py-3 rounded-lg font-medium text-base sm:text-lg hover:from-orange-700 hover:to-red-700 transition shadow-lg">
                         <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
                     </button>
 
                     <!-- Register Link -->
-                    <p class="text-center text-gray-600 mt-6">
+                    <p class="text-center text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base">
                         Chưa có tài khoản? 
                         <a href="dang-ky.html" class="text-orange-600 hover:text-orange-700 font-medium">Đăng ký ngay</a>
                     </p>

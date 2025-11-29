@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/modern-style.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <style>
         .status-badge {
             @apply px-3 py-1 rounded-full text-xs font-medium;
@@ -17,6 +18,18 @@
         .order-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        /* Mobile order card improvements */
+        @media (max-width: 639px) {
+            .order-card {
+                padding: 1rem;
+            }
+            
+            .order-item-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
         }
     </style>
 </head>

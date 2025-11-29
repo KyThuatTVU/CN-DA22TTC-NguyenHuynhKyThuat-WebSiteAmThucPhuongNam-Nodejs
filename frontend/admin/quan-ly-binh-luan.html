@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="admin-responsive.css">
 </head>
 <body>
     <div class="flex h-screen overflow-hidden">
@@ -58,10 +59,13 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Sidebar Overlay -->
+            <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+            
             <header class="header-bar flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
-                    <div><h2 class="text-xl font-bold">Quản lý Bình luận Tin tức</h2><p class="text-sm text-blue-200">Duyệt và quản lý bình luận của người dùng</p></div>
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <button onclick="toggleSidebar()" class="mobile-menu-btn lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+                    <div><h2 class="text-base sm:text-xl font-bold">Quản lý Bình luận</h2><p class="text-xs sm:text-sm text-blue-200 hidden sm:block">Duyệt và quản lý bình luận của người dùng</p></div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="../index.html" target="_blank" class="text-white hover:text-blue-200"><i class="fas fa-external-link-alt"></i></a>
@@ -140,6 +144,7 @@
 
     <script src="check-auth.js"></script>
     <script src="admin-layout.js"></script>
+    <script src="admin-mobile.js"></script>
     <script src="../js/admin-comments.js"></script>
 </body>
 </html>

@@ -1,0 +1,607 @@
+/* ===============================================
+   ADMIN RESPONSIVE DESIGN - PHƯƠNG NAM RESTAURANT
+   Mobile-First Approach for Admin Panel
+   =============================================== */
+
+/* ============================================
+   SIDEBAR RESPONSIVE
+   ============================================ */
+
+/* Mobile: Sidebar hidden by default */
+@media (max-width: 1023px) {
+    #sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    #sidebar.open {
+        left: 0;
+    }
+    
+    /* Overlay when sidebar is open */
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* Desktop: Sidebar always visible */
+@media (min-width: 1024px) {
+    #sidebar {
+        position: relative;
+        left: 0;
+    }
+    
+    .mobile-menu-btn {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   HEADER BAR RESPONSIVE
+   ============================================ */
+
+.header-bar {
+    padding: 12px 16px;
+}
+
+@media (min-width: 640px) {
+    .header-bar {
+        padding: 16px 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .header-bar {
+        padding: 16px 28px;
+    }
+}
+
+/* Header title responsive */
+@media (max-width: 639px) {
+    .header-bar h2 {
+        font-size: 1rem;
+    }
+    
+    .header-bar p {
+        font-size: 0.75rem;
+        display: none;
+    }
+    
+    .header-bar .btn-primary {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .header-bar .btn-primary span {
+        display: none;
+    }
+}
+
+/* ============================================
+   MAIN CONTENT RESPONSIVE
+   ============================================ */
+
+main {
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {
+    main {
+        padding: 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    main {
+        padding: 1.5rem;
+    }
+}
+
+/* ============================================
+   STAT CARDS RESPONSIVE
+   ============================================ */
+
+.stat-card {
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {
+    .stat-card {
+        padding: 1.25rem;
+    }
+}
+
+/* Stat cards grid */
+@media (max-width: 639px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    
+    .stat-card p.text-2xl {
+        font-size: 1.25rem;
+    }
+    
+    .stat-card .w-12 {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    .stat-card .text-xl {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   KPI CARDS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .kpi-card {
+        padding: 1rem;
+    }
+    
+    .kpi-value {
+        font-size: 1.5rem !important;
+    }
+    
+    .kpi-icon {
+        width: 44px !important;
+        height: 44px !important;
+    }
+}
+
+/* KPI grid */
+@media (max-width: 767px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+}
+
+/* ============================================
+   CONTENT CARDS RESPONSIVE
+   ============================================ */
+
+.content-card {
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+@media (min-width: 640px) {
+    .content-card {
+        padding: 1.25rem;
+        border-radius: 14px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .content-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+}
+
+/* ============================================
+   CHART CARDS RESPONSIVE
+   ============================================ */
+
+.chart-card {
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {
+    .chart-card {
+        padding: 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .chart-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Chart container height */
+@media (max-width: 639px) {
+    .chart-container {
+        height: 200px !important;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+    .chart-container {
+        height: 250px !important;
+    }
+}
+
+/* ============================================
+   TABLES RESPONSIVE
+   ============================================ */
+
+/* Table wrapper for horizontal scroll */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Table minimum width */
+@media (max-width: 767px) {
+    .admin-table {
+        min-width: 600px;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Mobile card view for tables */
+@media (max-width: 639px) {
+    .table-mobile-card {
+        display: block !important;
+    }
+    
+    .table-desktop {
+        display: none !important;
+    }
+    
+    .mobile-card-item {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .mobile-card-item:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (min-width: 640px) {
+    .table-mobile-card {
+        display: none !important;
+    }
+    
+    .table-desktop {
+        display: table !important;
+    }
+}
+
+/* ============================================
+   FILTER SECTION RESPONSIVE
+   ============================================ */
+
+.filter-section {
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {
+    .filter-section {
+        padding: 1.25rem;
+    }
+}
+
+/* Filter buttons */
+@media (max-width: 639px) {
+    .filter-btn {
+        padding: 6px 10px;
+        font-size: 0.6875rem;
+    }
+    
+    .filter-buttons {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+/* Filter grid */
+@media (max-width: 767px) {
+    .filter-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    .filter-grid-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ============================================
+   FORMS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .admin-form input,
+    .admin-form select,
+    .admin-form textarea {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+        padding: 0.75rem;
+    }
+    
+    .admin-form label {
+        font-size: 0.8125rem;
+    }
+    
+    .form-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ============================================
+   MODALS RESPONSIVE
+   ============================================ */
+
+.modal-content {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+@media (min-width: 640px) {
+    .modal-content {
+        margin: 2rem auto;
+        max-width: 500px;
+    }
+}
+
+@media (min-width: 768px) {
+    .modal-content {
+        max-width: 600px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .modal-content {
+        max-width: 700px;
+    }
+}
+
+/* Modal padding */
+@media (max-width: 639px) {
+    .modal-content {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.125rem;
+    }
+}
+
+/* ============================================
+   BUTTONS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .btn-primary {
+        padding: 8px 14px;
+        font-size: 0.8125rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group button {
+        width: 100%;
+    }
+    
+    /* Action buttons in tables */
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .action-buttons button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   PAGINATION RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .pagination button {
+        min-width: 36px;
+        height: 36px;
+        font-size: 0.75rem;
+    }
+    
+    .pagination-info {
+        width: 100%;
+        text-align: center;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   SEARCH BAR RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .search-bar {
+        width: 100%;
+    }
+    
+    .search-bar input {
+        font-size: 16px;
+        padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+    }
+}
+
+/* ============================================
+   ADMIN CARD (User Info) RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1023px) {
+    .admin-card {
+        padding: 12px;
+    }
+    
+    .admin-card img {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .admin-card p.font-semibold {
+        font-size: 0.8125rem;
+    }
+    
+    .admin-card p.text-xs {
+        font-size: 0.6875rem;
+    }
+}
+
+/* ============================================
+   ORDER DETAILS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .order-detail-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    .order-item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .order-item-image {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* ============================================
+   STATUS BADGES RESPONSIVE
+   ============================================ */
+
+@media (max-width: 639px) {
+    .status-badge {
+        padding: 4px 8px;
+        font-size: 0.6875rem;
+    }
+}
+
+/* ============================================
+   DASHBOARD GRID RESPONSIVE
+   ============================================ */
+
+@media (max-width: 767px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Hide on mobile */
+@media (max-width: 639px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Show only on mobile */
+@media (min-width: 640px) {
+    .show-mobile-only {
+        display: none !important;
+    }
+}
+
+/* Hide on tablet */
+@media (max-width: 1023px) {
+    .hide-tablet {
+        display: none !important;
+    }
+}
+
+/* Text truncate */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .sidebar-item {
+        min-height: 48px;
+    }
+    
+    button,
+    a {
+        min-height: 44px;
+    }
+    
+    /* Better touch feedback */
+    .sidebar-item:active,
+    button:active {
+        opacity: 0.8;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    #sidebar,
+    .header-bar button,
+    .no-print {
+        display: none !important;
+    }
+    
+    main {
+        padding: 0 !important;
+    }
+    
+    .content-card {
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb;
+    }
+}

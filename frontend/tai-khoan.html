@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/modern-style.css">
-    <link rel="stylesheet" href="css/navbar-fix.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <script src="js/tailwind-config.js"></script>
 </head>
 
@@ -20,12 +20,12 @@
     <div class="min-h-screen pt-24 pb-16">
         <div class="container mx-auto px-4 max-w-7xl">
             <!-- Page Header -->
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                    <i class="fas fa-user-circle text-orange-600 mr-3"></i>
+            <div class="mb-6 sm:mb-8">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-user-circle text-orange-600 mr-2 sm:mr-3"></i>
                     Tài Khoản Của Tôi
                 </h1>
-                <p class="text-gray-600">Quản lý thông tin cá nhân và cài đặt tài khoản</p>
+                <p class="text-gray-600 text-sm sm:text-base">Quản lý thông tin cá nhân và cài đặt tài khoản</p>
             </div>
 
             <div class="grid lg:grid-cols-4 gap-6">
@@ -42,9 +42,9 @@
                 <div class="lg:col-span-1">
                     <div id="sidebar-menu" class="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-24 hidden lg:block">
                         <!-- User Avatar -->
-                        <div class="text-center mb-6">
+                        <div class="text-center mb-4 sm:mb-6">
                             <div class="relative inline-block">
-                                <div id="avatar-display" class="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-3xl font-bold mx-auto shadow-lg transition-all duration-300 hover:scale-105">
+                                <div id="avatar-display" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold mx-auto shadow-lg transition-all duration-300 hover:scale-105">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <button onclick="document.getElementById('avatar-input').click()" class="absolute bottom-0 right-0 bg-orange-600 text-white w-8 h-8 rounded-full hover:bg-orange-700 hover:scale-110 transition-all duration-300 shadow-md flex items-center justify-center">
@@ -94,13 +94,13 @@
                 <div class="lg:col-span-3">
                     <!-- Profile Tab -->
                     <div id="profile-tab" class="tab-content">
-                        <div class="bg-white rounded-lg shadow-md p-8">
-                            <div class="flex items-center justify-between mb-6">
-                                <h2 class="text-2xl font-bold text-gray-800">
+                        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 md:p-8">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                                <h2 class="text-xl sm:text-2xl font-bold text-gray-800">
                                     <i class="fas fa-user-edit text-orange-600 mr-2"></i>
                                     Thông Tin Cá Nhân
                                 </h2>
-                                <button id="edit-profile-btn" onclick="toggleEditMode()" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                                <button id="edit-profile-btn" onclick="toggleEditMode()" class="w-full sm:w-auto px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition text-sm sm:text-base">
                                     <i class="fas fa-edit mr-2"></i>Chỉnh sửa
                                 </button>
                             </div>
@@ -171,8 +171,8 @@
 
                     <!-- Password Tab -->
                     <div id="password-tab" class="tab-content hidden">
-                        <div class="bg-white rounded-lg shadow-md p-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 md:p-8">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
                                 <i class="fas fa-key text-orange-600 mr-2"></i>
                                 Đổi Mật Khẩu
                             </h2>
@@ -234,8 +234,8 @@
 
                     <!-- Reservations Tab -->
                     <div id="reservations-tab" class="tab-content hidden">
-                        <div class="bg-white rounded-lg shadow-md p-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 md:p-8">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
                                 <i class="fas fa-calendar-check text-orange-600 mr-2"></i>
                                 Lịch Đặt Bàn
                             </h2>

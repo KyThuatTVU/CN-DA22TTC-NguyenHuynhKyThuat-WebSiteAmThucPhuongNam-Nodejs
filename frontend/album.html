@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/modern-style.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <style>
         .gallery-item {
             cursor: pointer;
@@ -20,6 +21,13 @@
 
         .gallery-item:hover img {
             transform: scale(1.1);
+        }
+        
+        /* Mobile gallery improvements */
+        @media (max-width: 639px) {
+            .gallery-item {
+                border-radius: 0.5rem;
+            }
         }
     </style>
 </head>

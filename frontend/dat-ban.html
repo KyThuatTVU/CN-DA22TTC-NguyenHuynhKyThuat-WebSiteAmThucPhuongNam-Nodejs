@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/modern-style.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
     <!-- Navigation Container -->
@@ -38,43 +39,43 @@
 
 
     <!-- Booking Section -->
-    <section class="py-16">
+    <section class="py-8 sm:py-12 md:py-16">
         <div class="container mx-auto px-4">
             <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
                     <!-- Booking Form -->
-                    <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-10 border border-orange-100">
-                        <div class="flex items-center mb-8">
-                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-                                <i class="fas fa-calendar-alt text-white text-xl"></i>
+                    <div class="bg-white rounded-2xl shadow-xl p-5 sm:p-8 lg:p-10 border border-orange-100">
+                        <div class="flex items-center mb-6 sm:mb-8">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-3 sm:mr-4">
+                                <i class="fas fa-calendar-alt text-white text-lg sm:text-xl"></i>
                             </div>
-                            <h2 class="text-3xl font-bold text-gray-800">Thông tin đặt bàn</h2>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Thông tin đặt bàn</h2>
                         </div>
-                        <form id="booking-form" class="space-y-4">
+                        <form id="booking-form" class="space-y-3 sm:space-y-4">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Họ và tên *</label>
                                 <input type="text" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Nguyễn Văn A">
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Số điện thoại *</label>
-                                    <input type="tel" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="0123456789">
+                                    <input type="tel" required class="w-full border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:outline-none focus:border-orange-600 text-base" placeholder="0123456789">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Email</label>
-                                    <input type="email" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="email@example.com">
+                                    <input type="email" class="w-full border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:outline-none focus:border-orange-600 text-base" placeholder="email@example.com">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Ngày đặt *</label>
-                                    <input type="date" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                    <input type="date" required class="w-full border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:outline-none focus:border-orange-600 text-base">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Giờ đặt *</label>
-                                    <input type="time" required class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600">
+                                    <input type="time" required class="w-full border rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:outline-none focus:border-orange-600 text-base">
                                 </div>
                             </div>
 
@@ -108,20 +109,20 @@
                                 <textarea rows="3" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Yêu cầu đặc biệt, dị ứng thực phẩm..."></textarea>
                             </div>
 
-                            <button type="submit" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-lg font-medium text-lg hover:opacity-90 transition">
+                            <button type="submit" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 sm:py-4 rounded-lg font-medium text-base sm:text-lg hover:opacity-90 transition">
                                 <i class="fas fa-calendar-check mr-2"></i> Xác nhận đặt bàn
                             </button>
                         </form>
                     </div>
 
                     <!-- Restaurant Info -->
-                    <div class="space-y-8">
-                        <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-10 border border-orange-100">
-                            <div class="flex items-center mb-6">
-                                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-                                    <i class="fas fa-info-circle text-white text-xl"></i>
+                    <div class="space-y-4 sm:space-y-6 lg:space-y-8">
+                        <div class="bg-white rounded-2xl shadow-xl p-5 sm:p-8 lg:p-10 border border-orange-100">
+                            <div class="flex items-center mb-4 sm:mb-6">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-3 sm:mr-4">
+                                    <i class="fas fa-info-circle text-white text-lg sm:text-xl"></i>
                                 </div>
-                                <h3 class="text-2xl font-bold text-gray-800">Thông tin nhà hàng</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Thông tin nhà hàng</h3>
                             </div>
                             <div class="space-y-4">
                                 <div class="flex items-start">
@@ -155,25 +156,25 @@
                             </div>
                         </div>
 
-                        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8 border border-orange-200">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
-                                    <i class="fas fa-exclamation-circle text-white"></i>
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-5 sm:p-8 border border-orange-200">
+                            <div class="flex items-center mb-3 sm:mb-4">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
+                                    <i class="fas fa-exclamation-circle text-white text-sm sm:text-base"></i>
                                 </div>
-                                <h4 class="font-bold text-xl text-gray-800">Lưu ý khi đặt bàn</h4>
+                                <h4 class="font-bold text-lg sm:text-xl text-gray-800">Lưu ý khi đặt bàn</h4>
                             </div>
-                            <ul class="space-y-3 text-gray-700">
-                                <li class="flex items-start bg-white rounded-lg p-3">
-                                    <i class="fas fa-check-circle text-orange-600 mr-3 mt-1 text-lg"></i>
-                                    <span>Vui lòng đặt bàn trước ít nhất 2 giờ</span>
+                            <ul class="space-y-2 sm:space-y-3 text-gray-700">
+                                <li class="flex items-start bg-white rounded-lg p-2.5 sm:p-3">
+                                    <i class="fas fa-check-circle text-orange-600 mr-2 sm:mr-3 mt-0.5 sm:mt-1 text-base sm:text-lg"></i>
+                                    <span class="text-sm sm:text-base">Vui lòng đặt bàn trước ít nhất 2 giờ</span>
                                 </li>
-                                <li class="flex items-start bg-white rounded-lg p-3">
-                                    <i class="fas fa-check-circle text-orange-600 mr-3 mt-1 text-lg"></i>
-                                    <span>Bàn sẽ được giữ trong vòng 15 phút kể từ giờ đặt</span>
+                                <li class="flex items-start bg-white rounded-lg p-2.5 sm:p-3">
+                                    <i class="fas fa-check-circle text-orange-600 mr-2 sm:mr-3 mt-0.5 sm:mt-1 text-base sm:text-lg"></i>
+                                    <span class="text-sm sm:text-base">Bàn sẽ được giữ trong vòng 15 phút kể từ giờ đặt</span>
                                 </li>
-                                <li class="flex items-start bg-white rounded-lg p-3">
-                                    <i class="fas fa-check-circle text-orange-600 mr-3 mt-1 text-lg"></i>
-                                    <span>Liên hệ với chúng tôi nếu cần hủy hoặc thay đổi</span>
+                                <li class="flex items-start bg-white rounded-lg p-2.5 sm:p-3">
+                                    <i class="fas fa-check-circle text-orange-600 mr-2 sm:mr-3 mt-0.5 sm:mt-1 text-base sm:text-lg"></i>
+                                    <span class="text-sm sm:text-base">Liên hệ với chúng tôi nếu cần hủy hoặc thay đổi</span>
                                 </li>
                             </ul>
                         </div>

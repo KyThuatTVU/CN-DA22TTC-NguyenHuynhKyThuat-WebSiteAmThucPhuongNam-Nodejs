@@ -15,3 +15,125 @@ body { background: #f0f4f8; }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 .table-header { background: #f8fafc; }
 .table-row:hover { background: #f8fafc; }
+
+/* ============================================
+   SIDEBAR TOGGLE FUNCTIONALITY
+   ============================================ */
+
+/* Mobile menu button */
+.mobile-menu-btn {
+    display: none;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+@media (max-width: 1023px) {
+    .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Sidebar overlay */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Sidebar mobile positioning */
+@media (max-width: 1023px) {
+    #sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    #sidebar.open {
+        left: 0;
+    }
+}
+
+/* ============================================
+   ADDITIONAL RESPONSIVE IMPROVEMENTS
+   ============================================ */
+
+/* Responsive grid utilities */
+.grid-responsive-4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .grid-responsive-4 {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+.grid-responsive-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .grid-responsive-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-responsive-3 {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Table wrapper */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+    .table-wrapper {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+/* Responsive text */
+@media (max-width: 639px) {
+    .text-responsive-lg {
+        font-size: 1.125rem !important;
+    }
+    
+    .text-responsive-xl {
+        font-size: 1.25rem !important;
+    }
+    
+    .text-responsive-2xl {
+        font-size: 1.5rem !important;
+    }
+}

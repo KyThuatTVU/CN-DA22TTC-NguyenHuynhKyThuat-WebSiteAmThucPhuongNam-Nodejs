@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="admin-responsive.css">
     <style>
         .reaction-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 13px; background: #f1f5f9; }
     </style>
@@ -61,10 +62,13 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Sidebar Overlay -->
+            <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+            
             <header class="header-bar flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
-                    <div><h2 class="text-xl font-bold">Quản lý Reactions Tin tức</h2><p class="text-sm text-blue-200">Quản lý cảm xúc của người dùng với tin tức</p></div>
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <button onclick="toggleSidebar()" class="mobile-menu-btn lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+                    <div><h2 class="text-base sm:text-xl font-bold">Quản lý Reactions</h2><p class="text-xs sm:text-sm text-blue-200 hidden sm:block">Quản lý cảm xúc của người dùng với tin tức</p></div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <button onclick="exportData()" class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 flex items-center space-x-2"><i class="fas fa-download"></i><span>Xuất Excel</span></button>
@@ -210,6 +214,7 @@
 
     <script src="check-auth.js"></script>
     <script src="admin-layout.js"></script>
+    <script src="admin-mobile.js"></script>
     <script src="../js/admin-news-reactions.js"></script>
 </body>
 </html>

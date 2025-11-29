@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="admin-responsive.css">
     <style>
         body { background: #f0f4f8; }
         .sidebar { background: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%); }
@@ -122,13 +124,16 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Sidebar Overlay -->
+            <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+            
             <!-- Header Bar -->
             <header class="header-bar flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <button onclick="toggleSidebar()" class="mobile-menu-btn lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
                     <div>
-                        <h2 class="text-xl font-bold">Dashboard</h2>
-                        <p class="text-sm text-blue-200">Báo cáo tổng quan nhà hàng</p>
+                        <h2 class="text-base sm:text-xl font-bold">Dashboard</h2>
+                        <p class="text-xs sm:text-sm text-blue-200 hidden sm:block">Báo cáo tổng quan nhà hàng</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -346,6 +351,7 @@
 
     <script src="check-auth.js"></script>
     <script src="admin-layout.js"></script>
+    <script src="admin-mobile.js"></script>
 
     <script>
         // API_URL đã được khai báo trong admin-layout.js

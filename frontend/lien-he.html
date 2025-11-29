@@ -150,7 +150,7 @@
     </style>
 
     <!-- Hero Section with Particles -->
-    <section class="relative pt-32 pb-20 overflow-hidden">
+    <section class="relative pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 overflow-hidden">
         <div class="absolute inset-0 gradient-bg opacity-10"></div>
         <div class="absolute top-10 left-10 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
         <div class="absolute bottom-10 right-10 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style="animation-delay: 1s;"></div>
@@ -171,47 +171,47 @@
     </section>
 
     <!-- Contact Section -->
-    <section class="py-16 relative">
+    <section class="py-8 sm:py-12 md:py-16 relative">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 max-w-7xl mx-auto">
                 <!-- Contact Form - Takes 3 columns -->
-                <div class="lg:col-span-3">
-                    <div class="glass-effect rounded-3xl shadow-2xl p-8 md:p-12 card-hover">
-                        <div class="flex items-center gap-4 mb-8">
-                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-comment-dots text-white text-xl"></i>
+                <div class="lg:col-span-3 order-2 lg:order-1">
+                    <div class="glass-effect rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-8 md:p-12 card-hover">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-comment-dots text-white text-lg sm:text-xl"></i>
                             </div>
-                            <h2 class="font-dancing text-3xl md:text-4xl font-bold text-gray-800">Gửi Tin Nhắn</h2>
+                            <h2 class="font-dancing text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">Gửi Tin Nhắn</h2>
                         </div>
                         
-                        <form id="contact-form" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <form id="contact-form" class="space-y-4 sm:space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                    <label class="block text-sm font-semibold mb-2 sm:mb-3 text-gray-700">
                                         <i class="fas fa-user mr-2 text-orange-500"></i>Họ và tên
                                     </label>
-                                    <input type="text" required class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white" placeholder="Nhập họ và tên của bạn">
+                                    <input type="text" required class="input-modern w-full rounded-xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none bg-white text-base" placeholder="Nhập họ và tên của bạn">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                    <label class="block text-sm font-semibold mb-2 sm:mb-3 text-gray-700">
                                         <i class="fas fa-phone mr-2 text-orange-500"></i>Số điện thoại
                                     </label>
-                                    <input type="tel" required class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white" placeholder="0123 456 789">
+                                    <input type="tel" required class="input-modern w-full rounded-xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none bg-white text-base" placeholder="0123 456 789">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                <label class="block text-sm font-semibold mb-2 sm:mb-3 text-gray-700">
                                     <i class="fas fa-envelope mr-2 text-orange-500"></i>Email
                                 </label>
-                                <input type="email" required class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white" placeholder="example@email.com">
+                                <input type="email" required class="input-modern w-full rounded-xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none bg-white text-base" placeholder="example@email.com">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                <label class="block text-sm font-semibold mb-2 sm:mb-3 text-gray-700">
                                     <i class="fas fa-tag mr-2 text-orange-500"></i>Chủ đề
                                 </label>
-                                <select class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white cursor-pointer">
+                                <select class="input-modern w-full rounded-xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none bg-white cursor-pointer text-base">
                                     <option>Câu hỏi chung</option>
                                     <option>Đặt bàn</option>
                                     <option>Đặt tiệc</option>
@@ -222,13 +222,13 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-3 text-gray-700">
+                                <label class="block text-sm font-semibold mb-2 sm:mb-3 text-gray-700">
                                     <i class="fas fa-edit mr-2 text-orange-500"></i>Nội dung tin nhắn
                                 </label>
-                                <textarea required rows="6" class="input-modern w-full rounded-xl px-5 py-4 focus:outline-none bg-white resize-none" placeholder="Hãy cho chúng tôi biết suy nghĩ của bạn..."></textarea>
+                                <textarea required rows="5" class="input-modern w-full rounded-xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none bg-white resize-none text-base" placeholder="Hãy cho chúng tôi biết suy nghĩ của bạn..."></textarea>
                             </div>
 
-                            <button type="submit" class="btn-modern w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-5 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                            <button type="submit" class="btn-modern w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-3 sm:py-4 md:py-5 rounded-xl font-semibold text-base sm:text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                                 <i class="fas fa-paper-plane mr-2"></i> Gửi Tin Nhắn Ngay
                             </button>
                         </form>
@@ -236,83 +236,83 @@
                 </div>
 
                 <!-- Contact Info - Takes 2 columns -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="lg:col-span-2 space-y-4 sm:space-y-6 order-1 lg:order-2">
                     <!-- Info Cards -->
-                    <div class="glass-effect rounded-3xl shadow-xl p-8 card-hover">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-info-circle text-white text-xl"></i>
+                    <div class="glass-effect rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-8 card-hover">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-info-circle text-white text-lg sm:text-xl"></i>
                             </div>
-                            <h3 class="font-dancing text-2xl font-bold text-gray-800">Thông Tin</h3>
+                            <h3 class="font-dancing text-xl sm:text-2xl font-bold text-gray-800">Thông Tin</h3>
                         </div>
                         
-                        <div class="space-y-5">
-                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
-                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
-                                    <i class="fas fa-map-marker-alt text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                        <div class="space-y-3 sm:space-y-5">
+                            <div class="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-map-marker-alt text-xl sm:text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-base mb-1 text-gray-800">Địa chỉ</h4>
-                                    <p class="text-gray-600 text-sm leading-relaxed">123 Đường ABC, Phường 1<br>TP. Vĩnh Long, Việt Nam</p>
+                                    <h4 class="font-bold text-sm sm:text-base mb-1 text-gray-800">Địa chỉ</h4>
+                                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed">123 Đường ABC, Phường 1<br>TP. Vĩnh Long, Việt Nam</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
-                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
-                                    <i class="fas fa-phone text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                            <div class="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-phone text-xl sm:text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-base mb-1 text-gray-800">Điện thoại</h4>
-                                    <p class="text-gray-600 text-sm">0123 456 789</p>
-                                    <p class="text-gray-600 text-sm">0987 654 321</p>
+                                    <h4 class="font-bold text-sm sm:text-base mb-1 text-gray-800">Điện thoại</h4>
+                                    <p class="text-gray-600 text-xs sm:text-sm">0123 456 789</p>
+                                    <p class="text-gray-600 text-xs sm:text-sm">0987 654 321</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
-                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
-                                    <i class="fas fa-envelope text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                            <div class="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-envelope text-xl sm:text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-base mb-1 text-gray-800">Email</h4>
-                                    <p class="text-gray-600 text-sm">info@phuongnam.vn</p>
-                                    <p class="text-gray-600 text-sm">support@phuongnam.vn</p>
+                                    <h4 class="font-bold text-sm sm:text-base mb-1 text-gray-800">Email</h4>
+                                    <p class="text-gray-600 text-xs sm:text-sm">info@phuongnam.vn</p>
+                                    <p class="text-gray-600 text-xs sm:text-sm">support@phuongnam.vn</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
-                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
-                                    <i class="fas fa-clock text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
+                            <div class="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 cursor-pointer group">
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 icon-bounce group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
+                                    <i class="fas fa-clock text-xl sm:text-2xl text-orange-600 group-hover:text-white transition-colors"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-base mb-1 text-gray-800">Giờ mở cửa</h4>
-                                    <p class="text-gray-600 text-sm">T2 - CN: 10:00 - 22:00</p>
-                                    <p class="text-gray-600 text-sm">Tết: 09:00 - 23:00</p>
+                                    <h4 class="font-bold text-sm sm:text-base mb-1 text-gray-800">Giờ mở cửa</h4>
+                                    <p class="text-gray-600 text-xs sm:text-sm">T2 - CN: 10:00 - 22:00</p>
+                                    <p class="text-gray-600 text-xs sm:text-sm">Tết: 09:00 - 23:00</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Social Media -->
-                    <div class="glass-effect rounded-3xl shadow-xl p-8 card-hover">
-                        <h3 class="font-bold text-xl mb-5 text-gray-800">
+                    <div class="glass-effect rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-8 card-hover">
+                        <h3 class="font-bold text-lg sm:text-xl mb-4 sm:mb-5 text-gray-800">
                             <i class="fas fa-share-alt mr-2 text-orange-500"></i>Kết Nối
                         </h3>
-                        <div class="flex flex-wrap gap-3">
-                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                                <i class="fab fa-facebook text-2xl"></i>
-                                <span class="font-semibold">Facebook</span>
+                        <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                            <a href="#" class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-3 sm:p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-facebook text-xl sm:text-2xl"></i>
+                                <span class="font-semibold text-sm sm:text-base">Facebook</span>
                             </a>
-                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                                <i class="fab fa-instagram text-2xl"></i>
-                                <span class="font-semibold">Instagram</span>
+                            <a href="#" class="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-3 sm:p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-instagram text-xl sm:text-2xl"></i>
+                                <span class="font-semibold text-sm sm:text-base">Instagram</span>
                             </a>
-                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-red-500 to-red-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                                <i class="fab fa-youtube text-2xl"></i>
-                                <span class="font-semibold">YouTube</span>
+                            <a href="#" class="bg-gradient-to-br from-red-500 to-red-600 text-white p-3 sm:p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-youtube text-xl sm:text-2xl"></i>
+                                <span class="font-semibold text-sm sm:text-base">YouTube</span>
                             </a>
-                            <a href="#" class="flex-1 min-w-[calc(50%-6px)] bg-gradient-to-br from-gray-800 to-gray-900 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                                <i class="fab fa-tiktok text-2xl"></i>
-                                <span class="font-semibold">TikTok</span>
+                            <a href="#" class="bg-gradient-to-br from-gray-800 to-gray-900 text-white p-3 sm:p-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
+                                <i class="fab fa-tiktok text-xl sm:text-2xl"></i>
+                                <span class="font-semibold text-sm sm:text-base">TikTok</span>
                             </a>
                         </div>
                     </div>
