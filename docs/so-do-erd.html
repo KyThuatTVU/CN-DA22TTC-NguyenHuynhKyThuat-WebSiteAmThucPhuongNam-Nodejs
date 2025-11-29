@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ ERD - Website Nhà Hàng Phương Nam</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #fff; }
+        h1, h2 { text-align: center; margin-bottom: 20px; }
+        svg { display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <h1>SƠ ĐỒ QUAN HỆ THỰC THỂ (ERD)</h1>
+    <h2>Website Nhà Hàng Ẩm Thực Phương Nam - Vĩnh Long</h2>
+
+    <svg width="1100" height="850" style="border: 1px solid #000;">
+        <!-- BẢNG DANH_MUC -->
+        <rect x="30" y="30" width="180" height="120" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="30" y="30" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="75" y="48" font-size="12" font-weight="bold">DANH_MUC</text>
+        <text x="35" y="70" font-size="10">PK ma_danh_muc INT</text>
+        <text x="35" y="85" font-size="10">ten_danh_muc VARCHAR</text>
+        <text x="35" y="100" font-size="10">mo_ta TEXT</text>
+        <text x="35" y="115" font-size="10">trang_thai TINYINT</text>
+        <text x="35" y="130" font-size="10">ngay_tao DATETIME</text>
+        
+        <!-- BẢNG MON_AN -->
+        <rect x="280" y="30" width="200" height="180" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="280" y="30" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="350" y="48" font-size="12" font-weight="bold">MON_AN</text>
+        <text x="285" y="70" font-size="10">PK ma_mon INT</text>
+        <text x="285" y="85" font-size="10">ten_mon VARCHAR</text>
+        <text x="285" y="100" font-size="10">mo_ta_chi_tiet TEXT</text>
+        <text x="285" y="115" font-size="10">gia_tien DECIMAL</text>
+        <text x="285" y="130" font-size="10">so_luong_ton INT</text>
+        <text x="285" y="145" font-size="10">anh_mon VARCHAR</text>
+        <text x="285" y="160" font-size="10">FK ma_danh_muc INT</text>
+        <text x="285" y="175" font-size="10">trang_thai TINYINT</text>
+        <text x="285" y="190" font-size="10">ngay_cap_nhat DATETIME</text>
+        
+        <!-- BẢNG ANH_SAN_PHAM -->
+        <rect x="550" y="30" width="180" height="100" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="550" y="30" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="585" y="48" font-size="12" font-weight="bold">ANH_SAN_PHAM</text>
+        <text x="555" y="70" font-size="10">PK ma_anh INT</text>
+        <text x="555" y="85" font-size="10">FK ma_mon INT</text>
+        <text x="555" y="100" font-size="10">duong_dan_anh VARCHAR</text>
+        <text x="555" y="115" font-size="10">mo_ta VARCHAR</text>
+        
+        <!-- BẢNG NGUOI_DUNG -->
+        <rect x="30" y="200" width="200" height="180" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="30" y="200" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="85" y="218" font-size="12" font-weight="bold">NGUOI_DUNG</text>
+        <text x="35" y="240" font-size="10">PK ma_nguoi_dung INT</text>
+        <text x="35" y="255" font-size="10">ten_nguoi_dung VARCHAR</text>
+        <text x="35" y="270" font-size="10">email VARCHAR (UNIQUE)</text>
+        <text x="35" y="285" font-size="10">so_dien_thoai VARCHAR</text>
+        <text x="35" y="300" font-size="10">mat_khau_hash VARCHAR</text>
+        <text x="35" y="315" font-size="10">dia_chi VARCHAR</text>
+        <text x="35" y="330" font-size="10">gioi_tinh ENUM</text>
+        <text x="35" y="345" font-size="10">anh_dai_dien VARCHAR</text>
+        <text x="35" y="360" font-size="10">trang_thai TINYINT</text>
+        
+        <!-- BẢNG GIO_HANG -->
+        <rect x="280" y="250" width="180" height="90" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="280" y="250" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="330" y="268" font-size="12" font-weight="bold">GIO_HANG</text>
+        <text x="285" y="290" font-size="10">PK ma_gio_hang INT</text>
+        <text x="285" y="305" font-size="10">FK ma_nguoi_dung INT</text>
+        <text x="285" y="320" font-size="10">trang_thai ENUM</text>
+        
+        <!-- BẢNG CHI_TIET_GIO_HANG -->
+        <rect x="520" y="250" width="200" height="100" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="520" y="250" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="545" y="268" font-size="12" font-weight="bold">CHI_TIET_GIO_HANG</text>
+        <text x="525" y="290" font-size="10">PK ma_chi_tiet INT</text>
+        <text x="525" y="305" font-size="10">FK ma_gio_hang INT</text>
+        <text x="525" y="320" font-size="10">FK ma_mon INT</text>
+        <text x="525" y="335" font-size="10">so_luong INT</text>
+        
+        <!-- BẢNG DON_HANG -->
+        <rect x="30" y="420" width="200" height="180" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="30" y="420" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="90" y="438" font-size="12" font-weight="bold">DON_HANG</text>
+        <text x="35" y="460" font-size="10">PK ma_don_hang INT</text>
+        <text x="35" y="475" font-size="10">FK ma_nguoi_dung INT</text>
+        <text x="35" y="490" font-size="10">ten_khach_vang_lai VARCHAR</text>
+        <text x="35" y="505" font-size="10">so_dt_khach VARCHAR</text>
+        <text x="35" y="520" font-size="10">dia_chi_giao VARCHAR</text>
+        <text x="35" y="535" font-size="10">tong_tien DECIMAL</text>
+        <text x="35" y="550" font-size="10">trang_thai ENUM</text>
+        <text x="35" y="565" font-size="10">ma_khuyen_mai VARCHAR</text>
+        <text x="35" y="580" font-size="10">thoi_gian_tao DATETIME</text>
+        
+        <!-- BẢNG CHI_TIET_DON_HANG -->
+        <rect x="280" y="420" width="200" height="110" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="280" y="420" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="305" y="438" font-size="12" font-weight="bold">CHI_TIET_DON_HANG</text>
+        <text x="285" y="460" font-size="10">PK ma_ct_don INT</text>
+        <text x="285" y="475" font-size="10">FK ma_don_hang INT</text>
+        <text x="285" y="490" font-size="10">FK ma_mon INT</text>
+        <text x="285" y="505" font-size="10">so_luong INT</text>
+        <text x="285" y="520" font-size="10">gia_tai_thoi_diem DECIMAL</text>
+        
+        <!-- BẢNG THANH_TOAN -->
+        <rect x="530" y="420" width="200" height="140" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="530" y="420" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="585" y="438" font-size="12" font-weight="bold">THANH_TOAN</text>
+        <text x="535" y="460" font-size="10">PK ma_thanh_toan INT</text>
+        <text x="535" y="475" font-size="10">FK ma_don_hang INT</text>
+        <text x="535" y="490" font-size="10">so_tien DECIMAL</text>
+        <text x="535" y="505" font-size="10">phuong_thuc VARCHAR</text>
+        <text x="535" y="520" font-size="10">ma_giao_dich VARCHAR</text>
+        <text x="535" y="535" font-size="10">trang_thai ENUM</text>
+        <text x="535" y="550" font-size="10">thoi_gian_thanh_toan DATETIME</text>
+        
+        <!-- BẢNG DAT_BAN -->
+        <rect x="780" y="30" width="180" height="150" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="780" y="30" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="835" y="48" font-size="12" font-weight="bold">DAT_BAN</text>
+        <text x="785" y="70" font-size="10">PK ma_dat_ban INT</text>
+        <text x="785" y="85" font-size="10">ten_nguoi_dat VARCHAR</text>
+        <text x="785" y="100" font-size="10">so_dien_thoai VARCHAR</text>
+        <text x="785" y="115" font-size="10">so_luong INT</text>
+        <text x="785" y="130" font-size="10">ngay_dat DATE</text>
+        <text x="785" y="145" font-size="10">gio_den TIME</text>
+        <text x="785" y="160" font-size="10">trang_thai ENUM</text>
+        
+        <!-- BẢNG TIN_TUC -->
+        <rect x="780" y="220" width="180" height="150" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="780" y="220" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="840" y="238" font-size="12" font-weight="bold">TIN_TUC</text>
+        <text x="785" y="260" font-size="10">PK ma_tin_tuc INT</text>
+        <text x="785" y="275" font-size="10">tieu_de VARCHAR</text>
+        <text x="785" y="290" font-size="10">tom_tat TEXT</text>
+        <text x="785" y="305" font-size="10">noi_dung LONGTEXT</text>
+        <text x="785" y="320" font-size="10">anh_dai_dien VARCHAR</text>
+        <text x="785" y="335" font-size="10">FK ma_admin_dang INT</text>
+        <text x="785" y="350" font-size="10">trang_thai TINYINT</text>
+        
+        <!-- BẢNG ADMIN -->
+        <rect x="780" y="400" width="180" height="120" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="780" y="400" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="845" y="418" font-size="12" font-weight="bold">ADMIN</text>
+        <text x="785" y="440" font-size="10">PK ma_admin INT</text>
+        <text x="785" y="455" font-size="10">tai_khoan VARCHAR</text>
+        <text x="785" y="470" font-size="10">mat_khau_hash VARCHAR</text>
+        <text x="785" y="485" font-size="10">ten_hien_thi VARCHAR</text>
+        <text x="785" y="500" font-size="10">email VARCHAR</text>
+        <text x="785" y="515" font-size="10">quyen VARCHAR</text>
+        
+        <!-- BẢNG DANH_GIA_SAN_PHAM -->
+        <rect x="550" y="150" width="180" height="90" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="550" y="150" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="570" y="168" font-size="12" font-weight="bold">DANH_GIA_SP</text>
+        <text x="555" y="190" font-size="10">PK ma_danh_gia INT</text>
+        <text x="555" y="205" font-size="10">FK ma_mon, ma_nguoi_dung</text>
+        <text x="555" y="220" font-size="10">so_sao TINYINT, binh_luan</text>
+        
+        <!-- BẢNG HOA_DON -->
+        <rect x="530" y="580" width="200" height="100" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="530" y="580" width="200" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="595" y="598" font-size="12" font-weight="bold">HOA_DON</text>
+        <text x="535" y="620" font-size="10">PK ma_hoa_don INT</text>
+        <text x="535" y="635" font-size="10">FK ma_don_hang INT</text>
+        <text x="535" y="650" font-size="10">FK ma_thanh_toan INT</text>
+        <text x="535" y="665" font-size="10">tong_tien, trang_thai</text>
+        
+        <!-- BẢNG ALBUM_ANH -->
+        <rect x="280" y="580" width="180" height="100" fill="none" stroke="#000" stroke-width="2"/>
+        <rect x="280" y="580" width="180" height="25" fill="#ddd" stroke="#000" stroke-width="2"/>
+        <text x="330" y="598" font-size="12" font-weight="bold">ALBUM_ANH</text>
+        <text x="285" y="620" font-size="10">PK ma_album INT</text>
+        <text x="285" y="635" font-size="10">duong_dan_anh VARCHAR</text>
+        <text x="285" y="650" font-size="10">loai_anh VARCHAR</text>
+        <text x="285" y="665" font-size="10">mo_ta VARCHAR</text>
+        
+        <!-- Relationships -->
+        <!-- DANH_MUC -> MON_AN (1:N) -->
+        <line x1="210" y1="90" x2="280" y2="90" stroke="#000" stroke-width="1"/>
+        <text x="220" y="85" font-size="9">1</text>
+        <text x="265" y="85" font-size="9">N</text>
+        
+        <!-- MON_AN -> ANH_SAN_PHAM (1:N) -->
+        <line x1="480" y1="80" x2="550" y2="80" stroke="#000" stroke-width="1"/>
+        <text x="490" y="75" font-size="9">1</text>
+        <text x="535" y="75" font-size="9">N</text>
+        
+        <!-- MON_AN -> DANH_GIA_SP (1:N) -->
+        <line x1="480" y1="150" x2="550" y2="180" stroke="#000" stroke-width="1"/>
+        <text x="490" y="155" font-size="9">1</text>
+        <text x="535" y="175" font-size="9">N</text>
+        
+        <!-- NGUOI_DUNG -> GIO_HANG (1:N) -->
+        <line x1="230" y1="290" x2="280" y2="290" stroke="#000" stroke-width="1"/>
+        <text x="240" y="285" font-size="9">1</text>
+        <text x="265" y="285" font-size="9">N</text>
+        
+        <!-- GIO_HANG -> CHI_TIET_GIO_HANG (1:N) -->
+        <line x1="460" y1="295" x2="520" y2="295" stroke="#000" stroke-width="1"/>
+        <text x="470" y="290" font-size="9">1</text>
+        <text x="505" y="290" font-size="9">N</text>
+        
+        <!-- NGUOI_DUNG -> DON_HANG (1:N) -->
+        <line x1="130" y1="380" x2="130" y2="420" stroke="#000" stroke-width="1"/>
+        <text x="135" y="395" font-size="9">1</text>
+        <text x="135" y="415" font-size="9">N</text>
+        
+        <!-- DON_HANG -> CHI_TIET_DON_HANG (1:N) -->
+        <line x1="230" y1="480" x2="280" y2="480" stroke="#000" stroke-width="1"/>
+        <text x="240" y="475" font-size="9">1</text>
+        <text x="265" y="475" font-size="9">N</text>
+        
+        <!-- DON_HANG -> THANH_TOAN (1:1) -->
+        <line x1="230" y1="520" x2="530" y2="480" stroke="#000" stroke-width="1"/>
+        <text x="350" y="495" font-size="9">1:1</text>
+        
+        <!-- DON_HANG -> HOA_DON (1:1) -->
+        <line x1="230" y1="560" x2="530" y2="620" stroke="#000" stroke-width="1"/>
+        <text x="350" y="595" font-size="9">1:1</text>
+        
+        <!-- ADMIN -> TIN_TUC (1:N) -->
+        <line x1="870" y1="400" x2="870" y2="370" stroke="#000" stroke-width="1"/>
+        <text x="875" y="390" font-size="9">1</text>
+        <text x="875" y="375" font-size="9">N</text>
+        
+        <!-- MON_AN -> CHI_TIET_DON_HANG -->
+        <line x1="380" y1="210" x2="380" y2="420" stroke="#000" stroke-width="1"/>
+        <text x="385" y="310" font-size="9">1:N</text>
+    </svg>
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <p><strong>Chú thích:</strong></p>
+        <p>PK = Primary Key (Khóa chính) | FK = Foreign Key (Khóa ngoại)</p>
+        <p>1:N = Quan hệ một-nhiều | 1:1 = Quan hệ một-một</p>
+    </div>
+</body>
+</html>

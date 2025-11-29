@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ Hoạt động - Website Nhà Hàng Phương Nam</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #fff; }
+        h1, h2 { text-align: center; margin-bottom: 20px; }
+        svg { display: block; margin: 0 auto 40px; }
+        .page-break { page-break-before: always; }
+    </style>
+</head>
+<body>
+    <h1>SƠ ĐỒ HOẠT ĐỘNG (ACTIVITY DIAGRAM)</h1>
+    <h2>Website Nhà Hàng Ẩm Thực Phương Nam - Vĩnh Long</h2>
+
+    <!-- Sơ đồ 1: Đặt bàn -->
+    <h2>1. Quy trình Đặt bàn trực tuyến</h2>
+    <svg width="500" height="700" style="border: 1px solid #000;">
+        <!-- Start -->
+        <circle cx="250" cy="30" r="15" fill="#000"/>
+        <text x="220" y="60" font-size="10">Bắt đầu</text>
+        
+        <!-- Activity 1 -->
+        <rect x="150" y="80" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="175" y="105" font-size="11">Vào trang Đặt bàn</text>
+        
+        <line x1="250" y1="45" x2="250" y2="80" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity 2 -->
+        <rect x="150" y="150" width="200" height="60" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="165" y="175" font-size="10">Nhập thông tin đặt bàn:</text>
+        <text x="165" y="190" font-size="9">- Họ tên, SĐT, Số người</text>
+        <text x="165" y="203" font-size="9">- Ngày, Giờ, Ghi chú</text>
+        
+        <line x1="250" y1="120" x2="250" y2="150" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision 1 -->
+        <polygon points="250,240 310,280 250,320 190,280" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="210" y="285" font-size="10">Hợp lệ?</text>
+        
+        <line x1="250" y1="210" x2="250" y2="240" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- No branch -->
+        <rect x="50" y="260" width="100" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="60" y="285" font-size="10">Hiển thị lỗi</text>
+        
+        <line x1="190" y1="280" x2="150" y2="280" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="155" y="275" font-size="9">Không</text>
+        
+        <line x1="100" y1="260" x2="100" y2="180" stroke="#000" stroke-width="1"/>
+        <line x1="100" y1="180" x2="150" y2="180" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Yes branch -->
+        <rect x="150" y="350" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="165" y="375" font-size="11">Gửi yêu cầu đến Server</text>
+        
+        <line x1="250" y1="320" x2="250" y2="350" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="255" y="340" font-size="9">Có</text>
+        
+        <!-- Activity 3 -->
+        <rect x="150" y="420" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="165" y="445" font-size="11">Lưu vào Database</text>
+        
+        <line x1="250" y1="390" x2="250" y2="420" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity 4 -->
+        <rect x="150" y="490" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="170" y="515" font-size="11">Gửi email xác nhận</text>
+        
+        <line x1="250" y1="460" x2="250" y2="490" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity 5 -->
+        <rect x="150" y="560" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="160" y="585" font-size="11">Hiển thị thông báo OK</text>
+        
+        <line x1="250" y1="530" x2="250" y2="560" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- End -->
+        <circle cx="250" cy="640" r="15" fill="none" stroke="#000" stroke-width="3"/>
+        <circle cx="250" cy="640" r="10" fill="#000"/>
+        <text x="220" y="670" font-size="10">Kết thúc</text>
+        
+        <line x1="250" y1="600" x2="250" y2="625" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#000"/>
+            </marker>
+        </defs>
+    </svg>
+
+    <div class="page-break"></div>
+    
+    <!-- Sơ đồ 2: Đặt hàng -->
+    <h2>2. Quy trình Đặt hàng</h2>
+    <svg width="600" height="900" style="border: 1px solid #000;">
+        <!-- Start -->
+        <circle cx="300" cy="30" r="15" fill="#000"/>
+        
+        <line x1="300" y1="45" x2="300" y2="70" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity 1 -->
+        <rect x="200" y="70" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="230" y="95" font-size="11">Xem giỏ hàng</text>
+        
+        <line x1="300" y1="110" x2="300" y2="140" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision: Giỏ trống? -->
+        <polygon points="300,140 360,175 300,210 240,175" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="260" y="180" font-size="9">Giỏ trống?</text>
+        
+        <!-- Yes - Giỏ trống -->
+        <rect x="420" y="155" width="140" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="430" y="180" font-size="10">Thông báo trống</text>
+        
+        <line x1="360" y1="175" x2="420" y2="175" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="375" y="170" font-size="9">Có</text>
+        
+        <!-- End for empty -->
+        <circle cx="490" cy="230" r="12" fill="none" stroke="#000" stroke-width="3"/>
+        <circle cx="490" cy="230" r="7" fill="#000"/>
+        <line x1="490" y1="195" x2="490" y2="218" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- No - Có món -->
+        <rect x="200" y="240" width="200" height="50" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="210" y="260" font-size="10">Nhập thông tin giao hàng:</text>
+        <text x="210" y="275" font-size="9">Tên, SĐT, Địa chỉ</text>
+        
+        <line x1="300" y1="210" x2="300" y2="240" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="305" y="230" font-size="9">Không</text>
+        
+        <line x1="300" y1="290" x2="300" y2="320" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity: Chọn thanh toán -->
+        <rect x="200" y="320" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="210" y="345" font-size="11">Chọn phương thức TT</text>
+        
+        <line x1="300" y1="360" x2="300" y2="390" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision: Phương thức -->
+        <polygon points="300,390 370,430 300,470 230,430" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="260" y="435" font-size="9">Phương thức?</text>
+        
+        <!-- COD branch -->
+        <rect x="50" y="410" width="120" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="75" y="435" font-size="10">Đặt hàng COD</text>
+        
+        <line x1="230" y1="430" x2="170" y2="430" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="180" y="425" font-size="9">COD</text>
+        
+        <!-- MoMo branch -->
+        <rect x="430" y="410" width="140" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="445" y="435" font-size="10">Chuyển đến MoMo</text>
+        
+        <line x1="370" y1="430" x2="430" y2="430" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="380" y="425" font-size="9">MoMo</text>
+        
+        <!-- MoMo payment -->
+        <rect x="430" y="480" width="140" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="445" y="505" font-size="10">Thanh toán MoMo</text>
+        
+        <line x1="500" y1="450" x2="500" y2="480" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision: TT thành công? -->
+        <polygon points="500,550 560,585 500,620 440,585" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="460" y="590" font-size="9">Thành công?</text>
+        
+        <line x1="500" y1="520" x2="500" y2="550" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Merge point -->
+        <line x1="110" y1="450" x2="110" y2="650" stroke="#000" stroke-width="1"/>
+        <line x1="110" y1="650" x2="300" y2="650" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <line x1="500" y1="620" x2="500" y2="650" stroke="#000" stroke-width="1"/>
+        <line x1="500" y1="650" x2="400" y2="650" stroke="#000" stroke-width="1"/>
+        <text x="505" y="640" font-size="9">Có</text>
+        
+        <!-- Fail branch -->
+        <rect x="350" y="680" width="120" height="35" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="365" y="702" font-size="9">Thông báo lỗi</text>
+        
+        <line x1="440" y1="585" x2="410" y2="585" stroke="#000" stroke-width="1"/>
+        <line x1="410" y1="585" x2="410" y2="680" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="380" y="580" font-size="9">Không</text>
+        
+        <!-- Activity: Tạo đơn hàng -->
+        <rect x="200" y="680" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="230" y="705" font-size="11">Tạo đơn hàng</text>
+        
+        <line x1="300" y1="650" x2="300" y2="680" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity: Cập nhật tồn kho -->
+        <rect x="200" y="750" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="220" y="775" font-size="11">Cập nhật tồn kho</text>
+        
+        <line x1="300" y1="720" x2="300" y2="750" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity: Hiển thị kết quả -->
+        <rect x="200" y="820" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="210" y="845" font-size="11">Hiển thị đặt hàng OK</text>
+        
+        <line x1="300" y1="790" x2="300" y2="820" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- End -->
+        <circle cx="300" cy="890" r="15" fill="none" stroke="#000" stroke-width="3"/>
+        <circle cx="300" cy="890" r="10" fill="#000"/>
+        
+        <line x1="300" y1="860" x2="300" y2="875" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#000"/>
+            </marker>
+        </defs>
+    </svg>
+
+    <div class="page-break"></div>
+    
+    <!-- Sơ đồ 3: Quản lý đơn hàng Admin -->
+    <h2>3. Quy trình Quản lý đơn hàng (Admin)</h2>
+    <svg width="650" height="750" style="border: 1px solid #000;">
+        <!-- Start -->
+        <circle cx="325" cy="30" r="15" fill="#000"/>
+        
+        <line x1="325" y1="45" x2="325" y2="70" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity: Đăng nhập -->
+        <rect x="225" y="70" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="265" y="95" font-size="11">Đăng nhập Admin</text>
+        
+        <line x1="325" y1="110" x2="325" y2="140" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision: Xác thực -->
+        <polygon points="325,140 385,175 325,210 265,175" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="285" y="180" font-size="9">Xác thực?</text>
+        
+        <!-- Fail -->
+        <rect x="450" y="155" width="120" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="465" y="180" font-size="10">Thông báo lỗi</text>
+        
+        <line x1="385" y1="175" x2="450" y2="175" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="400" y="170" font-size="9">Không</text>
+        
+        <circle cx="510" cy="230" r="12" fill="none" stroke="#000" stroke-width="3"/>
+        <circle cx="510" cy="230" r="7" fill="#000"/>
+        <line x1="510" y1="195" x2="510" y2="218" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Success -->
+        <rect x="225" y="240" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="240" y="265" font-size="11">Vào trang Đơn hàng</text>
+        
+        <line x1="325" y1="210" x2="325" y2="240" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="330" y="230" font-size="9">Có</text>
+        
+        <line x1="325" y1="280" x2="325" y2="310" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Activity: Hiển thị danh sách -->
+        <rect x="225" y="310" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="240" y="335" font-size="11">Hiển thị danh sách ĐH</text>
+        
+        <line x1="325" y1="350" x2="325" y2="380" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision: Chọn hành động -->
+        <polygon points="325,380 400,425 325,470 250,425" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="280" y="430" font-size="9">Hành động?</text>
+        
+        <!-- Branch 1: Lọc -->
+        <rect x="50" y="405" width="120" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="65" y="430" font-size="10">Lọc trạng thái</text>
+        
+        <line x1="250" y1="425" x2="170" y2="425" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="185" y="420" font-size="9">Lọc</text>
+        
+        <!-- Branch 2: Xem chi tiết -->
+        <rect x="225" y="500" width="200" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="260" y="525" font-size="10">Xem chi tiết đơn</text>
+        
+        <line x1="325" y1="470" x2="325" y2="500" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="330" y="490" font-size="9">Xem</text>
+        
+        <!-- Branch 3: Cập nhật -->
+        <rect x="480" y="405" width="140" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="490" y="430" font-size="10">Cập nhật trạng thái</text>
+        
+        <line x1="400" y1="425" x2="480" y2="425" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="420" y="420" font-size="9">Cập nhật</text>
+        
+        <!-- Sub-activity: Chọn trạng thái -->
+        <rect x="480" y="475" width="140" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="490" y="500" font-size="10">Chọn trạng thái mới</text>
+        
+        <line x1="550" y1="445" x2="550" y2="475" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Decision: Xác nhận -->
+        <polygon points="550,545 600,575 550,605 500,575" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="520" y="580" font-size="9">Xác nhận?</text>
+        
+        <line x1="550" y1="515" x2="550" y2="545" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <!-- Cập nhật DB -->
+        <rect x="480" y="630" width="140" height="40" rx="10" fill="none" stroke="#000" stroke-width="2"/>
+        <text x="500" y="655" font-size="10">Cập nhật Database</text>
+        
+        <line x1="550" y1="605" x2="550" y2="630" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="555" y="620" font-size="9">Có</text>
+        
+        <!-- Merge -->
+        <line x1="110" y1="445" x2="110" y2="700" stroke="#000" stroke-width="1"/>
+        <line x1="110" y1="700" x2="325" y2="700" stroke="#000" stroke-width="1"/>
+        
+        <line x1="325" y1="540" x2="325" y2="700" stroke="#000" stroke-width="1"/>
+        
+        <line x1="550" y1="670" x2="550" y2="700" stroke="#000" stroke-width="1"/>
+        <line x1="550" y1="700" x2="400" y2="700" stroke="#000" stroke-width="1"/>
+        
+        <line x1="500" y1="575" x2="400" y2="575" stroke="#000" stroke-width="1"/>
+        <line x1="400" y1="575" x2="400" y2="700" stroke="#000" stroke-width="1"/>
+        <text x="420" y="570" font-size="9">Không</text>
+        
+        <!-- End -->
+        <circle cx="325" cy="730" r="15" fill="none" stroke="#000" stroke-width="3"/>
+        <circle cx="325" cy="730" r="10" fill="#000"/>
+        
+        <line x1="325" y1="700" x2="325" y2="715" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+        
+        <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#000"/>
+            </marker>
+        </defs>
+    </svg>
+</body>
+</html>
