@@ -101,6 +101,7 @@ async function handleLogin(formData) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include', // Quan trọng: gửi cookie session
             body: JSON.stringify(formData)
         });
 

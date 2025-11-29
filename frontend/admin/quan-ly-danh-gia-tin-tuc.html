@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Reactions Tin tức - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <style>
+        .reaction-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 13px; background: #f1f5f9; }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0">
+            <div class="h-full flex flex-col">
+                <div class="p-5 border-b border-white/10">
+                    <div class="flex items-center space-x-3">
+                        <img src="../images/Green Simple Clean Vegan Food Logo.png" alt="Logo" class="w-11 h-11 rounded-xl object-contain bg-white p-1">
+                        <div><h1 class="font-bold text-white text-lg">Phương Nam</h1><p class="text-xs text-blue-300">Hệ thống quản trị</p></div>
+                    </div>
+                </div>
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Menu chính</p>
+                    <div class="space-y-1">
+                        <a href="dashboard.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-chart-pie w-5"></i><span class="text-sm">Tổng quan</span></a>
+                        <a href="products.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-utensils w-5"></i><span class="text-sm">Món ăn</span></a>
+                        <a href="orders.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-shopping-cart w-5"></i><span class="text-sm">Đơn hàng</span></a>
+                        <a href="reservations.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-calendar-check w-5"></i><span class="text-sm">Đặt bàn</span></a>
+                        <a href="customers.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-users w-5"></i><span class="text-sm">Khách hàng</span></a>
+                        <a href="reviews.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-star w-5"></i><span class="text-sm">Đánh giá</span></a>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-3">Nội dung</p>
+                    <div class="space-y-1">
+                        <a href="news.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-newspaper w-5"></i><span class="text-sm">Tin tức</span></a>
+                        <a href="quan-ly-binh-luan.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-comments w-5"></i><span class="text-sm">Bình luận tin tức</span></a>
+                        <a href="quan-ly-danh-gia-tin-tuc.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-thumbs-up w-5"></i><span class="text-sm font-medium">Reactions tin tức</span></a>
+                        <a href="albums.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-images w-5"></i><span class="text-sm">Album ảnh</span></a>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-3">Hệ thống</p>
+                    <div class="space-y-1">
+                        <a href="settings.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl"><i class="fas fa-cog w-5"></i><span class="text-sm">Cài đặt</span></a>
+                    </div>
+                </nav>
+                <div class="p-4 border-t border-white/10">
+                    <div class="admin-card">
+                        <div class="flex items-center space-x-3">
+                            <img id="admin-avatar" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="Admin" class="w-12 h-12 rounded-full border-2 border-blue-400">
+                            <div class="flex-1 min-w-0"><p id="admin-name" class="font-semibold text-sm text-white truncate">Đang tải...</p><p id="admin-email" class="text-xs text-blue-300 truncate">admin@example.com</p></div>
+                        </div>
+                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/20">
+                            <span class="text-xs text-blue-300"><i class="fab fa-google mr-1"></i>Google</span>
+                            <button onclick="logout()" class="text-xs text-red-400 hover:text-red-300"><i class="fas fa-sign-out-alt mr-1"></i>Đăng xuất</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="header-bar flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+                    <div><h2 class="text-xl font-bold">Quản lý Reactions Tin tức</h2><p class="text-sm text-blue-200">Quản lý cảm xúc của người dùng với tin tức</p></div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="exportData()" class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 flex items-center space-x-2"><i class="fas fa-download"></i><span>Xuất Excel</span></button>
+                    <a href="../index.html" target="_blank" class="text-white hover:text-blue-200"><i class="fas fa-external-link-alt"></i></a>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="content-card">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500">Tổng Reactions</p><p class="text-2xl font-bold text-slate-800" id="total-reactions">0</p></div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><span class="text-2xl">👍</span></div>
+                        </div>
+                    </div>
+                    <div class="content-card">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500">Tin tức có Reactions</p><p class="text-2xl font-bold text-slate-800" id="news-with-reactions">0</p></div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center"><i class="fas fa-newspaper text-orange-600 text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="content-card">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500">Reaction phổ biến</p><p class="text-2xl font-bold text-slate-800" id="popular-reaction">👍</p></div>
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center"><span class="text-2xl">❤️</span></div>
+                        </div>
+                    </div>
+                    <div class="content-card">
+                        <div class="flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500">Người dùng tương tác</p><p class="text-2xl font-bold text-slate-800" id="unique-users">0</p></div>
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-users text-green-600 text-xl"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="content-card mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input type="text" id="search-input" placeholder="Tìm kiếm..." class="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <select id="filter-reaction" class="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            <option value="">Tất cả reactions</option>
+                            <option value="like">👍 Thích</option>
+                            <option value="love">❤️ Yêu thích</option>
+                            <option value="haha">😄 Haha</option>
+                            <option value="wow">😮 Wow</option>
+                            <option value="sad">😢 Buồn</option>
+                            <option value="angry">😠 Phẫn nộ</option>
+                        </select>
+                        <select id="filter-news" class="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            <option value="">Tất cả tin tức</option>
+                        </select>
+                        <button onclick="applyFilters()" class="bg-slate-800 text-white px-4 py-2.5 rounded-xl hover:bg-slate-900"><i class="fas fa-filter mr-2"></i>Lọc</button>
+                    </div>
+                </div>
+
+                <!-- Reactions Table -->
+                <div class="content-card mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-slate-800">Danh sách Reactions</h3>
+                        <button onclick="deleteSelected()" class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 disabled:opacity-50" id="btn-delete-selected" disabled>
+                            <i class="fas fa-trash mr-2"></i>Xóa đã chọn (<span id="selected-count">0</span>)
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-200">
+                                    <th class="py-4 px-4"><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
+                                    <th class="text-left py-4 px-4 text-sm font-semibold text-slate-600">Tin tức</th>
+                                    <th class="text-left py-4 px-4 text-sm font-semibold text-slate-600">Người dùng</th>
+                                    <th class="text-left py-4 px-4 text-sm font-semibold text-slate-600">Reaction</th>
+                                    <th class="text-left py-4 px-4 text-sm font-semibold text-slate-600">Ngày tạo</th>
+                                    <th class="text-center py-4 px-4 text-sm font-semibold text-slate-600">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reactions-table-body">
+                                <tr><td colspan="6" class="text-center py-12 text-slate-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+                        <p class="text-sm text-slate-500">Hiển thị <span id="showing-count">0</span> / <span id="total-count">0</span> reactions</p>
+                        <div class="flex gap-2" id="pagination"></div>
+                    </div>
+                </div>
+
+                <!-- News Summary -->
+                <div class="content-card">
+                    <h3 class="font-semibold text-slate-800 mb-4">Thống kê theo Tin tức</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-200">
+                                    <th class="text-left py-4 px-4 text-sm font-semibold text-slate-600">Tin tức</th>
+                                    <th class="text-center py-4 px-2 text-sm">👍</th>
+                                    <th class="text-center py-4 px-2 text-sm">❤️</th>
+                                    <th class="text-center py-4 px-2 text-sm">😄</th>
+                                    <th class="text-center py-4 px-2 text-sm">😮</th>
+                                    <th class="text-center py-4 px-2 text-sm">😢</th>
+                                    <th class="text-center py-4 px-2 text-sm">😠</th>
+                                    <th class="text-center py-4 px-4 text-sm font-semibold text-slate-600">Tổng</th>
+                                    <th class="text-center py-4 px-4 text-sm font-semibold text-slate-600">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="news-summary-body">
+                                <tr><td colspan="9" class="text-center py-8 text-slate-500">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full">
+            <div class="p-6 border-b flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-700 text-white rounded-t-2xl">
+                <h3 class="text-xl font-bold">Chỉnh sửa Reaction</h3>
+                <button onclick="closeEditModal()" class="text-white/70 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <input type="hidden" id="edit-reaction-id">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Loại Reaction</label>
+                    <select id="edit-reaction-type" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <option value="like">👍 Thích</option>
+                        <option value="love">❤️ Yêu thích</option>
+                        <option value="haha">😄 Haha</option>
+                        <option value="wow">😮 Wow</option>
+                        <option value="sad">😢 Buồn</option>
+                        <option value="angry">😠 Phẫn nộ</option>
+                    </select>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="saveReaction()" class="flex-1 btn-primary">Lưu</button>
+                    <button onclick="closeEditModal()" class="flex-1 px-6 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50">Hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="check-auth.js"></script>
+    <script src="admin-layout.js"></script>
+    <script src="../js/admin-news-reactions.js"></script>
+</body>
+</html>

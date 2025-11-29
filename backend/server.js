@@ -8,9 +8,13 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware - CORS phải cho phép tất cả origins trong development
 app.use(cors({
-  origin: true,
+  origin: function(origin, callback) {
+    // Cho phép tất cả origins trong development
+    console.log('🌐 CORS Origin:', origin);
+    callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -19,14 +23,23 @@ app.use(express.urlencoded({ extended: true }));
 // Session middleware (phải đặt trước passport)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-session-secret-change-this',
-  resave: false,
+  resave: true, // Quan trọng: lưu lại session mỗi request
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true nếu dùng HTTPS
+    secure: false, // false cho localhost (không dùng HTTPS)
     httpOnly: true,
+    sameSite: 'lax', // Quan trọng: cho phép cookie cross-site
     maxAge: 24 * 60 * 60 * 1000 // 24 giờ
   }
 }));
+
+// Debug middleware - log session cho mỗi request
+app.use((req, res, next) => {
+  console.log('📍 Request:', req.method, req.path);
+  console.log('🔑 Session ID:', req.sessionID);
+  console.log('👤 Session User:', req.session?.user ? req.session.user.email : 'none');
+  next();
+});
 
 // Passport middleware
 app.use(passport.initialize());

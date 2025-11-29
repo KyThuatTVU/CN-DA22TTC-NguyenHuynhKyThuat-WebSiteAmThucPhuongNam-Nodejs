@@ -431,24 +431,49 @@ router.post('/login', async (req, res) => {
             { expiresIn: '7d' }
         );
 
+        // Lưu thông tin người dùng vào session
+        req.session.user = {
+            ma_nguoi_dung: user.ma_nguoi_dung,
+            ten_nguoi_dung: user.ten_nguoi_dung,
+            email: user.email,
+            anh_dai_dien: user.anh_dai_dien
+        };
+
         // Trả về thông tin người dùng (không bao gồm mật khẩu)
         const { mat_khau_hash, ...userData } = user;
 
         console.log('✅ Login successful for:', user.email);
+        console.log('🔑 Session ID at login:', req.sessionID);
         console.log('📦 User data being sent:', {
             ma_nguoi_dung: userData.ma_nguoi_dung,
             ten_nguoi_dung: userData.ten_nguoi_dung,
             email: userData.email,
             anh_dai_dien: userData.anh_dai_dien
         });
+        console.log('🔐 Session user set:', req.session.user);
+        console.log('📋 Full session:', req.session);
 
-        res.json({
-            success: true,
-            message: 'Đăng nhập thành công',
-            data: {
-                ...userData,
-                token
+        // Force save session before sending response
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Session save error:', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Lỗi lưu session'
+                });
             }
+            
+            console.log('💾 Session saved successfully');
+            console.log('🔑 Session ID after save:', req.sessionID);
+            
+            res.json({
+                success: true,
+                message: 'Đăng nhập thành công',
+                data: {
+                    ...userData,
+                    token
+                }
+            });
         });
 
     } catch (error) {
@@ -829,6 +854,61 @@ router.post('/reset-password', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// Kiểm tra session người dùng (hỗ trợ cả session và token)
+router.get('/check-session', async (req, res) => {
+    console.log('');
+    console.log('========== CHECK SESSION ==========');
+    console.log('🔍 Check session request received');
+    console.log('🔑 Session ID:', req.sessionID);
+    console.log('🍪 Cookies:', req.headers.cookie);
+    console.log('🎫 Auth Header:', req.headers.authorization);
+    console.log('===================================');
+    
+    // Kiểm tra session trước
+    if (req.session && req.session.user) {
+        console.log('✅ User logged in via session:', req.session.user.email);
+        return res.json({
+            loggedIn: true,
+            user: {
+                ma_nguoi_dung: req.session.user.ma_nguoi_dung,
+                ten_nguoi_dung: req.session.user.ten_nguoi_dung,
+                email: req.session.user.email
+            }
+        });
+    }
+    
+    // Nếu không có session, kiểm tra token
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            const [users] = await db.query(
+                'SELECT ma_nguoi_dung, ten_nguoi_dung, email FROM nguoi_dung WHERE ma_nguoi_dung = ?',
+                [decoded.ma_nguoi_dung]
+            );
+            
+            if (users.length > 0) {
+                console.log('✅ User logged in via token:', users[0].email);
+                return res.json({
+                    loggedIn: true,
+                    user: {
+                        ma_nguoi_dung: users[0].ma_nguoi_dung,
+                        ten_nguoi_dung: users[0].ten_nguoi_dung,
+                        email: users[0].email
+                    }
+                });
+            }
+        } catch (tokenError) {
+            console.log('❌ Token invalid:', tokenError.message);
+        }
+    }
+    
+    console.log('❌ No valid session or token');
+    res.json({ loggedIn: false });
 });
 
 module.exports = router;
