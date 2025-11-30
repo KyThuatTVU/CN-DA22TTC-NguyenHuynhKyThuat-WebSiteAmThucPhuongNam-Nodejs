@@ -10,7 +10,9 @@ const pool = mysql.createPool({
   port: process.env.DB_PORT,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+07:00', // Timezone Việt Nam
+  dateStrings: true   // Trả về date dạng string để tránh convert timezone
 });
 
 // Sử dụng promise wrapper để dễ dàng làm việc với async/await

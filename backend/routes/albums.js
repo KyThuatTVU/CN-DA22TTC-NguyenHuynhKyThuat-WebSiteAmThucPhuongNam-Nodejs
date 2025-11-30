@@ -207,11 +207,14 @@ router.post('/', requireAdmin, upload.array('images', 10), async (req, res) => {
         }
         
         const insertedIds = [];
+        // Lấy thời gian hiện tại theo timezone Việt Nam
+        const now = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' }).replace('T', ' ');
+        
         for (const file of files) {
             const [result] = await db.query(
                 `INSERT INTO album_anh (duong_dan_anh, loai_anh, mo_ta, ngay_tao) 
-                 VALUES (?, ?, ?, NOW())`,
-                [file.filename, loai_anh || 'khac', mo_ta || '']
+                 VALUES (?, ?, ?, ?)`,
+                [file.filename, loai_anh || 'khac', mo_ta || '', now]
             );
             insertedIds.push(result.insertId);
         }

@@ -216,9 +216,21 @@ function getCategoryName(filter) {
     return names[filter] || 'Tất cả';
 }
 
-// Format date
+// Format date - hiển thị ngày tháng từ server (đã đúng timezone VN)
 function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    // dateString từ server đã ở dạng "YYYY-MM-DD HH:mm:ss" theo timezone VN
+    // Chỉ cần parse và format lại
+    const parts = dateString.split(' ')[0].split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+    }
+    
+    // Fallback nếu format khác
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
+    
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();

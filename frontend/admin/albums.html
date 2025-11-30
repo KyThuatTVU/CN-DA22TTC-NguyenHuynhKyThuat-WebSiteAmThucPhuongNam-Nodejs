@@ -170,6 +170,16 @@
         // API_URL đã được khai báo trong admin-layout.js
         let albums = [];
 
+        // Format ngày tháng từ server (đã đúng timezone VN)
+        function formatDateVN(dateString) {
+            if (!dateString) return 'N/A';
+            const parts = dateString.split(' ')[0].split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return dateString;
+        }
+
         async function loadAlbums() {
             try {
                 const response = await fetch(`${API_URL}/albums?limit=100`, { credentials: 'include' });
@@ -244,7 +254,7 @@
             document.getElementById('preview-info').innerHTML = `
                 <p class="text-lg font-semibold">${typeName[album.loai_anh] || 'Khác'}</p>
                 ${album.mo_ta ? `<p class="text-sm opacity-80">${album.mo_ta}</p>` : ''}
-                <p class="text-xs opacity-60 mt-2">Ngày tạo: ${album.ngay_tao ? new Date(album.ngay_tao).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                <p class="text-xs opacity-60 mt-2">Ngày tạo: ${formatDateVN(album.ngay_tao)}</p>
             `;
             document.getElementById('preview-modal').classList.remove('hidden'); 
         }
