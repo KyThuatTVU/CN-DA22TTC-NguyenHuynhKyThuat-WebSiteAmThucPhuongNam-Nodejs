@@ -1,53 +1,115 @@
 <!-- Chatbot Component -->
+<style>
+    /* Chatbot mobile fullscreen */
+    @media (max-width: 640px) {
+        #chatbotPanel.mobile-open {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            border-radius: 0 !important;
+            z-index: 99999 !important;
+            opacity: 1 !important;
+            transform: none !important;
+            pointer-events: auto !important;
+        }
+        #chatbotPanel.mobile-open .chatbot-header {
+            padding-top: max(16px, env(safe-area-inset-top));
+        }
+        #chatbotPanel.mobile-open #chatbotMessages {
+            height: calc(100vh - 160px) !important;
+            height: calc(100dvh - 160px) !important;
+        }
+        #chatbotButton {
+            width: 56px !important;
+            height: 56px !important;
+            right: 16px !important;
+            bottom: 16px !important;
+        }
+        #chatbotButton i {
+            font-size: 26px !important;
+        }
+    }
+</style>
+
 <!-- CHATBOT BUTTON -->
 <button id="chatbotButton"
-  class="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full shadow-2xl flex items-center justify-center text-white text-3xl hover:scale-110 transition-transform duration-300">
-  <i class="fas fa-robot animate-bounce"></i>
+    class="fixed bottom-6 right-6 z-[9999] w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full shadow-2xl flex items-center justify-center text-white hover:scale-110 transition-transform duration-300">
+    <i class="fas fa-robot text-3xl"></i>
 </button>
 
 <!-- CHAT PANEL -->
 <div id="chatbotPanel"
-  class="fixed bottom-24 right-6 z-50 w-80 bg-white rounded-2xl shadow-2xl overflow-hidden 
-         transform opacity-0 scale-90 pointer-events-none transition-all duration-300">
-  <!-- Header -->
-  <div class="bg-gradient-to-r from-green-500 to-blue-600 p-4 flex items-center justify-between">
-    <div class="flex items-center">
-      <i class="fas fa-robot text-2xl text-white mr-2"></i>
-      <div>
-        <h3 class="text-white font-bold">Phương Nam Bot</h3>
-        <p class="text-gray-200 text-xs">Trực tuyến 24/7</p>
-      </div>
+    class="fixed bottom-24 right-6 z-[9999] w-[360px] sm:w-[380px] bg-white rounded-2xl shadow-2xl overflow-hidden 
+           transform opacity-0 scale-90 pointer-events-none transition-all duration-300"
+    style="max-height: 520px;">
+    
+    <!-- Header -->
+    <div class="chatbot-header bg-gradient-to-r from-green-500 to-blue-600 p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-robot text-xl text-white"></i>
+            </div>
+            <div>
+                <h3 class="text-white font-bold">Phương Nam Bot</h3>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                    <p class="text-white/80 text-xs">Trực tuyến 24/7</p>
+                </div>
+            </div>
+        </div>
+        <button id="closeChatbot" class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition">
+            <i class="fas fa-times text-lg"></i>
+        </button>
     </div>
-    <button id="closeChatbot" class="text-white text-xl hover:text-gray-200 transition-colors">&times;</button>
-  </div>
 
-  <!-- Messages -->
-  <div id="chatbotMessages" class="p-4 space-y-3 max-h-64 overflow-y-auto bg-gray-50">
-    <!-- Tin chào -->
-    <div class="flex">
-      <div class="bg-white p-3 rounded-2xl shadow-md inline-block max-w-[80%]">
-        <p>Xin chào! Tôi là trợ lý ảo Nhà hàng Phương Nam. Mình giúp gì cho bạn?</p>
-      </div>
+    <!-- Messages Area -->
+    <div id="chatbotMessages" class="p-4 space-y-3 overflow-y-auto bg-gradient-to-b from-gray-50 to-white" style="height: 340px;">
+        <!-- Welcome message -->
+        <div class="flex gap-3">
+            <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-robot text-white text-sm"></i>
+            </div>
+            <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
+                <p class="text-gray-700 text-sm leading-relaxed">Xin chào! 👋 Mình là trợ lý của <span class="font-semibold text-green-600">Nhà hàng Phương Nam</span>. Mình giúp gì được cho bạn?</p>
+            </div>
+        </div>
+        
+        <!-- Quick suggestions -->
+        <div class="flex flex-wrap gap-2 pl-11">
+            <button onclick="chatbotSendQuick('Xem thực đơn')" class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-200 transition">
+                🍽️ Thực đơn
+            </button>
+            <button onclick="chatbotSendQuick('Đặt bàn')" class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-200 transition">
+                📅 Đặt bàn
+            </button>
+            <button onclick="chatbotSendQuick('Giờ mở cửa')" class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-200 transition">
+                🕐 Giờ mở cửa
+            </button>
+            <button onclick="chatbotSendQuick('Địa chỉ')" class="bg-pink-100 text-pink-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-pink-200 transition">
+                📍 Địa chỉ
+            </button>
+            <button onclick="chatbotSendQuick('Hotline')" class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-purple-200 transition">
+                📞 Hotline
+            </button>
+        </div>
     </div>
-    <!-- Gợi ý -->
-    <div id="suggestionBox" class="flex justify-start">
-      <div
-        class="bg-yellow-100 text-yellow-800 px-3 py-2 rounded-full opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer">
-        Hôm nay bạn muốn ăn gì?
-      </div>
-    </div>
-  </div>
 
-  <!-- Input -->
-  <div class="p-4 bg-white border-t">
-    <div class="flex items-end space-x-2">
-      <textarea id="chatbotInput"
-        class="flex-1 h-8 resize-none border border-gray-300 rounded-2xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200"
-        placeholder="Gõ tin nhắn..." rows="1"></textarea>
-      <button id="sendMessage"
-        class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform duration-200">
-        <i class="fas fa-paper-plane"></i>
-      </button>
+    <!-- Input Area -->
+    <div class="p-3 bg-white border-t border-gray-100">
+        <div class="flex items-center gap-2">
+            <input type="text" id="chatbotInput"
+                class="flex-1 h-11 border border-gray-200 rounded-full px-4 text-sm focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition"
+                placeholder="Nhập tin nhắn..."
+                onkeypress="if(event.key==='Enter') chatbotSendMessage()">
+            <button id="sendMessage" onclick="chatbotSendMessage()"
+                class="w-11 h-11 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white hover:scale-105 transition flex-shrink-0">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
     </div>
-  </div>
 </div>

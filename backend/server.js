@@ -96,6 +96,7 @@ const statsRoutes = require('./routes/stats');
 const reservationRoutes = require('./routes/reservations');
 const reviewRoutes = require('./routes/reviews');
 const contactRoutes = require('./routes/contact');
+const chatbotRoutes = require('./routes/chatbot');
 
 app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -111,6 +112,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // 404 handler for API routes - return JSON instead of HTML
 app.use('/api/*', (req, res) => {

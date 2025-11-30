@@ -173,7 +173,7 @@
                                     <div>
                                         <p class="kpi-label">Tổng doanh thu</p>
                                         <p class="kpi-value" id="total-revenue">0đ</p>
-                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 12.5%</span></p>
+                                        <p class="kpi-compare" id="revenue-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 0%</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -185,7 +185,7 @@
                                     <div>
                                         <p class="kpi-label">Số đơn hàng</p>
                                         <p class="kpi-value" id="total-orders">0</p>
-                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 8.2%</span></p>
+                                        <p class="kpi-compare" id="orders-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 0%</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -197,7 +197,7 @@
                                     <div>
                                         <p class="kpi-label">Khách hàng</p>
                                         <p class="kpi-value" id="total-customers">0</p>
-                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 5.3%</span></p>
+                                        <p class="kpi-compare" id="customers-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 0%</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -209,7 +209,7 @@
                                     <div>
                                         <p class="kpi-label">Đặt bàn</p>
                                         <p class="kpi-value" id="total-reservations">0</p>
-                                        <p class="kpi-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 15.1%</span></p>
+                                        <p class="kpi-compare" id="reservations-compare">So với tháng trước: <span class="up"><i class="fas fa-arrow-up"></i> 0%</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -231,8 +231,7 @@
                                 <p class="chart-title"><i class="fas fa-chart-bar text-emerald-500 mr-2"></i>Doanh thu 12 tháng gần nhất</p>
                                 <div style="height: 200px;"><canvas id="revenueChart"></canvas></div>
                                 <div class="flex justify-center gap-8 mt-3">
-                                    <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"></div> Doanh thu</div>
-                                    <div class="legend-item"><div class="legend-dot" style="background:#e2e8f0"></div> Mục tiêu</div>
+                                    <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"></div> Doanh thu (triệu đồng)</div>
                                 </div>
                             </div>
                         </div>
@@ -376,14 +375,13 @@
                 options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
             });
 
-            // Revenue Chart
+            // Revenue Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
             revenueChart = new Chart(document.getElementById('revenueChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
                     datasets: [
-                        { label: 'Doanh thu', data: [45, 52, 48, 61, 55, 67, 72, 68, 75, 82, 78, 85], backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 },
-                        { label: 'Mục tiêu', data: [50, 55, 55, 60, 60, 70, 75, 75, 80, 85, 85, 90], backgroundColor: '#e2e8f0', borderRadius: 6, barPercentage: 0.6 }
+                        { label: 'Doanh thu', data: new Array(12).fill(0), backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + 'tr' } } } }
@@ -396,17 +394,17 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } } } }
             });
 
-            // Customer Chart
+            // Customer Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
             customerChart = new Chart(document.getElementById('customerChart').getContext('2d'), {
                 type: 'line',
-                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
+                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: new Array(12).fill(0), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
-            // Reservation Chart
+            // Reservation Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
             reservationChart = new Chart(document.getElementById('reservationChart').getContext('2d'), {
                 type: 'bar',
-                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: [15, 45, 20, 25, 60, 35], backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'], borderRadius: 8 }] },
+                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: new Array(6).fill(0), backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'], borderRadius: 8 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
@@ -503,17 +501,33 @@
                         document.getElementById('total-orders').textContent = data.totalOrders || 0;
                         updateGaugeChart(data.totalRevenue || 0, 100000000);
                         updateOrdersChart(data.byStatus || []);
+                        
+                        // Cập nhật so sánh với tháng trước từ dữ liệu thật
+                        if (data.comparison) {
+                            updateComparisonDisplay('revenue-compare', data.comparison.revenueChange);
+                            updateComparisonDisplay('orders-compare', data.comparison.ordersChange);
+                        }
                     }
                 }
 
                 if (customersRes && customersRes.ok) {
                     const data = await customersRes.json();
-                    if (data.success !== false) document.getElementById('total-customers').textContent = data.totalCustomers || 0;
+                    if (data.success !== false) {
+                        document.getElementById('total-customers').textContent = data.totalCustomers || 0;
+                        if (data.comparison) {
+                            updateComparisonDisplay('customers-compare', data.comparison.customersChange);
+                        }
+                    }
                 }
 
                 if (reservationsRes && reservationsRes.ok) {
                     const data = await reservationsRes.json();
-                    if (data.success !== false) document.getElementById('total-reservations').textContent = data.totalReservations || 0;
+                    if (data.success !== false) {
+                        document.getElementById('total-reservations').textContent = data.totalReservations || 0;
+                        if (data.comparison) {
+                            updateComparisonDisplay('reservations-compare', data.comparison.reservationsChange);
+                        }
+                    }
                 }
 
                 // Biểu đồ doanh thu theo tháng
@@ -798,6 +812,19 @@
         }
 
         function formatCurrency(value) { return new Intl.NumberFormat('vi-VN').format(value); }
+
+        // Hàm cập nhật hiển thị so sánh với tháng trước
+        function updateComparisonDisplay(elementId, changePercent) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const isPositive = changePercent >= 0;
+            const icon = isPositive ? 'fa-arrow-up' : 'fa-arrow-down';
+            const colorClass = isPositive ? 'up' : 'down';
+            const displayValue = Math.abs(changePercent).toFixed(1);
+            
+            element.innerHTML = `So với tháng trước: <span class="${colorClass}"><i class="fas ${icon}"></i> ${displayValue}%</span>`;
+        }
 
         // Lấy giá trị filter hiện tại
         function getFilterValues() {

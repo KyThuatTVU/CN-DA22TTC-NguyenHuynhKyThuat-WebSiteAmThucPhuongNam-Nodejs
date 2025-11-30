@@ -56,6 +56,9 @@ function initializeComponents() {
     // Update user menu with login status
     updateUserMenu();
     
+    // Initialize Chatbot
+    initializeChatbot();
+    
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -458,6 +461,144 @@ function initializeCart() {
 // Call initialize cart
 initializeCart();
 
+// Initialize Chatbot functionality
+function initializeChatbot() {
+    const chatbotButton = document.getElementById('chatbotButton');
+    const chatbotPanel = document.getElementById('chatbotPanel');
+    const closeChatbot = document.getElementById('closeChatbot');
+    
+    if (chatbotButton && chatbotPanel) {
+        console.log('🤖 Initializing chatbot...');
+        
+        const isMobile = () => window.innerWidth <= 640;
+        
+        // Toggle chat panel khi click vào button
+        chatbotButton.addEventListener('click', function() {
+            if (isMobile()) {
+                // Mobile: fullscreen mode
+                chatbotPanel.classList.toggle('mobile-open');
+                document.body.style.overflow = chatbotPanel.classList.contains('mobile-open') ? 'hidden' : '';
+            } else {
+                // Desktop: popup mode
+                chatbotPanel.classList.toggle('opacity-0');
+                chatbotPanel.classList.toggle('scale-90');
+                chatbotPanel.classList.toggle('pointer-events-none');
+            }
+            // Focus input
+            setTimeout(() => document.getElementById('chatbotInput')?.focus(), 100);
+        });
+        
+        // Đóng chat panel
+        if (closeChatbot) {
+            closeChatbot.addEventListener('click', function() {
+                if (isMobile()) {
+                    chatbotPanel.classList.remove('mobile-open');
+                    document.body.style.overflow = '';
+                } else {
+                    chatbotPanel.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+                }
+            });
+        }
+        
+        console.log('✅ Chatbot initialized successfully');
+    }
+}
+
+// Gửi tin nhắn nhanh
+window.chatbotSendQuick = function(message) {
+    document.getElementById('chatbotInput').value = message;
+    chatbotSendMessage();
+};
+
+// Session ID cho chatbot
+const chatbotSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+// Gửi tin nhắn chatbot
+window.chatbotSendMessage = async function() {
+    const input = document.getElementById('chatbotInput');
+    const messages = document.getElementById('chatbotMessages');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    // Thêm tin nhắn user
+    const userMsg = document.createElement('div');
+    userMsg.className = 'flex justify-end';
+    userMsg.innerHTML = `
+        <div class="bg-gradient-to-br from-green-400 to-blue-500 p-4 rounded-2xl rounded-tr-none max-w-[85%] shadow-md">
+            <p class="text-white text-[15px]">${escapeHtmlChat(text)}</p>
+        </div>
+    `;
+    messages.appendChild(userMsg);
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+    
+    // Hiển thị typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'chatbot-typing';
+    typingDiv.className = 'flex gap-3';
+    typingDiv.innerHTML = `
+        <div class="w-9 h-9 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-robot text-white text-sm"></i>
+        </div>
+        <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-md">
+            <div class="flex gap-1">
+                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+        </div>
+    `;
+    messages.appendChild(typingDiv);
+    messages.scrollTop = messages.scrollHeight;
+    
+    try {
+        const response = await fetch('http://localhost:3000/api/chatbot/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        });
+        
+        const result = await response.json();
+        document.getElementById('chatbot-typing')?.remove();
+        
+        let botResponse = result.success && result.data?.response 
+            ? result.data.response 
+            : (result.message || '❌ Không thể kết nối. Vui lòng thử lại!');
+        
+        addBotMessage(messages, botResponse);
+        
+    } catch (error) {
+        console.error('Chatbot API error:', error);
+        document.getElementById('chatbot-typing')?.remove();
+        addBotMessage(messages, '❌ Lỗi kết nối. Vui lòng thử lại sau!');
+    }
+};
+
+// Thêm tin nhắn bot
+function addBotMessage(messages, response) {
+    const botMsg = document.createElement('div');
+    botMsg.className = 'flex gap-2';
+    botMsg.innerHTML = `
+        <div class="w-7 h-7 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-robot text-white text-xs"></i>
+        </div>
+        <div class="chat-bubble-bot px-3 py-2 max-w-[85%]">
+            <p class="text-gray-700 text-sm leading-relaxed">${response}</p>
+        </div>
+    `;
+    messages.appendChild(botMsg);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+// Escape HTML
+function escapeHtmlChat(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Export functions to window for global access
 window.updateUserMenu = updateUserMenu;
 window.getAvatarUrl = getAvatarUrl;
+window.initializeChatbot = initializeChatbot;
