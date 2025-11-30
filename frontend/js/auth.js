@@ -29,14 +29,29 @@ function setLoadingButton(button, isLoading) {
 
 // Save user data to localStorage
 function saveUserData(data) {
+    // Đảm bảo dữ liệu được chuẩn hóa trước khi lưu
+    const userData = {
+        ma_nguoi_dung: data.ma_nguoi_dung,
+        ten_nguoi_dung: data.ten_nguoi_dung || data.email || 'Người dùng',
+        email: data.email || '',
+        anh_dai_dien: data.anh_dai_dien || null,
+        so_dien_thoai: data.so_dien_thoai || null,
+        dia_chi: data.dia_chi || null,
+        gioi_tinh: data.gioi_tinh || 'khac',
+        token: data.token
+    };
+    
     console.log('💾 Saving user data to localStorage:', {
-        name: data.ten_nguoi_dung,
-        email: data.email,
-        avatar: data.anh_dai_dien,
-        hasToken: !!data.token
+        name: userData.ten_nguoi_dung,
+        email: userData.email,
+        avatar: userData.anh_dai_dien,
+        hasToken: !!userData.token
     });
-    localStorage.setItem('user', JSON.stringify(data));
-    localStorage.setItem('token', data.token);
+    
+    localStorage.setItem('user', JSON.stringify(userData));
+    if (data.token) {
+        localStorage.setItem('token', data.token);
+    }
 }
 
 // Get user data from localStorage

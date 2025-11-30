@@ -210,7 +210,7 @@ router.post('/change-password', authenticateAdmin, async (req, res) => {
 
 // Khởi tạo đăng nhập Google cho Admin
 router.get('/google',
-    passport.authenticate('google', {
+    passport.authenticate('google-admin', {
         scope: ['profile', 'email'],
         session: true, // Dùng session thay vì JWT
         prompt: 'select_account', // Bắt buộc chọn tài khoản mỗi lần đăng nhập
@@ -220,7 +220,7 @@ router.get('/google',
 
 // Callback từ Google cho Admin
 router.get('/google/callback',
-    passport.authenticate('google', {
+    passport.authenticate('google-admin', {
         session: true, // Dùng session
         failureRedirect: '/admin/dang-nhap-admin.html?error=google_auth_failed'
     }),

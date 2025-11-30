@@ -168,6 +168,35 @@ window.renderUserMenu = function() {
                     </div>
                 </div>
             `;
+
+            // Cập nhật mobile menu khi đã đăng nhập
+            const mobileUserMenu = document.getElementById('mobile-user-menu');
+            if (mobileUserMenu) {
+                mobileUserMenu.innerHTML = `
+                    <div class="flex items-center px-4 py-3 border-b border-gray-200 bg-orange-50">
+                        ${avatarUrl 
+                            ? `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-10 h-10 rounded-full object-cover border-2 border-orange-300">`
+                            : `<div class="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center">
+                                <i class="fas fa-user text-orange-600"></i>
+                               </div>`
+                        }
+                        <div class="ml-3">
+                            <p class="font-medium text-gray-800">${user.ten_nguoi_dung}</p>
+                            <p class="text-xs text-gray-500">${user.email}</p>
+                        </div>
+                    </div>
+                    <a href="tai-khoan.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                        <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
+                    </a>
+                    <a href="don-hang-cua-toi.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                        <i class="fas fa-shopping-bag mr-2"></i> Đơn hàng của tôi
+                    </a>
+                    <button onclick="handleLogout()" class="w-full text-left py-3 px-4 text-red-600 hover:bg-red-50 transition font-medium">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+                    </button>
+                `;
+            }
+
             console.log('✅ User menu rendered for:', user.ten_nguoi_dung);
         } catch (error) {
             console.error('❌ Error parsing user data:', error);
@@ -199,6 +228,19 @@ window.renderGuestMenu = function() {
             </div>
         </div>
     `;
+
+    // Cập nhật mobile menu
+    const mobileUserMenu = document.getElementById('mobile-user-menu');
+    if (mobileUserMenu) {
+        mobileUserMenu.innerHTML = `
+            <a href="dang-nhap.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
+            </a>
+            <a href="dang-ky.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                <i class="fas fa-user-plus mr-2"></i> Đăng ký
+            </a>
+        `;
+    }
 }
 
 // Handle logout (global function)

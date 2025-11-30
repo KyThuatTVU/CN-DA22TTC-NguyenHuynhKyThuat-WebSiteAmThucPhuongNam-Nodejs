@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const passport = require('passport');
 const db = require('../config/database');
 const { sendVerificationEmail, sendWelcomeEmail } = require('../config/email');
 
@@ -909,6 +910,76 @@ router.get('/check-session', async (req, res) => {
     
     console.log('❌ No valid session or token');
     res.json({ loggedIn: false });
+});
+
+// ==================== GOOGLE OAUTH CHO USER ====================
+
+// Bắt đầu đăng nhập Google
+router.get('/google', passport.authenticate('google-user', {
+    scope: ['profile', 'email']
+}));
+
+// Callback sau khi Google xác thực
+router.get('/google/callback',
+    passport.authenticate('google-user', { 
+        failureRedirect: '/dang-nhap.html?error=google_auth_failed',
+        session: false 
+    }),
+    async (req, res) => {
+        try {
+            const user = req.user;
+            
+            console.log('🔐 Google callback - User data:', user);
+            
+            if (!user) {
+                console.log('❌ No user data from Google');
+                return res.redirect('/dang-nhap.html?error=google_auth_failed');
+            }
+
+            // Tạo JWT token
+            const token = jwt.sign(
+                { ma_nguoi_dung: user.ma_nguoi_dung, email: user.email },
+                JWT_SECRET,
+                { expiresIn: '7d' }
+            );
+
+            // Tạo object user data
+            const userDataObj = {
+                ma_nguoi_dung: user.ma_nguoi_dung,
+                ten_nguoi_dung: user.ten_nguoi_dung,
+                email: user.email,
+                anh_dai_dien: user.anh_dai_dien,
+                so_dien_thoai: user.so_dien_thoai || null,
+                dia_chi: user.dia_chi || null,
+                token: token,
+                isNewUser: user.isNewUser || false
+            };
+
+            console.log('📦 User data to send:', userDataObj);
+
+            // Tạo URL redirect với thông tin user
+            const userData = encodeURIComponent(JSON.stringify(userDataObj));
+
+            // Redirect về frontend với token
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            const redirectUrl = `${frontendUrl}/dang-nhap.html?google_auth=success&data=${userData}`;
+            console.log('🔗 Redirect URL length:', redirectUrl.length);
+            res.redirect(redirectUrl);
+
+        } catch (error) {
+            console.error('Lỗi Google callback:', error);
+            res.redirect('/dang-nhap.html?error=server_error');
+        }
+    }
+);
+
+// API kiểm tra trạng thái Google OAuth
+router.get('/google/status', (req, res) => {
+    res.json({
+        success: true,
+        enabled: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+        message: 'Google OAuth is configured'
+    });
 });
 
 module.exports = router;

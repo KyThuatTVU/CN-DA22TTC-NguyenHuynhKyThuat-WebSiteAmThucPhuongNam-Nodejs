@@ -300,13 +300,20 @@
                 document.getElementById('sidebar-username').textContent = user.ten_nguoi_dung;
                 document.getElementById('sidebar-email').textContent = user.email;
 
-                // Display avatar
+                // Display avatar - sử dụng hàm getAvatarUrl để xử lý nhất quán
                 const avatarDisplay = document.getElementById('avatar-display');
-                if (user.anh_dai_dien) {
-                    const avatarUrl = user.anh_dai_dien.startsWith('http') 
+                const avatarUrl = typeof getAvatarUrl === 'function' 
+                    ? getAvatarUrl(user.anh_dai_dien)
+                    : (user.anh_dai_dien && user.anh_dai_dien.startsWith('http') 
                         ? user.anh_dai_dien 
-                        : `${window.API_URL.replace('/api', '')}${user.anh_dai_dien}`;
-                    avatarDisplay.innerHTML = `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-full h-full object-cover rounded-full" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+                        : `${window.API_URL.replace('/api', '')}${user.anh_dai_dien || ''}`);
+                
+                if (avatarUrl) {
+                    console.log('🖼️ Avatar URL (tai-khoan):', avatarUrl);
+                    // Thêm referrerpolicy để tránh bị chặn ảnh từ Google
+                    avatarDisplay.innerHTML = `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-full h-full object-cover rounded-full" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+                } else {
+                    console.log('⚠️ No avatar found for user (tai-khoan)');
                 }
 
                 // Fill form

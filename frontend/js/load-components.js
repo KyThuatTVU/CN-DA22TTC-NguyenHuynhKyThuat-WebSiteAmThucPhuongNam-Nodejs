@@ -120,8 +120,41 @@ function updateCartBadge() {
     }
 }
 
-// Update user menu based on login status
-function updateUserMenu() {
+// Hàm xử lý avatar URL - đảm bảo nhất quán giữa Google và local
+function getAvatarUrl(avatarPath) {
+    if (!avatarPath || (typeof avatarPath === 'string' && avatarPath.trim() === '')) {
+        return null;
+    }
+    
+    let url = avatarPath.trim();
+    
+    // Nếu là URL Google, giữ nguyên (đã được xử lý từ backend)
+    if (url.includes('googleusercontent.com')) {
+        // Chỉ sửa nếu URL bị lỗi (có chứa 'onerror' hoặc các ký tự lạ)
+        if (url.includes('onerror') || url.includes('undefined')) {
+            // Loại bỏ phần lỗi và thêm lại size
+            url = url.replace(/=s\d+(-c)?(onerror|undefined)?.*$/gi, '');
+            url = `${url}=s200-c`;
+        }
+        console.log('🖼️ Google Avatar URL:', url);
+        return url;
+    }
+    
+    // Nếu là URL đầy đủ khác (http/https), giữ nguyên
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+    
+    // Nếu là đường dẫn local, thêm base URL
+    if (url.startsWith('/')) {
+        return `http://localhost:3000${url}`;
+    }
+    
+    return `http://localhost:3000/${url}`;
+}
+
+// Update user menu based on login status - lấy data từ API
+async function updateUserMenu() {
     const userMenuContainer = document.getElementById('user-menu-container');
     const mobileUserMenu = document.getElementById('mobile-user-menu');
     
@@ -130,91 +163,140 @@ function updateUserMenu() {
         return;
     }
 
-    // Check if user is logged in
-    const userStr = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     
-    console.log('🔄 Updating user menu...', { hasUser: !!userStr, hasToken: !!token });
+    console.log('🔄 Updating user menu...', { hasToken: !!token });
 
-    if (userStr && token) {
-        try {
-            const user = JSON.parse(userStr);
-            console.log('👤 User data in updateUserMenu:', { 
-                name: user.ten_nguoi_dung, 
-                avatar: user.anh_dai_dien,
-                avatarType: typeof user.anh_dai_dien
-            });
-            
-            // Xử lý avatar URL - kiểm tra null, undefined, và empty string
-            let avatarUrl = null;
-            if (user.anh_dai_dien && user.anh_dai_dien.trim() !== '') {
-                // Nếu đường dẫn đã có http, giữ nguyên, nếu không thì thêm localhost:3000
-                avatarUrl = user.anh_dai_dien.startsWith('http') 
-                    ? user.anh_dai_dien 
-                    : `http://localhost:3000${user.anh_dai_dien}`;
-                console.log('🖼️ Avatar URL (load-components):', avatarUrl);
-            } else {
-                console.log('⚠️ No avatar found for user (load-components)');
+    if (!token) {
+        console.log('👤 No token, showing guest menu');
+        renderGuestMenu(userMenuContainer, mobileUserMenu);
+        return;
+    }
+
+    try {
+        // Lấy thông tin user từ API (database) thay vì localStorage
+        const response = await fetch('http://localhost:3000/api/auth/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
+        });
 
-            // Desktop User Menu
-            userMenuContainer.innerHTML = `
-                <div class="relative group">
-                    <button class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition">
-                        ${avatarUrl 
-                            ? `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-8 h-8 rounded-full object-cover border-2 border-orange-200" onerror="console.error('Failed to load avatar (load-components):', this.src); this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center\\'><i class=\\'fas fa-user text-orange-600\\'></i></div>';\">`
-                            : `<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                                <i class="fas fa-user text-orange-600"></i>
-                               </div>`
-                        }
-                        <span class="hidden xl:inline font-medium">${user.ten_nguoi_dung}</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                    <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100">
-                        <div class="px-4 py-3 border-b border-gray-100">
-                            <p class="text-sm font-medium text-gray-800">${user.ten_nguoi_dung}</p>
-                            <p class="text-xs text-gray-500">${user.email}</p>
-                        </div>
-                        <a href="tai-khoan.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                            <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
-                        </a>
-                        <a href="dat-ban.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                            <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
-                        </a>
-                        <button onclick="handleLogout()" class="w-full text-left block px-4 py-3 text-red-600 hover:bg-red-50 border-t border-gray-100">
-                            <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
-                        </button>
-                    </div>
-                </div>
-            `;
+        const result = await response.json();
 
-            // Mobile User Menu
-            if (mobileUserMenu) {
-                mobileUserMenu.innerHTML = `
-                    <div class="px-4 py-3 bg-orange-50 border-b border-orange-100">
-                        <p class="text-sm font-medium text-gray-800">${user.ten_nguoi_dung}</p>
-                        <p class="text-xs text-gray-500">${user.email}</p>
-                    </div>
-                    <a href="tai-khoan.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
-                        <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
-                    </a>
-                    <a href="dat-ban.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
-                        <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
-                    </a>
-                    <button onclick="handleLogout()" class="w-full text-left py-3 px-4 text-red-600 hover:bg-red-50 font-medium border-t border-gray-200">
-                        <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
-                    </button>
-                `;
+        if (!result.success || !result.data) {
+            console.log('❌ Token invalid or user not found');
+            // Token không hợp lệ, xóa và hiển thị guest menu
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            renderGuestMenu(userMenuContainer, mobileUserMenu);
+            return;
+        }
+
+        const user = result.data;
+        console.log('👤 User data from API:', { 
+            name: user.ten_nguoi_dung, 
+            avatar: user.anh_dai_dien
+        });
+
+        // Cập nhật localStorage với data mới từ DB
+        const localUser = localStorage.getItem('user');
+        if (localUser) {
+            const parsedUser = JSON.parse(localUser);
+            parsedUser.ten_nguoi_dung = user.ten_nguoi_dung;
+            parsedUser.anh_dai_dien = user.anh_dai_dien;
+            parsedUser.email = user.email;
+            localStorage.setItem('user', JSON.stringify(parsedUser));
+        }
+        
+        // Xử lý avatar URL - sử dụng hàm helper
+        const avatarUrl = getAvatarUrl(user.anh_dai_dien);
+        if (avatarUrl) {
+            console.log('🖼️ Avatar URL from DB:', avatarUrl);
+        } else {
+            console.log('⚠️ No avatar found for user');
+        }
+        
+        // Lấy tên hiển thị - đảm bảo luôn có giá trị
+        const displayName = user.ten_nguoi_dung || user.email || 'Người dùng';
+
+        // Render user menu
+        renderLoggedInMenu(userMenuContainer, mobileUserMenu, user, avatarUrl, displayName);
+        console.log('✅ User menu updated for:', displayName);
+
+    } catch (error) {
+        console.error('❌ Error fetching user data:', error);
+        // Fallback: sử dụng localStorage nếu API lỗi
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                const avatarUrl = getAvatarUrl(user.anh_dai_dien);
+                const displayName = user.ten_nguoi_dung || user.email || 'Người dùng';
+                renderLoggedInMenu(userMenuContainer, mobileUserMenu, user, avatarUrl, displayName);
+                console.log('✅ User menu updated from localStorage (fallback)');
+            } catch (e) {
+                renderGuestMenu(userMenuContainer, mobileUserMenu);
             }
-
-            console.log('✅ User menu updated for:', user.ten_nguoi_dung);
-        } catch (error) {
-            console.error('❌ Error parsing user data:', error);
+        } else {
             renderGuestMenu(userMenuContainer, mobileUserMenu);
         }
-    } else {
-        console.log('👤 No user logged in, showing guest menu');
-        renderGuestMenu(userMenuContainer, mobileUserMenu);
+    }
+}
+
+// Render menu cho user đã đăng nhập
+function renderLoggedInMenu(userMenuContainer, mobileUserMenu, user, avatarUrl, displayName) {
+    // Desktop User Menu - z-index 9999 để đảm bảo hiển thị trên tất cả
+    // Thêm referrerpolicy="no-referrer" để tránh bị chặn ảnh từ Google
+    userMenuContainer.innerHTML = `
+        <div class="relative group" style="z-index: 9999;">
+            <button class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition">
+                ${avatarUrl 
+                    ? `<img src="${avatarUrl}" alt="${displayName}" class="w-8 h-8 rounded-full object-cover border-2 border-orange-200" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="w-8 h-8 rounded-full bg-orange-100 items-center justify-center hidden">
+                           <i class="fas fa-user text-orange-600"></i>
+                       </div>`
+                    : `<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                        <i class="fas fa-user text-orange-600"></i>
+                       </div>`
+                }
+                <span class="hidden xl:inline font-medium max-w-32 truncate">${displayName}</span>
+                <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+            <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100" style="z-index: 9999;">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <p class="text-sm font-medium text-gray-800 truncate">${displayName}</p>
+                    <p class="text-xs text-gray-500 truncate">${user.email || ''}</p>
+                </div>
+                <a href="tai-khoan.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                    <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
+                </a>
+                <a href="dat-ban.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                    <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
+                </a>
+                <button onclick="handleLogout()" class="w-full text-left block px-4 py-3 text-red-600 hover:bg-red-50 border-t border-gray-100">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Mobile User Menu
+    if (mobileUserMenu) {
+        mobileUserMenu.innerHTML = `
+            <div class="px-4 py-3 bg-orange-50 border-b border-orange-100">
+                <p class="text-sm font-medium text-gray-800">${displayName}</p>
+                <p class="text-xs text-gray-500">${user.email || ''}</p>
+            </div>
+            <a href="tai-khoan.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
+            </a>
+            <a href="dat-ban.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
+            </a>
+            <button onclick="handleLogout()" class="w-full text-left py-3 px-4 text-red-600 hover:bg-red-50 font-medium border-t border-gray-200">
+                <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+            </button>
+        `;
     }
 }
 
@@ -362,3 +444,7 @@ function initializeCart() {
 
 // Call initialize cart
 initializeCart();
+
+// Export functions to window for global access
+window.updateUserMenu = updateUserMenu;
+window.getAvatarUrl = getAvatarUrl;
