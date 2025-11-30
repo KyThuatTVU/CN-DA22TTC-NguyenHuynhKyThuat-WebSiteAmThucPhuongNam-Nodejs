@@ -243,23 +243,20 @@ async function updateUserMenu() {
     }
 }
 
-// Render menu cho user đã đăng nhập
+// Render menu cho user đã đăng nhập - đồng nhất style cho cả Google và user thường
 function renderLoggedInMenu(userMenuContainer, mobileUserMenu, user, avatarUrl, displayName) {
-    // Desktop User Menu - z-index 9999 để đảm bảo hiển thị trên tất cả
-    // Thêm referrerpolicy="no-referrer" để tránh bị chặn ảnh từ Google
+    // Desktop User Menu - xóa toàn bộ nội dung cũ và thay thế
     userMenuContainer.innerHTML = `
         <div class="relative group" style="z-index: 9999;">
             <button class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition">
-                ${avatarUrl 
-                    ? `<img src="${avatarUrl}" alt="${displayName}" class="w-8 h-8 rounded-full object-cover border-2 border-orange-200" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                       <div class="w-8 h-8 rounded-full bg-orange-100 items-center justify-center hidden">
-                           <i class="fas fa-user text-orange-600"></i>
-                       </div>`
-                    : `<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                        <i class="fas fa-user text-orange-600"></i>
-                       </div>`
-                }
-                <span class="hidden xl:inline font-medium max-w-32 truncate">${displayName}</span>
+                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-orange-200 bg-orange-100 flex items-center justify-center">
+                    ${avatarUrl 
+                        ? `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                           <i class="fas fa-user text-orange-600" style="display:none;"></i>`
+                        : `<i class="fas fa-user text-orange-600"></i>`
+                    }
+                </div>
+                <span class="hidden xl:inline font-medium text-sm max-w-[120px] truncate">${displayName}</span>
                 <i class="fas fa-chevron-down text-xs"></i>
             </button>
             <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100" style="z-index: 9999;">
