@@ -420,6 +420,52 @@ router.get('/stats', requireAdmin, async (req, res) => {
             SELECT trang_thai, COUNT(*) as count FROM don_hang WHERE ${statusWhere} GROUP BY trang_thai
         `, statusParams);
 
+        // === TÍNH SO SÁNH VỚI THÁNG TRƯỚC ===
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentYear = currentDate.getFullYear();
+        
+        // Tháng trước
+        let prevMonth = currentMonth - 1;
+        let prevYear = currentYear;
+        if (prevMonth === 0) {
+            prevMonth = 12;
+            prevYear = currentYear - 1;
+        }
+
+        // Doanh thu tháng này
+        const [revenueThisMonth] = await db.query(`
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+        `, [currentMonth, currentYear]);
+
+        // Doanh thu tháng trước
+        const [revenueLastMonth] = await db.query(`
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+        `, [prevMonth, prevYear]);
+
+        // Đơn hàng tháng này
+        const [ordersThisMonth] = await db.query(`
+            SELECT COUNT(*) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+        `, [currentMonth, currentYear]);
+
+        // Đơn hàng tháng trước
+        const [ordersLastMonth] = await db.query(`
+            SELECT COUNT(*) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+        `, [prevMonth, prevYear]);
+
+        // Tính phần trăm thay đổi
+        const revenueChange = revenueLastMonth[0].total > 0 
+            ? ((revenueThisMonth[0].total - revenueLastMonth[0].total) / revenueLastMonth[0].total * 100).toFixed(1)
+            : (revenueThisMonth[0].total > 0 ? 100 : 0);
+
+        const ordersChange = ordersLastMonth[0].total > 0 
+            ? ((ordersThisMonth[0].total - ordersLastMonth[0].total) / ordersLastMonth[0].total * 100).toFixed(1)
+            : (ordersThisMonth[0].total > 0 ? 100 : 0);
+
         res.json({
             success: true,
             totalOrders: totalOrders[0].total,
@@ -428,7 +474,16 @@ router.get('/stats', requireAdmin, async (req, res) => {
             todayOrders: todayOrders[0].count,
             todayRevenue: todayRevenue[0].total,
             byStatus: statusStats,
-            filters: { year, month, status }
+            filters: { year, month, status },
+            // Dữ liệu so sánh với tháng trước
+            comparison: {
+                revenueChange: parseFloat(revenueChange),
+                ordersChange: parseFloat(ordersChange),
+                revenueThisMonth: revenueThisMonth[0].total,
+                revenueLastMonth: revenueLastMonth[0].total,
+                ordersThisMonth: ordersThisMonth[0].total,
+                ordersLastMonth: ordersLastMonth[0].total
+            }
         });
     } catch (error) {
         console.error('Error fetching order stats:', error);

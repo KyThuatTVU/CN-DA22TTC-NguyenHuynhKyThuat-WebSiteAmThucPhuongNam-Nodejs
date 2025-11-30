@@ -33,12 +33,42 @@ router.get('/stats', requireAdmin, async (req, res) => {
             WHERE YEARWEEK(ngay_dat, 1) = YEARWEEK(CURDATE(), 1)
         `);
 
+        // Đặt bàn tháng này
+        const [thisMonthCount] = await db.query(`
+            SELECT COUNT(*) as count FROM dat_ban 
+            WHERE MONTH(ngay_dat) = MONTH(CURDATE()) AND YEAR(ngay_dat) = YEAR(CURDATE())
+        `);
+
+        // Đặt bàn tháng trước
+        const currentDate = new Date();
+        let prevMonth = currentDate.getMonth(); // 0-11
+        let prevYear = currentDate.getFullYear();
+        if (prevMonth === 0) {
+            prevMonth = 12;
+            prevYear = prevYear - 1;
+        }
+        
+        const [lastMonthCount] = await db.query(`
+            SELECT COUNT(*) as count FROM dat_ban 
+            WHERE MONTH(ngay_dat) = ? AND YEAR(ngay_dat) = ?
+        `, [prevMonth, prevYear]);
+
+        // Tính phần trăm thay đổi
+        const reservationsChange = lastMonthCount[0].count > 0 
+            ? ((thisMonthCount[0].count - lastMonthCount[0].count) / lastMonthCount[0].count * 100).toFixed(1)
+            : (thisMonthCount[0].count > 0 ? 100 : 0);
+
         res.json({
             success: true,
             totalReservations: totalCount[0].total,
             today: todayCount[0].count,
             thisWeek: weekStats[0].count,
-            byStatus: statusStats
+            thisMonth: thisMonthCount[0].count,
+            lastMonth: lastMonthCount[0].count,
+            byStatus: statusStats,
+            comparison: {
+                reservationsChange: parseFloat(reservationsChange)
+            }
         });
     } catch (error) {
         console.error('Error fetching reservation stats:', error);

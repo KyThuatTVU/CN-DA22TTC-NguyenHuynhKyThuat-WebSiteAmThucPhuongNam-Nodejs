@@ -23,16 +23,39 @@ router.get('/stats', requireAdmin, async (req, res) => {
             WHERE MONTH(ngay_tao) = MONTH(CURDATE()) AND YEAR(ngay_tao) = YEAR(CURDATE())
         `);
         
+        // Khách hàng mới tháng trước
+        const currentDate = new Date();
+        let prevMonth = currentDate.getMonth(); // 0-11, tháng hiện tại - 1
+        let prevYear = currentDate.getFullYear();
+        if (prevMonth === 0) {
+            prevMonth = 12;
+            prevYear = prevYear - 1;
+        }
+        
+        const [newLastMonth] = await db.query(`
+            SELECT COUNT(*) as count FROM nguoi_dung 
+            WHERE MONTH(ngay_tao) = ? AND YEAR(ngay_tao) = ?
+        `, [prevMonth, prevYear]);
+        
         // Khách hàng active
         const [activeCustomers] = await db.query(`
             SELECT COUNT(*) as count FROM nguoi_dung WHERE trang_thai = 1
         `);
 
+        // Tính phần trăm thay đổi
+        const customersChange = newLastMonth[0].count > 0 
+            ? ((newThisMonth[0].count - newLastMonth[0].count) / newLastMonth[0].count * 100).toFixed(1)
+            : (newThisMonth[0].count > 0 ? 100 : 0);
+
         res.json({
             success: true,
             totalCustomers: totalCustomers[0].total,
             newThisMonth: newThisMonth[0].count,
-            activeCustomers: activeCustomers[0].count
+            newLastMonth: newLastMonth[0].count,
+            activeCustomers: activeCustomers[0].count,
+            comparison: {
+                customersChange: parseFloat(customersChange)
+            }
         });
     } catch (error) {
         console.error('Error fetching customer stats:', error);
