@@ -433,9 +433,16 @@ function showLoading() {
     const productPrice = document.getElementById('product-price');
     const productDesc = document.getElementById('product-description');
     
-    if (productName) productName.textContent = 'Đang tải...';
-    if (productPrice) productPrice.textContent = '...';
-    if (productDesc) productDesc.textContent = 'Đang tải thông tin món ăn...';
+    // Use LoadingManager if available
+    if (typeof LoadingManager !== 'undefined') {
+        if (productName) productName.innerHTML = `<span class="pulse-loading">Đang tải...</span>`;
+        if (productPrice) productPrice.innerHTML = `<span class="skeleton" style="display:inline-block;width:100px;height:24px;"></span>`;
+        if (productDesc) productDesc.innerHTML = `<div class="skeleton skeleton-text mb-2"></div><div class="skeleton skeleton-text w-3/4"></div>`;
+    } else {
+        if (productName) productName.textContent = 'Đang tải...';
+        if (productPrice) productPrice.textContent = '...';
+        if (productDesc) productDesc.textContent = 'Đang tải thông tin món ăn...';
+    }
 }
 
 // Show error

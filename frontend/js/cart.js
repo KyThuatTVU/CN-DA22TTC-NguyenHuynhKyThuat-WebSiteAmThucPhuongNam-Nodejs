@@ -121,10 +121,20 @@ class CartManager {
                 return;
             }
 
+            // Show loading toast
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.showToast('Đang thêm vào giỏ hàng...');
+            }
+
             const response = await this.apiCall('/cart/add', {
                 method: 'POST',
                 body: JSON.stringify({ ma_mon, so_luong })
             });
+
+            // Hide loading toast
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
 
             if (response.success) {
                 this.showNotification('Đã thêm vào giỏ hàng!', 'success');
@@ -132,6 +142,10 @@ class CartManager {
                 await this.loadCart();
             }
         } catch (error) {
+            // Hide loading toast on error
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
             console.error('Lỗi thêm vào giỏ hàng:', error);
             this.showNotification(error.message, 'error');
         }
@@ -146,16 +160,29 @@ class CartManager {
                 return;
             }
 
+            // Show loading toast
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.showToast('Đang cập nhật...');
+            }
+
             const response = await this.apiCall('/cart/update', {
                 method: 'PUT',
                 body: JSON.stringify({ ma_chi_tiet, so_luong })
             });
+
+            // Hide loading toast
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
 
             if (response.success) {
                 this.showNotification('Đã cập nhật giỏ hàng!', 'success');
                 await this.loadCart();
             }
         } catch (error) {
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
             console.error('Lỗi cập nhật giỏ hàng:', error);
             this.showNotification(error.message, 'error');
         }
@@ -164,15 +191,26 @@ class CartManager {
     // Remove item from cart
     async removeFromCart(ma_chi_tiet) {
         try {
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.showToast('Đang xóa...');
+            }
+
             const response = await this.apiCall(`/cart/remove/${ma_chi_tiet}`, {
                 method: 'DELETE'
             });
+
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
 
             if (response.success) {
                 this.showNotification('Đã xóa khỏi giỏ hàng!', 'success');
                 await this.loadCart();
             }
         } catch (error) {
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
             console.error('Lỗi xóa khỏi giỏ hàng:', error);
             this.showNotification(error.message, 'error');
         }
@@ -181,15 +219,26 @@ class CartManager {
     // Clear entire cart
     async clearCart() {
         try {
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.showToast('Đang xóa giỏ hàng...');
+            }
+
             const response = await this.apiCall('/cart/clear', {
                 method: 'DELETE'
             });
+
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
 
             if (response.success) {
                 this.showNotification('Đã xóa toàn bộ giỏ hàng!', 'success');
                 await this.loadCart();
             }
         } catch (error) {
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hideToast();
+            }
             console.error('Lỗi xóa giỏ hàng:', error);
             this.showNotification(error.message, 'error');
         }

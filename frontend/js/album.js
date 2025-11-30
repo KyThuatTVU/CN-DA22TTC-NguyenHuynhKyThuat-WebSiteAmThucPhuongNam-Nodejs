@@ -28,13 +28,17 @@ async function loadAlbums(filter = 'all', page = 1) {
     try {
         const galleryContainer = document.getElementById('gallery');
         
-        // Show loading
-        galleryContainer.innerHTML = `
-            <div class="col-span-full text-center py-12">
-                <i class="fas fa-spinner fa-spin text-4xl text-orange-600"></i>
-                <p class="mt-4 text-gray-600">Đang tải album...</p>
-            </div>
-        `;
+        // Show loading - use LoadingManager if available
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.showSectionLoading(galleryContainer, 'Đang tải album...');
+        } else {
+            galleryContainer.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-spinner fa-spin text-4xl text-orange-600"></i>
+                    <p class="mt-4 text-gray-600">Đang tải album...</p>
+                </div>
+            `;
+        }
 
         let url;
         if (filter === 'all' || !FILTER_MAP[filter]) {

@@ -152,12 +152,17 @@ async function loadOrders() {
     const container = document.getElementById('orders-container');
     const emptyState = document.getElementById('empty-state');
 
-    container.innerHTML = `
-        <div class="text-center py-12">
-            <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
-            <p class="text-gray-600">Đang tải đơn hàng...</p>
-        </div>
-    `;
+    // Use LoadingManager if available
+    if (typeof LoadingManager !== 'undefined') {
+        LoadingManager.showSectionLoading(container, 'Đang tải đơn hàng...');
+    } else {
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
+                <p class="text-gray-600">Đang tải đơn hàng...</p>
+            </div>
+        `;
+    }
 
     try {
         const token = getToken();
@@ -381,12 +386,18 @@ async function viewOrderDetail(orderId) {
     const content = document.getElementById('order-detail-content');
 
     modal.classList.remove('hidden');
-    content.innerHTML = `
-        <div class="text-center py-12">
-            <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
-            <p class="text-gray-600">Đang tải chi tiết...</p>
-        </div>
-    `;
+    
+    // Use LoadingManager if available
+    if (typeof LoadingManager !== 'undefined') {
+        LoadingManager.showSectionLoading(content, 'Đang tải chi tiết...');
+    } else {
+        content.innerHTML = `
+            <div class="text-center py-12">
+                <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
+                <p class="text-gray-600">Đang tải chi tiết...</p>
+            </div>
+        `;
+    }
 
     try {
         const token = getToken();
@@ -575,6 +586,11 @@ async function confirmCancelOrder() {
     if (!cancelOrderId) return;
 
     const reason = document.getElementById('cancel-reason').value.trim();
+    
+    // Show loading
+    if (typeof LoadingManager !== 'undefined') {
+        LoadingManager.showToast('Đang hủy đơn hàng...');
+    }
 
     try {
         const token = getToken();
@@ -590,6 +606,11 @@ async function confirmCancelOrder() {
         const result = await response.json();
         console.log('🚫 Cancel result:', result);
 
+        // Hide loading
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.hideToast();
+        }
+
         if (response.ok && result.success) {
             showNotification('Hủy đơn hàng thành công', 'success');
             closeCancelModal();
@@ -598,6 +619,10 @@ async function confirmCancelOrder() {
             throw new Error(result.message || 'Không thể hủy đơn hàng');
         }
     } catch (error) {
+        // Hide loading on error
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.hideToast();
+        }
         console.error('❌ Error canceling order:', error);
         showNotification(error.message, 'error');
     }

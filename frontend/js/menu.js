@@ -270,22 +270,28 @@ function showLoading() {
     const container = document.getElementById('menu-products');
     if (!container) return;
     
-    const skeletonHTML = Array(6).fill(0).map(() => `
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md">
-            <div class="skeleton h-64 w-full"></div>
-            <div class="p-5">
-                <div class="skeleton h-6 w-3/4 mb-3 rounded"></div>
-                <div class="skeleton h-4 w-full mb-2 rounded"></div>
-                <div class="skeleton h-4 w-2/3 mb-4 rounded"></div>
-                <div class="flex justify-between items-center">
-                    <div class="skeleton h-8 w-24 rounded"></div>
-                    <div class="skeleton h-12 w-12 rounded-full"></div>
+    // Use LoadingManager if available
+    if (typeof LoadingManager !== 'undefined') {
+        LoadingManager.showSkeletonLoading(container, 6, 'card');
+    } else {
+        // Fallback skeleton
+        const skeletonHTML = Array(6).fill(0).map(() => `
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md">
+                <div class="skeleton h-64 w-full"></div>
+                <div class="p-5">
+                    <div class="skeleton h-6 w-3/4 mb-3 rounded"></div>
+                    <div class="skeleton h-4 w-full mb-2 rounded"></div>
+                    <div class="skeleton h-4 w-2/3 mb-4 rounded"></div>
+                    <div class="flex justify-between items-center">
+                        <div class="skeleton h-8 w-24 rounded"></div>
+                        <div class="skeleton h-12 w-12 rounded-full"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
-    
-    container.innerHTML = skeletonHTML;
+        `).join('');
+        
+        container.innerHTML = skeletonHTML;
+    }
 }
 
 // Show error message

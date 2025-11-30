@@ -299,7 +299,19 @@ async function submitOrder(event) {
 
     // Show loading
     console.log('⏳ Submitting order to server...');
-    showNotification('Đang xử lý đơn hàng...', 'info');
+    
+    // Use LoadingManager for better UX
+    if (typeof LoadingManager !== 'undefined') {
+        LoadingManager.showPageLoading('Đang xử lý đơn hàng...');
+    } else {
+        showNotification('Đang xử lý đơn hàng...', 'info');
+    }
+    
+    // Disable submit button
+    const submitBtn = document.getElementById('submit-order-btn');
+    if (submitBtn && typeof LoadingManager !== 'undefined') {
+        LoadingManager.setButtonLoading(submitBtn, true, 'Đang đặt hàng...');
+    }
 
     try {
         const token = getToken();
@@ -403,9 +415,21 @@ async function submitOrder(event) {
                 }, 2000);
             }
         } else {
+            // Hide loading on error
+            if (typeof LoadingManager !== 'undefined') {
+                LoadingManager.hidePageLoading();
+                const submitBtn = document.getElementById('submit-order-btn');
+                if (submitBtn) LoadingManager.setButtonLoading(submitBtn, false);
+            }
             showNotification(result.message || 'Đặt hàng thất bại', 'error');
         }
     } catch (error) {
+        // Hide loading on error
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.hidePageLoading();
+            const submitBtn = document.getElementById('submit-order-btn');
+            if (submitBtn) LoadingManager.setButtonLoading(submitBtn, false);
+        }
         console.error('Lỗi đặt hàng:', error);
         showNotification('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'error');
     }

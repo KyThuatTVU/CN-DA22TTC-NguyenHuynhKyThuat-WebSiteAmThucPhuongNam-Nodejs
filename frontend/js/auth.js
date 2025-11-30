@@ -18,12 +18,24 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
-function setLoadingButton(button, isLoading) {
-    if (isLoading) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý...';
+function setLoadingButton(button, isLoading, originalText = null) {
+    if (typeof LoadingManager !== 'undefined') {
+        LoadingManager.setButtonLoading(button, isLoading, isLoading ? 'Đang xử lý...' : null);
     } else {
-        button.disabled = false;
+        // Fallback
+        if (isLoading) {
+            if (!button.dataset.originalHtml) {
+                button.dataset.originalHtml = button.innerHTML;
+            }
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý...';
+        } else {
+            button.disabled = false;
+            if (button.dataset.originalHtml) {
+                button.innerHTML = button.dataset.originalHtml;
+                delete button.dataset.originalHtml;
+            }
+        }
     }
 }
 

@@ -96,6 +96,7 @@ function initNavbar() {
 }
 
 // Render user menu based on login status (global function)
+// Đồng nhất style với load-components.js
 window.renderUserMenu = function() {
     console.log('🔄 renderUserMenu() called');
     
@@ -118,46 +119,50 @@ window.renderUserMenu = function() {
     if (userStr && token) {
         try {
             const user = JSON.parse(userStr);
+            const displayName = user.ten_nguoi_dung || user.email || 'Người dùng';
             console.log('👤 User data:', { 
-                name: user.ten_nguoi_dung, 
+                name: displayName, 
                 avatar: user.anh_dai_dien,
                 avatarType: typeof user.anh_dai_dien
             });
             
-            // Xử lý avatar URL - kiểm tra null, undefined, và empty string
+            // Xử lý avatar URL - sử dụng hàm helper nếu có
             let avatarUrl = null;
-            if (user.anh_dai_dien && user.anh_dai_dien.trim() !== '') {
-                // Nếu đường dẫn đã có http, giữ nguyên, nếu không thì thêm localhost:3000
+            if (typeof window.getAvatarUrl === 'function') {
+                avatarUrl = window.getAvatarUrl(user.anh_dai_dien);
+            } else if (user.anh_dai_dien && user.anh_dai_dien.trim() !== '') {
                 avatarUrl = user.anh_dai_dien.startsWith('http') 
                     ? user.anh_dai_dien 
                     : `http://localhost:3000${user.anh_dai_dien}`;
+            }
+            
+            if (avatarUrl) {
                 console.log('🖼️ Avatar URL:', avatarUrl);
             } else {
                 console.log('⚠️ No avatar found for user');
             }
 
+            // Desktop User Menu - đồng nhất style: w-9 h-9 avatar, hiển thị tên từ lg trở lên
             userMenuContainer.innerHTML = `
-                <div class="relative group">
+                <div class="relative group" style="z-index: 9999;">
                     <button class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition">
-                        ${avatarUrl 
-                            ? `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-8 h-8 rounded-full object-cover border-2 border-orange-200" onerror="console.error('Failed to load avatar:', this.src); this.onerror=null; this.parentElement.innerHTML='<div class=\'w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center\'><i class=\'fas fa-user text-orange-600\'></i></div>';">`
-                            : `<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                                <i class="fas fa-user text-orange-600"></i>
-                               </div>`
-                        }
-                        <span class="hidden xl:inline font-medium">${user.ten_nguoi_dung}</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
+                        <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-orange-200 bg-orange-100 flex items-center justify-center flex-shrink-0">
+                            ${avatarUrl 
+                                ? `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                   <i class="fas fa-user text-orange-600 text-sm" style="display:none;"></i>`
+                                : `<i class="fas fa-user text-orange-600 text-sm"></i>`
+                            }
+                        </div>
+                        <span class="hidden lg:inline font-medium text-sm max-w-[150px] truncate">${displayName}</span>
+                        <i class="fas fa-chevron-down text-xs hidden lg:inline ml-1"></i>
                     </button>
-                    <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100" style="z-index: 9999;">
                         <div class="px-4 py-3 border-b border-gray-100">
-                            <p class="text-sm font-medium text-gray-800">${user.ten_nguoi_dung}</p>
-                            <p class="text-xs text-gray-500">${user.email}</p>
+                            <p class="text-sm font-medium text-gray-800 truncate">${displayName}</p>
+                            <p class="text-xs text-gray-500 truncate">${user.email || ''}</p>
                         </div>
                         <a href="tai-khoan.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                             <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
-                        </a>
-                        <a href="don-hang.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                            <i class="fas fa-shopping-bag mr-2"></i> Đơn hàng
                         </a>
                         <a href="dat-ban.html" class="block px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                             <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
@@ -169,35 +174,36 @@ window.renderUserMenu = function() {
                 </div>
             `;
 
-            // Cập nhật mobile menu khi đã đăng nhập
+            // Mobile User Menu - đồng nhất style: w-10 h-10 avatar với border
             const mobileUserMenu = document.getElementById('mobile-user-menu');
             if (mobileUserMenu) {
                 mobileUserMenu.innerHTML = `
-                    <div class="flex items-center px-4 py-3 border-b border-gray-200 bg-orange-50">
-                        ${avatarUrl 
-                            ? `<img src="${avatarUrl}" alt="${user.ten_nguoi_dung}" class="w-10 h-10 rounded-full object-cover border-2 border-orange-300">`
-                            : `<div class="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center">
-                                <i class="fas fa-user text-orange-600"></i>
-                               </div>`
-                        }
-                        <div class="ml-3">
-                            <p class="font-medium text-gray-800">${user.ten_nguoi_dung}</p>
-                            <p class="text-xs text-gray-500">${user.email}</p>
+                    <div class="flex items-center px-4 py-3 bg-orange-50 border-b border-orange-100">
+                        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-orange-300 bg-orange-100 flex items-center justify-center flex-shrink-0">
+                            ${avatarUrl 
+                                ? `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                   <i class="fas fa-user text-orange-600" style="display:none;"></i>`
+                                : `<i class="fas fa-user text-orange-600"></i>`
+                            }
+                        </div>
+                        <div class="ml-3 overflow-hidden">
+                            <p class="text-sm font-medium text-gray-800 truncate">${displayName}</p>
+                            <p class="text-xs text-gray-500 truncate">${user.email || ''}</p>
                         </div>
                     </div>
                     <a href="tai-khoan.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
                         <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
                     </a>
-                    <a href="don-hang-cua-toi.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
-                        <i class="fas fa-shopping-bag mr-2"></i> Đơn hàng của tôi
+                    <a href="dat-ban.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
+                        <i class="fas fa-calendar-check mr-2"></i> Đặt bàn
                     </a>
-                    <button onclick="handleLogout()" class="w-full text-left py-3 px-4 text-red-600 hover:bg-red-50 transition font-medium">
+                    <button onclick="handleLogout()" class="w-full text-left py-3 px-4 text-red-600 hover:bg-red-50 font-medium border-t border-gray-200">
                         <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
                     </button>
                 `;
             }
 
-            console.log('✅ User menu rendered for:', user.ten_nguoi_dung);
+            console.log('✅ User menu rendered for:', displayName);
         } catch (error) {
             console.error('❌ Error parsing user data:', error);
             window.renderGuestMenu();

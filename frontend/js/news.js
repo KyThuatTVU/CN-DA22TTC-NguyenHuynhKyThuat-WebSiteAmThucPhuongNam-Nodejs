@@ -276,12 +276,17 @@ async function searchNews(query) {
 function showLoading() {
     const container = document.getElementById('news-list');
     if (container) {
-        container.innerHTML = `
-            <div class="col-span-full text-center py-12">
-                <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
-                <p class="text-gray-600">Đang tải tin tức...</p>
-            </div>
-        `;
+        // Use LoadingManager if available
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.showSectionLoading(container, 'Đang tải tin tức...');
+        } else {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
+                    <p class="text-gray-600">Đang tải tin tức...</p>
+                </div>
+            `;
+        }
     }
 }
 

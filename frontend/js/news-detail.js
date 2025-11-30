@@ -165,12 +165,17 @@ function copyLink() {
 function showLoading() {
     const contentDiv = document.querySelector('.news-content');
     if (contentDiv) {
-        contentDiv.innerHTML = `
-            <div class="text-center py-12">
-                <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
-                <p class="text-gray-600">Đang tải tin tức...</p>
-            </div>
-        `;
+        // Use LoadingManager if available
+        if (typeof LoadingManager !== 'undefined') {
+            LoadingManager.showSectionLoading(contentDiv, 'Đang tải tin tức...');
+        } else {
+            contentDiv.innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
+                    <p class="text-gray-600">Đang tải tin tức...</p>
+                </div>
+            `;
+        }
     }
 }
 

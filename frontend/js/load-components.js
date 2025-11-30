@@ -1,12 +1,18 @@
 // Load Component Function
 async function loadComponent(elementId, componentPath) {
     try {
+        const element = document.getElementById(elementId);
+        
+        // Show loading placeholder if element exists
+        if (element && typeof LoadingManager !== 'undefined') {
+            element.innerHTML = `<div class="pulse-loading py-4 text-center text-gray-400"><i class="fas fa-spinner fa-spin"></i></div>`;
+        }
+        
         const response = await fetch(componentPath);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const html = await response.text();
-        const element = document.getElementById(elementId);
         if (element) {
             element.innerHTML = html;
         }
@@ -246,18 +252,19 @@ async function updateUserMenu() {
 // Render menu cho user đã đăng nhập - đồng nhất style cho cả Google và user thường
 function renderLoggedInMenu(userMenuContainer, mobileUserMenu, user, avatarUrl, displayName) {
     // Desktop User Menu - xóa toàn bộ nội dung cũ và thay thế
+    // Avatar size: w-9 h-9 (36px) - đồng nhất cho tất cả các trang
     userMenuContainer.innerHTML = `
         <div class="relative group" style="z-index: 9999;">
             <button class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition">
-                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-orange-200 bg-orange-100 flex items-center justify-center">
+                <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-orange-200 bg-orange-100 flex items-center justify-center flex-shrink-0">
                     ${avatarUrl 
-                        ? `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                           <i class="fas fa-user text-orange-600" style="display:none;"></i>`
-                        : `<i class="fas fa-user text-orange-600"></i>`
+                        ? `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                           <i class="fas fa-user text-orange-600 text-sm" style="display:none;"></i>`
+                        : `<i class="fas fa-user text-orange-600 text-sm"></i>`
                     }
                 </div>
-                <span class="hidden xl:inline font-medium text-sm max-w-[120px] truncate">${displayName}</span>
-                <i class="fas fa-chevron-down text-xs"></i>
+                <span class="hidden lg:inline font-medium text-sm max-w-[150px] truncate">${displayName}</span>
+                <i class="fas fa-chevron-down text-xs hidden lg:inline ml-1"></i>
             </button>
             <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100" style="z-index: 9999;">
                 <div class="px-4 py-3 border-b border-gray-100">
@@ -277,12 +284,21 @@ function renderLoggedInMenu(userMenuContainer, mobileUserMenu, user, avatarUrl, 
         </div>
     `;
 
-    // Mobile User Menu
+    // Mobile User Menu - thêm avatar và đồng nhất style
     if (mobileUserMenu) {
         mobileUserMenu.innerHTML = `
-            <div class="px-4 py-3 bg-orange-50 border-b border-orange-100">
-                <p class="text-sm font-medium text-gray-800">${displayName}</p>
-                <p class="text-xs text-gray-500">${user.email || ''}</p>
+            <div class="flex items-center px-4 py-3 bg-orange-50 border-b border-orange-100">
+                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-orange-300 bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    ${avatarUrl 
+                        ? `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                           <i class="fas fa-user text-orange-600" style="display:none;"></i>`
+                        : `<i class="fas fa-user text-orange-600"></i>`
+                    }
+                </div>
+                <div class="ml-3 overflow-hidden">
+                    <p class="text-sm font-medium text-gray-800 truncate">${displayName}</p>
+                    <p class="text-xs text-gray-500 truncate">${user.email || ''}</p>
+                </div>
             </div>
             <a href="tai-khoan.html" class="block py-3 px-4 text-gray-800 hover:text-orange-600 hover:bg-orange-50 transition font-medium">
                 <i class="fas fa-user-circle mr-2"></i> Tài khoản của tôi
