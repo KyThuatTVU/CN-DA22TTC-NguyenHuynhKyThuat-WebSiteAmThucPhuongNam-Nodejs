@@ -78,15 +78,15 @@
                     <!-- Restaurant Info -->
                     <div class="content-card">
                         <h3 class="text-lg font-bold mb-4 flex items-center text-slate-800"><i class="fas fa-store text-blue-600 mr-2"></i>Thông tin nhà hàng</h3>
-                        <form class="space-y-4">
+                        <form class="space-y-4" onsubmit="saveRestaurantInfo(event)">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Tên nhà hàng</label><input type="text" value="Nhà hàng Phương Nam Vĩnh Long" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
-                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Số điện thoại</label><input type="tel" value="0270 123 4567" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
-                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Email</label><input type="email" value="contact@phuongnam.vn" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
-                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Website</label><input type="url" value="https://phuongnam.vn" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
-                                <div class="md:col-span-2"><label class="block text-sm font-medium text-slate-700 mb-2">Địa chỉ</label><input type="text" value="123 Đường ABC, Phường 1, TP. Vĩnh Long" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Tên nhà hàng</label><input type="text" id="ten_nha_hang" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Số điện thoại</label><input type="tel" id="so_dien_thoai" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Email</label><input type="email" id="email" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-2">Website</label><input type="url" id="website" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                                <div class="md:col-span-2"><label class="block text-sm font-medium text-slate-700 mb-2">Địa chỉ</label><input type="text" id="dia_chi" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
                             </div>
-                            <div class="flex justify-end"><button type="submit" class="btn-primary">Lưu thay đổi</button></div>
+                            <div class="flex justify-end"><button type="submit" class="btn-primary"><i class="fas fa-save mr-2"></i>Lưu thay đổi</button></div>
                         </form>
                     </div>
 
@@ -97,21 +97,21 @@
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <span class="font-medium text-slate-700">Thứ 2 - Thứ 6</span>
                                 <div class="flex items-center space-x-2">
-                                    <input type="time" value="08:00" class="px-3 py-2 border border-slate-200 rounded-xl">
+                                    <input type="time" id="gio_mo_t2t6" value="08:00" class="px-3 py-2 border border-slate-200 rounded-xl">
                                     <span class="text-slate-400">-</span>
-                                    <input type="time" value="22:00" class="px-3 py-2 border border-slate-200 rounded-xl">
+                                    <input type="time" id="gio_dong_t2t6" value="22:00" class="px-3 py-2 border border-slate-200 rounded-xl">
                                 </div>
                             </div>
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <span class="font-medium text-slate-700">Thứ 7 - Chủ nhật</span>
                                 <div class="flex items-center space-x-2">
-                                    <input type="time" value="07:00" class="px-3 py-2 border border-slate-200 rounded-xl">
+                                    <input type="time" id="gio_mo_t7cn" value="07:00" class="px-3 py-2 border border-slate-200 rounded-xl">
                                     <span class="text-slate-400">-</span>
-                                    <input type="time" value="23:00" class="px-3 py-2 border border-slate-200 rounded-xl">
+                                    <input type="time" id="gio_dong_t7cn" value="23:00" class="px-3 py-2 border border-slate-200 rounded-xl">
                                 </div>
                             </div>
                         </div>
-                        <div class="flex justify-end mt-4"><button class="btn-primary">Lưu thay đổi</button></div>
+                        <div class="flex justify-end mt-4"><button onclick="saveBusinessHours()" class="btn-primary"><i class="fas fa-save mr-2"></i>Lưu thay đổi</button></div>
                     </div>
 
                     <!-- Delivery Settings -->
@@ -121,14 +121,14 @@
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <div><p class="font-medium text-slate-700">Cho phép giao hàng</p><p class="text-sm text-slate-500">Bật/tắt chức năng giao hàng</p></div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked class="sr-only peer">
+                                    <input type="checkbox" id="cho_phep_giao_hang" checked class="sr-only peer">
                                     <div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
-                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Phí giao hàng mặc định (VNĐ)</label><input type="number" value="20000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
-                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Miễn phí giao hàng cho đơn từ (VNĐ)</label><input type="number" value="200000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Phí giao hàng mặc định (VNĐ)</label><input type="number" id="phi_giao_hang" value="20000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
+                            <div><label class="block text-sm font-medium text-slate-700 mb-2">Miễn phí giao hàng cho đơn từ (VNĐ)</label><input type="number" id="mien_phi_giao_hang_tu" value="200000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500"></div>
                         </div>
-                        <div class="flex justify-end mt-4"><button class="btn-primary">Lưu thay đổi</button></div>
+                        <div class="flex justify-end mt-4"><button onclick="saveDeliverySettings()" class="btn-primary"><i class="fas fa-save mr-2"></i>Lưu thay đổi</button></div>
                     </div>
 
                     <!-- Payment Methods -->
@@ -137,15 +137,15 @@
                         <div class="space-y-3">
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <div class="flex items-center space-x-3"><i class="fas fa-money-bill-wave text-emerald-600 text-xl"></i><div><p class="font-medium text-slate-700">Tiền mặt</p><p class="text-sm text-slate-500">Thanh toán khi nhận hàng</p></div></div>
-                                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label>
+                                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="thanh_toan_tien_mat" onchange="savePaymentMethod('thanh_toan_tien_mat', this.checked)" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label>
                             </div>
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <div class="flex items-center space-x-3"><i class="fas fa-university text-blue-600 text-xl"></i><div><p class="font-medium text-slate-700">Chuyển khoản</p><p class="text-sm text-slate-500">Chuyển khoản ngân hàng</p></div></div>
-                                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label>
+                                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="thanh_toan_chuyen_khoan" onchange="savePaymentMethod('thanh_toan_chuyen_khoan', this.checked)" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label>
                             </div>
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <div class="flex items-center space-x-3"><i class="fas fa-mobile-alt text-purple-600 text-xl"></i><div><p class="font-medium text-slate-700">MoMo</p><p class="text-sm text-slate-500">Ví điện tử MoMo</p></div></div>
-                                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label>
+                                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="thanh_toan_momo" onchange="savePaymentMethod('thanh_toan_momo', this.checked)" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label>
                             </div>
                         </div>
                     </div>
@@ -167,9 +167,138 @@
     <script src="admin-layout.js"></script>
     <script src="admin-mobile.js"></script>
     <script>
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => { e.preventDefault(); alert('Lưu thành công!'); });
-        });
+        // Load settings khi trang load
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${API_URL}/settings`, { credentials: 'include' });
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const s = result.data;
+                    // Thông tin nhà hàng
+                    document.getElementById('ten_nha_hang').value = s.ten_nha_hang || '';
+                    document.getElementById('so_dien_thoai').value = s.so_dien_thoai || '';
+                    document.getElementById('email').value = s.email || '';
+                    document.getElementById('website').value = s.website || '';
+                    document.getElementById('dia_chi').value = s.dia_chi || '';
+                    
+                    // Giờ hoạt động
+                    if (s.gio_mo_cua_t2_t6) {
+                        const [open1, close1] = s.gio_mo_cua_t2_t6.split('-');
+                        document.getElementById('gio_mo_t2t6').value = open1 || '08:00';
+                        document.getElementById('gio_dong_t2t6').value = close1 || '22:00';
+                    }
+                    if (s.gio_mo_cua_t7_cn) {
+                        const [open2, close2] = s.gio_mo_cua_t7_cn.split('-');
+                        document.getElementById('gio_mo_t7cn').value = open2 || '07:00';
+                        document.getElementById('gio_dong_t7cn').value = close2 || '23:00';
+                    }
+                    
+                    // Giao hàng
+                    document.getElementById('cho_phep_giao_hang').checked = s.cho_phep_giao_hang === '1';
+                    document.getElementById('phi_giao_hang').value = s.phi_giao_hang || '20000';
+                    document.getElementById('mien_phi_giao_hang_tu').value = s.mien_phi_giao_hang_tu || '200000';
+                    
+                    // Thanh toán
+                    document.getElementById('thanh_toan_tien_mat').checked = s.thanh_toan_tien_mat === '1';
+                    document.getElementById('thanh_toan_chuyen_khoan').checked = s.thanh_toan_chuyen_khoan === '1';
+                    document.getElementById('thanh_toan_momo').checked = s.thanh_toan_momo === '1';
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Lưu thông tin nhà hàng
+        async function saveRestaurantInfo(e) {
+            e.preventDefault();
+            try {
+                const settings = {
+                    ten_nha_hang: document.getElementById('ten_nha_hang').value,
+                    so_dien_thoai: document.getElementById('so_dien_thoai').value,
+                    email: document.getElementById('email').value,
+                    website: document.getElementById('website').value,
+                    dia_chi: document.getElementById('dia_chi').value
+                };
+                
+                const response = await fetch(`${API_URL}/settings/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                alert(result.success ? 'Đã lưu thông tin nhà hàng!' : 'Lỗi: ' + result.message);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        // Lưu giờ hoạt động
+        async function saveBusinessHours() {
+            try {
+                const settings = {
+                    gio_mo_cua_t2_t6: document.getElementById('gio_mo_t2t6').value + '-' + document.getElementById('gio_dong_t2t6').value,
+                    gio_mo_cua_t7_cn: document.getElementById('gio_mo_t7cn').value + '-' + document.getElementById('gio_dong_t7cn').value
+                };
+                
+                const response = await fetch(`${API_URL}/settings/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                alert(result.success ? 'Đã lưu giờ hoạt động!' : 'Lỗi: ' + result.message);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        // Lưu cài đặt giao hàng
+        async function saveDeliverySettings() {
+            try {
+                const settings = {
+                    cho_phep_giao_hang: document.getElementById('cho_phep_giao_hang').checked ? '1' : '0',
+                    phi_giao_hang: document.getElementById('phi_giao_hang').value,
+                    mien_phi_giao_hang_tu: document.getElementById('mien_phi_giao_hang_tu').value
+                };
+                
+                const response = await fetch(`${API_URL}/settings/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                alert(result.success ? 'Đã lưu cài đặt giao hàng!' : 'Lỗi: ' + result.message);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        // Lưu phương thức thanh toán (tự động khi toggle)
+        async function savePaymentMethod(key, checked) {
+            try {
+                await fetch(`${API_URL}/settings/${key}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: checked ? '1' : '0' }),
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Load settings khi trang load
+        loadSettings();
     </script>
 </body>
 </html>

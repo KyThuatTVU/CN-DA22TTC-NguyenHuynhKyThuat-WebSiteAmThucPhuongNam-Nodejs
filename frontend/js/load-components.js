@@ -21,6 +21,82 @@ async function loadComponent(elementId, componentPath) {
     }
 }
 
+// Biến lưu trữ settings từ API
+let siteSettings = null;
+
+// Load settings từ API và cập nhật các phần tử trên trang
+async function loadSiteSettings() {
+    try {
+        const response = await fetch('http://localhost:3000/api/settings');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            siteSettings = result.data;
+            console.log('⚙️ Site settings loaded:', siteSettings);
+            
+            // Cập nhật tất cả các phần tử có data-setting attribute
+            updateSettingsElements();
+        }
+    } catch (error) {
+        console.error('❌ Error loading site settings:', error);
+    }
+}
+
+// Cập nhật các phần tử HTML dựa trên settings
+function updateSettingsElements() {
+    if (!siteSettings) return;
+    
+    console.log('🔄 Updating settings elements...');
+    let updatedCount = 0;
+    
+    // Cập nhật các phần tử có data-setting attribute
+    document.querySelectorAll('[data-setting]').forEach(element => {
+        const settingKey = element.getAttribute('data-setting');
+        const value = siteSettings[settingKey];
+        
+        if (value) {
+            // Kiểm tra nếu có data-setting-href (cho link tel: hoặc mailto:)
+            const hrefPrefix = element.getAttribute('data-setting-href');
+            if (hrefPrefix && element.tagName === 'A') {
+                element.href = hrefPrefix + value;
+            }
+            
+            // Chỉ cập nhật text nếu element không có child elements quan trọng (như icon)
+            const hasChildElements = element.querySelector('i, svg, img');
+            if (!hasChildElements) {
+                element.textContent = value;
+            }
+            
+            updatedCount++;
+        }
+    });
+    
+    // Cập nhật href cho các link có data-setting-value (dùng cho link có icon bên trong)
+    document.querySelectorAll('[data-setting-value]').forEach(element => {
+        const settingKey = element.getAttribute('data-setting-value');
+        const hrefPrefix = element.getAttribute('data-setting-href');
+        const value = siteSettings[settingKey];
+        
+        if (value && hrefPrefix && element.tagName === 'A') {
+            element.href = hrefPrefix + value;
+            updatedCount++;
+        }
+    });
+    
+    // Cập nhật các link có data-setting-link attribute
+    document.querySelectorAll('[data-setting-link]').forEach(element => {
+        const settingKey = element.getAttribute('data-setting-link');
+        const value = siteSettings[settingKey];
+        
+        if (value && element.tagName === 'A') {
+            element.href = value;
+            updatedCount++;
+        }
+    });
+    
+    console.log(`✅ Settings elements updated: ${updatedCount} elements`);
+}
+
 // Load all common components
 async function loadAllComponents() {
     const promises = [];
@@ -42,6 +118,11 @@ async function loadAllComponents() {
     
     // Initialize after components loaded
     initializeComponents();
+    
+    // Load và apply settings sau khi components đã load (với delay để đảm bảo DOM đã render)
+    setTimeout(async () => {
+        await loadSiteSettings();
+    }, 100);
 }
 
 // Initialize component functionality
