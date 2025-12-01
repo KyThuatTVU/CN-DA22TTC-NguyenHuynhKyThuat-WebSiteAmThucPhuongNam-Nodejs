@@ -461,6 +461,49 @@ function initializeCart() {
 // Call initialize cart
 initializeCart();
 
+// Biến đánh dấu đã hiển thị lời chào chưa
+let chatbotGreeted = false;
+
+// Hiển thị lời chào khi mở chatbot
+function showChatbotGreeting() {
+    if (chatbotGreeted) return;
+    chatbotGreeted = true;
+    
+    const messages = document.getElementById('chatbotMessages');
+    if (!messages) return;
+    
+    // Lấy thông tin user từ localStorage
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    let greeting = '';
+    
+    if (token && userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            const userName = user.ten_nguoi_dung || 'bạn';
+            greeting = `Chào anh/chị <strong>${userName}</strong> ạ! 🌸 Em là Trà My, trợ lý ảo của Nhà hàng Ẩm thực Phương Nam đây ạ. Rất vui được gặp lại anh/chị! Hôm nay em có thể giúp gì cho anh/chị ạ? 💕`;
+        } catch (e) {
+            greeting = 'Chào anh/chị ạ! 🌸 Em là Trà My, trợ lý ảo của Nhà hàng Ẩm thực Phương Nam. Em có thể giúp gì cho anh/chị ạ? 💕';
+        }
+    } else {
+        greeting = 'Chào quý khách ạ! 🌸 Em là Trà My, trợ lý ảo của Nhà hàng Ẩm thực Phương Nam đây ạ. Em có thể giúp anh/chị tìm hiểu về thực đơn, đặt bàn hoặc giải đáp mọi thắc mắc. Anh/chị cần em hỗ trợ gì ạ? 💕';
+    }
+    
+    // Thêm tin nhắn chào mừng
+    const botMsg = document.createElement('div');
+    botMsg.className = 'flex gap-2';
+    botMsg.innerHTML = `
+        <div class="w-7 h-7 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user-tie text-white text-xs"></i>
+        </div>
+        <div class="chat-bubble-bot px-3 py-2 max-w-[85%]">
+            <p class="text-gray-700 text-sm leading-relaxed">${greeting}</p>
+        </div>
+    `;
+    messages.appendChild(botMsg);
+    messages.scrollTop = messages.scrollHeight;
+}
+
 // Initialize Chatbot functionality
 function initializeChatbot() {
     const chatbotButton = document.getElementById('chatbotButton');
@@ -484,6 +527,8 @@ function initializeChatbot() {
                 chatbotPanel.classList.toggle('scale-90');
                 chatbotPanel.classList.toggle('pointer-events-none');
             }
+            // Hiển thị lời chào khi mở chatbot lần đầu
+            showChatbotGreeting();
             // Focus input
             setTimeout(() => document.getElementById('chatbotInput')?.focus(), 100);
         });
@@ -510,8 +555,15 @@ window.chatbotSendQuick = function(message) {
     chatbotSendMessage();
 };
 
-// Session ID cho chatbot
-const chatbotSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+// Session ID cho chatbot - lưu vào sessionStorage để giữ trong phiên làm việc
+function getChatbotSessionId() {
+    let sessionId = sessionStorage.getItem('chatbot_session_id');
+    if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem('chatbot_session_id', sessionId);
+    }
+    return sessionId;
+}
 
 // Gửi tin nhắn chatbot
 window.chatbotSendMessage = async function() {
@@ -553,10 +605,20 @@ window.chatbotSendMessage = async function() {
     messages.scrollTop = messages.scrollHeight;
     
     try {
+        // Lấy token nếu user đã đăng nhập
+        const token = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         const response = await fetch('http://localhost:3000/api/chatbot/chat', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
+            headers: headers,
+            body: JSON.stringify({ 
+                message: text,
+                session_id: getChatbotSessionId()
+            })
         });
         
         const result = await response.json();
