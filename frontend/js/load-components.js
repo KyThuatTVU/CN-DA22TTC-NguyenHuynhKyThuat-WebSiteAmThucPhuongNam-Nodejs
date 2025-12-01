@@ -109,6 +109,15 @@ async function loadAllComponents() {
     promises.push(loadComponent('footer-container', 'components/footer.html'));
     promises.push(loadComponent('chatbot-container', 'components/chatbot.html'));
     
+    // Load floating contact buttons - tự động tạo container nếu chưa có
+    let floatingContactContainer = document.getElementById('floating-contact-container');
+    if (!floatingContactContainer) {
+        floatingContactContainer = document.createElement('div');
+        floatingContactContainer.id = 'floating-contact-container';
+        document.body.appendChild(floatingContactContainer);
+    }
+    promises.push(loadComponent('floating-contact-container', 'components/floating-contact.html'));
+    
     // Load page header if container exists
     if (document.getElementById('page-header-container')) {
         promises.push(loadComponent('page-header-container', 'components/page-header.html'));
@@ -122,6 +131,10 @@ async function loadAllComponents() {
     // Load và apply settings sau khi components đã load (với delay để đảm bảo DOM đã render)
     setTimeout(async () => {
         await loadSiteSettings();
+        // Cập nhật lại settings sau khi tất cả components đã load hoàn toàn
+        setTimeout(() => {
+            updateSettingsElements();
+        }, 200);
     }, 100);
 }
 
