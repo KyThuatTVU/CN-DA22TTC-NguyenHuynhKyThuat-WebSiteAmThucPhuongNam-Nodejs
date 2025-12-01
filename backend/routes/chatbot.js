@@ -199,6 +199,61 @@ ${menuInfo}
     }
 });
 
+// API lấy danh sách các sessions chat của user (giống ChatGPT)
+router.get('/sessions', async (req, res) => {
+    try {
+        const ma_nguoi_dung = getUserFromToken(req);
+        
+        console.log('📜 Getting sessions for user:', ma_nguoi_dung);
+        
+        if (!ma_nguoi_dung) {
+            return res.status(401).json({
+                success: false,
+                message: 'Vui lòng đăng nhập để xem lịch sử chat'
+            });
+        }
+
+        // Lấy danh sách sessions - query đơn giản hơn
+        const [sessions] = await db.query(
+            `SELECT 
+                session_id,
+                MIN(thoi_diem_chat) as thoi_diem_chat,
+                COUNT(*) as message_count
+             FROM lich_su_chatbot
+             WHERE ma_nguoi_dung = ? AND session_id IS NOT NULL
+             GROUP BY session_id
+             ORDER BY MIN(thoi_diem_chat) DESC
+             LIMIT 50`,
+            [ma_nguoi_dung]
+        );
+        
+        console.log('📜 Found sessions:', sessions.length);
+
+        // Lấy tin nhắn đầu tiên cho mỗi session
+        for (let session of sessions) {
+            const [firstMsg] = await db.query(
+                `SELECT noi_dung FROM lich_su_chatbot 
+                 WHERE session_id = ? AND nguoi_gui = 'user' 
+                 ORDER BY thoi_diem_chat ASC LIMIT 1`,
+                [session.session_id]
+            );
+            session.first_message = firstMsg.length > 0 ? firstMsg[0].noi_dung : 'Cuộc trò chuyện';
+        }
+
+        res.json({
+            success: true,
+            data: sessions
+        });
+
+    } catch (error) {
+        console.error('Error getting chat sessions:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi lấy danh sách chat'
+        });
+    }
+});
+
 // API lấy lịch sử chat của user đang đăng nhập
 router.get('/history', async (req, res) => {
     try {
@@ -258,6 +313,138 @@ router.get('/history/:session_id', async (req, res) => {
             success: false,
             message: 'Lỗi lấy lịch sử chat'
         });
+    }
+});
+
+// ==================== ADMIN APIs ====================
+
+// API lấy thống kê chat cho admin
+router.get('/admin/stats', async (req, res) => {
+    try {
+        const [totalMsg] = await db.query('SELECT COUNT(*) as count FROM lich_su_chatbot');
+        const [totalSessions] = await db.query('SELECT COUNT(DISTINCT session_id) as count FROM lich_su_chatbot WHERE session_id IS NOT NULL');
+        const [loggedUsers] = await db.query('SELECT COUNT(DISTINCT ma_nguoi_dung) as count FROM lich_su_chatbot WHERE ma_nguoi_dung IS NOT NULL');
+        const [guestSessions] = await db.query('SELECT COUNT(DISTINCT session_id) as count FROM lich_su_chatbot WHERE ma_nguoi_dung IS NULL AND session_id IS NOT NULL');
+        
+        // Thống kê user vs bot
+        const [userMessages] = await db.query("SELECT COUNT(*) as count FROM lich_su_chatbot WHERE nguoi_gui = 'user'");
+        const [botMessages] = await db.query("SELECT COUNT(*) as count FROM lich_su_chatbot WHERE nguoi_gui = 'bot'");
+        
+        // Thống kê 7 ngày gần nhất
+        const [dailyStats] = await db.query(`
+            SELECT DATE(thoi_diem_chat) as ngay, COUNT(*) as so_tin_nhan
+            FROM lich_su_chatbot
+            WHERE thoi_diem_chat >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DATE(thoi_diem_chat)
+            ORDER BY ngay ASC
+        `);
+
+        res.json({
+            success: true,
+            data: {
+                total_messages: totalMsg[0].count,
+                total_sessions: totalSessions[0].count,
+                logged_users: loggedUsers[0].count,
+                guest_sessions: guestSessions[0].count,
+                user_messages: userMessages[0].count,
+                bot_messages: botMessages[0].count,
+                daily_stats: dailyStats
+            }
+        });
+    } catch (error) {
+        console.error('Error getting chat stats:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi lấy thống kê' });
+    }
+});
+
+// API lấy lịch sử chat cho admin (có phân trang và filter)
+router.get('/admin/history', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        const { search, user_type, nguoi_gui } = req.query;
+
+        let whereClause = '1=1';
+        const params = [];
+
+        if (search) {
+            whereClause += ' AND l.noi_dung LIKE ?';
+            params.push(`%${search}%`);
+        }
+        if (user_type === 'logged') {
+            whereClause += ' AND l.ma_nguoi_dung IS NOT NULL';
+        } else if (user_type === 'guest') {
+            whereClause += ' AND l.ma_nguoi_dung IS NULL';
+        }
+        if (nguoi_gui) {
+            whereClause += ' AND l.nguoi_gui = ?';
+            params.push(nguoi_gui);
+        }
+
+        // Count total
+        const [countResult] = await db.query(
+            `SELECT COUNT(*) as total FROM lich_su_chatbot l WHERE ${whereClause}`,
+            params
+        );
+        const total = countResult[0].total;
+
+        // Get data with user info
+        const [history] = await db.query(
+            `SELECT l.*, n.ten_nguoi_dung, n.email 
+             FROM lich_su_chatbot l
+             LEFT JOIN nguoi_dung n ON l.ma_nguoi_dung = n.ma_nguoi_dung
+             WHERE ${whereClause}
+             ORDER BY l.thoi_diem_chat DESC
+             LIMIT ? OFFSET ?`,
+            [...params, limit, offset]
+        );
+
+        res.json({
+            success: true,
+            data: history,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        console.error('Error getting admin chat history:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi lấy lịch sử chat' });
+    }
+});
+
+// API lấy chi tiết một session cho admin
+router.get('/admin/session/:session_id', async (req, res) => {
+    try {
+        const { session_id } = req.params;
+        const [messages] = await db.query(
+            `SELECT l.*, n.ten_nguoi_dung, n.email 
+             FROM lich_su_chatbot l
+             LEFT JOIN nguoi_dung n ON l.ma_nguoi_dung = n.ma_nguoi_dung
+             WHERE l.session_id = ?
+             ORDER BY l.thoi_diem_chat ASC`,
+            [session_id]
+        );
+
+        res.json({ success: true, data: messages });
+    } catch (error) {
+        console.error('Error getting session:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi lấy cuộc trò chuyện' });
+    }
+});
+
+// API xóa tin nhắn
+router.delete('/admin/message/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.query('DELETE FROM lich_su_chatbot WHERE ma_tin_nhan = ?', [id]);
+        res.json({ success: true, message: 'Đã xóa tin nhắn' });
+    } catch (error) {
+        console.error('Error deleting message:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi xóa tin nhắn' });
     }
 });
 

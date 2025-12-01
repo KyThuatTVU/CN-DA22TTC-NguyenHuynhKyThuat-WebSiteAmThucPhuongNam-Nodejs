@@ -34,9 +34,37 @@
             font-size: 26px !important;
         }
     }
+    
+    /* Chat bubble styles */
+    .chat-bubble-bot {
+        background: white;
+        border-radius: 18px;
+        border-top-left-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    /* History dropdown */
+    #chatHistoryDropdown {
+        display: none;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    #chatHistoryDropdown.show {
+        display: block;
+    }
+    .history-item {
+        transition: all 0.2s ease;
+    }
+    .history-item:hover {
+        background-color: #f0fdf4;
+    }
+    .history-item.active {
+        background-color: #dcfce7;
+        border-left: 3px solid #22c55e;
+    }
 </style>
 
-<!-- CHATBOT BUTTON -->
+<!-- CHATBOT BUTTON - Màu xanh gradient -->
 <button id="chatbotButton"
     class="fixed bottom-6 right-6 z-[9999] w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full shadow-2xl flex items-center justify-center text-white hover:scale-110 transition-transform duration-300">
     <i class="fas fa-robot text-3xl"></i>
@@ -44,11 +72,11 @@
 
 <!-- CHAT PANEL -->
 <div id="chatbotPanel"
-    class="fixed bottom-24 right-6 z-[9999] w-[360px] sm:w-[380px] bg-white rounded-2xl shadow-2xl overflow-hidden 
+    class="fixed bottom-24 right-6 z-[9999] w-[400px] sm:w-[420px] bg-white rounded-2xl shadow-2xl overflow-hidden 
            transform opacity-0 scale-90 pointer-events-none transition-all duration-300"
-    style="max-height: 520px;">
+    style="max-height: 600px;">
     
-    <!-- Header -->
+    <!-- Header - Màu xanh gradient -->
     <div class="chatbot-header bg-gradient-to-r from-green-500 to-blue-600 p-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -62,41 +90,48 @@
                 </div>
             </div>
         </div>
-        <button id="closeChatbot" class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition">
-            <i class="fas fa-times text-lg"></i>
-        </button>
+        <div class="flex items-center gap-2">
+            <!-- Nút xem lịch sử -->
+            <button onclick="toggleChatHistory()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition" title="Lịch sử chat">
+                <i class="fas fa-history text-sm"></i>
+            </button>
+            <!-- Nút chat mới -->
+            <button onclick="startNewChat()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition" title="Chat mới">
+                <i class="fas fa-plus text-sm"></i>
+            </button>
+            <button id="closeChatbot" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- History Dropdown -->
+    <div id="chatHistoryDropdown" class="absolute left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-20" style="top: 72px;">
+        <div class="p-3 border-b border-gray-100 bg-gray-50">
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700">📜 Lịch sử trò chuyện</span>
+                <button onclick="toggleChatHistory()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="historyList" class="max-h-[250px] overflow-y-auto">
+            <div class="text-center text-gray-400 text-sm py-6">
+                <i class="fas fa-spinner fa-spin"></i> Đang tải...
+            </div>
+        </div>
+        <!-- Login prompt -->
+        <div id="historyLoginPrompt" class="hidden p-3 bg-yellow-50 border-t border-yellow-100 text-center">
+            <p class="text-xs text-yellow-700 mb-2">🔒 Đăng nhập để xem lịch sử chat</p>
+            <a href="dang-nhap.html" class="inline-block px-4 py-1.5 bg-green-500 text-white rounded-full text-xs font-medium hover:bg-green-600">
+                Đăng nhập
+            </a>
+        </div>
     </div>
 
     <!-- Messages Area -->
-    <div id="chatbotMessages" class="p-4 space-y-3 overflow-y-auto bg-gradient-to-b from-gray-50 to-white" style="height: 340px;">
-        <!-- Welcome message -->
-        <div class="flex gap-3">
-            <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-robot text-white text-sm"></i>
-            </div>
-            <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
-                <p class="text-gray-700 text-sm leading-relaxed">Xin chào! 👋 Mình là trợ lý của <span class="font-semibold text-green-600">Nhà hàng Phương Nam</span>. Mình giúp gì được cho bạn?</p>
-            </div>
-        </div>
-        
-        <!-- Quick suggestions -->
-        <div class="flex flex-wrap gap-2 pl-11">
-            <button onclick="chatbotSendQuick('Xem thực đơn')" class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-200 transition">
-                🍽️ Thực đơn
-            </button>
-            <button onclick="chatbotSendQuick('Đặt bàn')" class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-200 transition">
-                📅 Đặt bàn
-            </button>
-            <button onclick="chatbotSendQuick('Giờ mở cửa')" class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-200 transition">
-                🕐 Giờ mở cửa
-            </button>
-            <button onclick="chatbotSendQuick('Địa chỉ')" class="bg-pink-100 text-pink-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-pink-200 transition">
-                📍 Địa chỉ
-            </button>
-            <button onclick="chatbotSendQuick('Hotline')" class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-purple-200 transition">
-                📞 Hotline
-            </button>
-        </div>
+    <div id="chatbotMessages" class="p-4 space-y-3 overflow-y-auto bg-gradient-to-b from-gray-50 to-white" style="height: 420px;">
+        <!-- Messages will be loaded dynamically -->
     </div>
 
     <!-- Input Area -->

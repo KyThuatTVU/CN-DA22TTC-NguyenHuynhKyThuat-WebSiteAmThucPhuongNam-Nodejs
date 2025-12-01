@@ -463,6 +463,20 @@ initializeCart();
 
 // Biến đánh dấu đã hiển thị lời chào chưa
 let chatbotGreeted = false;
+let currentChatSessionId = null;
+let chatHistoryList = [];
+
+// Lấy hoặc tạo session ID cho chat
+function getChatbotSessionId() {
+    if (!currentChatSessionId) {
+        currentChatSessionId = sessionStorage.getItem('chatbot_session_id');
+        if (!currentChatSessionId) {
+            currentChatSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('chatbot_session_id', currentChatSessionId);
+        }
+    }
+    return currentChatSessionId;
+}
 
 // Hiển thị lời chào khi mở chatbot
 function showChatbotGreeting() {
@@ -489,19 +503,202 @@ function showChatbotGreeting() {
         greeting = 'Chào quý khách ạ! 🌸 Em là Trà My, trợ lý ảo của Nhà hàng Ẩm thực Phương Nam đây ạ. Em có thể giúp anh/chị tìm hiểu về thực đơn, đặt bàn hoặc giải đáp mọi thắc mắc. Anh/chị cần em hỗ trợ gì ạ? 💕';
     }
     
+    // Thêm quick suggestions
+    const quickSuggestions = `
+        <div class="flex flex-wrap gap-2 mt-3">
+            <button onclick="chatbotSendQuick('Xem thực đơn')" class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-200 transition">🍽️ Thực đơn</button>
+            <button onclick="chatbotSendQuick('Đặt bàn')" class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-200 transition">📅 Đặt bàn</button>
+            <button onclick="chatbotSendQuick('Giờ mở cửa')" class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-200 transition">🕐 Giờ mở cửa</button>
+        </div>
+    `;
+    
     // Thêm tin nhắn chào mừng
     const botMsg = document.createElement('div');
     botMsg.className = 'flex gap-2';
     botMsg.innerHTML = `
-        <div class="w-7 h-7 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-user-tie text-white text-xs"></i>
+        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-robot text-white text-sm"></i>
         </div>
-        <div class="chat-bubble-bot px-3 py-2 max-w-[85%]">
+        <div class="chat-bubble-bot px-3 py-2 max-w-[85%] bg-white rounded-2xl rounded-tl-none shadow-sm">
             <p class="text-gray-700 text-sm leading-relaxed">${greeting}</p>
+            ${quickSuggestions}
         </div>
     `;
     messages.appendChild(botMsg);
     messages.scrollTop = messages.scrollHeight;
+}
+
+// Toggle dropdown lịch sử
+window.toggleChatHistory = function() {
+    const dropdown = document.getElementById('chatHistoryDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+        if (dropdown.classList.contains('show')) {
+            loadChatHistory();
+        }
+    }
+};
+
+// Đóng dropdown khi click ra ngoài
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('chatHistoryDropdown');
+    const historyBtn = e.target.closest('[onclick*="toggleChatHistory"]');
+    if (dropdown && dropdown.classList.contains('show') && !dropdown.contains(e.target) && !historyBtn) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Tải lịch sử chat
+async function loadChatHistory() {
+    const historyList = document.getElementById('historyList');
+    const loginPrompt = document.getElementById('historyLoginPrompt');
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        // Khách vãng lai - hiển thị prompt đăng nhập
+        if (loginPrompt) loginPrompt.classList.remove('hidden');
+        if (historyList) {
+            historyList.innerHTML = `
+                <div class="text-center text-gray-400 text-xs py-4">
+                    <i class="fas fa-lock mb-2 text-lg"></i>
+                    <p>Đăng nhập để xem lịch sử</p>
+                </div>
+            `;
+        }
+        return;
+    }
+    
+    if (loginPrompt) loginPrompt.classList.add('hidden');
+    
+    try {
+        console.log('📜 Loading chat history with token:', token ? 'exists' : 'none');
+        
+        const response = await fetch('http://localhost:3000/api/chatbot/sessions', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        
+        console.log('📜 Chat history response:', result);
+        
+        if (result.success && result.data && result.data.length > 0) {
+            chatHistoryList = result.data;
+            renderHistoryList();
+        } else {
+            historyList.innerHTML = `
+                <div class="text-center text-gray-400 text-sm py-6">
+                    <i class="fas fa-comments mb-2 text-2xl"></i>
+                    <p>Chưa có lịch sử chat</p>
+                    <p class="text-xs mt-1">Hãy bắt đầu trò chuyện với Trà My!</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading chat history:', error);
+        historyList.innerHTML = `<div class="text-center text-red-400 text-xs py-4">Lỗi tải lịch sử</div>`;
+    }
+}
+
+// Render danh sách lịch sử
+function renderHistoryList() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList || !chatHistoryList.length) {
+        historyList.innerHTML = `<div class="text-center text-gray-400 text-xs py-4">Chưa có lịch sử chat</div>`;
+        return;
+    }
+    
+    historyList.innerHTML = chatHistoryList.map(session => {
+        const isActive = session.session_id === currentChatSessionId;
+        const date = new Date(session.thoi_diem_chat);
+        const timeStr = date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+        const preview = session.first_message ? session.first_message.substring(0, 35) + '...' : 'Cuộc trò chuyện';
+        
+        return `
+            <div class="history-item ${isActive ? 'active' : ''} px-3 py-2 cursor-pointer border-b border-gray-50" onclick="loadChatSession('${session.session_id}')">
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-comment-dots text-green-500 mt-0.5"></i>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-700 truncate">${escapeHtmlChat(preview)}</p>
+                        <p class="text-xs text-gray-400">${timeStr}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Tải một session chat cụ thể
+window.loadChatSession = async function(sessionId) {
+    const token = localStorage.getItem('token');
+    const messages = document.getElementById('chatbotMessages');
+    
+    try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        
+        const response = await fetch(`http://localhost:3000/api/chatbot/history/${sessionId}`, { headers });
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            // Cập nhật session hiện tại
+            currentChatSessionId = sessionId;
+            sessionStorage.setItem('chatbot_session_id', sessionId);
+            chatbotGreeted = true;
+            
+            // Clear và render messages
+            messages.innerHTML = '';
+            result.data.forEach(msg => {
+                if (msg.nguoi_gui === 'user') {
+                    addUserMessageToUI(messages, msg.noi_dung);
+                } else {
+                    addBotMessage(messages, msg.noi_dung);
+                }
+            });
+            
+            // Đóng dropdown
+            const dropdown = document.getElementById('chatHistoryDropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            
+            // Cập nhật active state
+            renderHistoryList();
+        }
+    } catch (error) {
+        console.error('Error loading chat session:', error);
+    }
+};
+
+// Tạo cuộc trò chuyện mới
+window.startNewChat = function() {
+    const messages = document.getElementById('chatbotMessages');
+    
+    // Tạo session ID mới
+    currentChatSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem('chatbot_session_id', currentChatSessionId);
+    
+    // Reset và hiển thị lời chào mới
+    chatbotGreeted = false;
+    messages.innerHTML = '';
+    showChatbotGreeting();
+    
+    // Đóng sidebar nếu đang mở
+    const sidebar = document.getElementById('chatHistorySidebar');
+    if (sidebar && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+    }
+    
+    // Focus input
+    document.getElementById('chatbotInput')?.focus();
+};
+
+// Thêm tin nhắn user vào UI (không gửi API)
+function addUserMessageToUI(messages, text) {
+    const userMsg = document.createElement('div');
+    userMsg.className = 'flex justify-end';
+    userMsg.innerHTML = `
+        <div class="bg-gradient-to-br from-green-400 to-blue-500 p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">
+            <p class="text-white text-sm">${escapeHtmlChat(text)}</p>
+        </div>
+    `;
+    messages.appendChild(userMsg);
 }
 
 // Initialize Chatbot functionality
@@ -555,16 +752,6 @@ window.chatbotSendQuick = function(message) {
     chatbotSendMessage();
 };
 
-// Session ID cho chatbot - lưu vào sessionStorage để giữ trong phiên làm việc
-function getChatbotSessionId() {
-    let sessionId = sessionStorage.getItem('chatbot_session_id');
-    if (!sessionId) {
-        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem('chatbot_session_id', sessionId);
-    }
-    return sessionId;
-}
-
 // Gửi tin nhắn chatbot
 window.chatbotSendMessage = async function() {
     const input = document.getElementById('chatbotInput');
@@ -574,30 +761,23 @@ window.chatbotSendMessage = async function() {
     if (!text) return;
     
     // Thêm tin nhắn user
-    const userMsg = document.createElement('div');
-    userMsg.className = 'flex justify-end';
-    userMsg.innerHTML = `
-        <div class="bg-gradient-to-br from-green-400 to-blue-500 p-4 rounded-2xl rounded-tr-none max-w-[85%] shadow-md">
-            <p class="text-white text-[15px]">${escapeHtmlChat(text)}</p>
-        </div>
-    `;
-    messages.appendChild(userMsg);
+    addUserMessageToUI(messages, text);
     input.value = '';
     messages.scrollTop = messages.scrollHeight;
     
     // Hiển thị typing indicator
     const typingDiv = document.createElement('div');
     typingDiv.id = 'chatbot-typing';
-    typingDiv.className = 'flex gap-3';
+    typingDiv.className = 'flex gap-2';
     typingDiv.innerHTML = `
-        <div class="w-9 h-9 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
             <i class="fas fa-robot text-white text-sm"></i>
         </div>
-        <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-md">
+        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm">
             <div class="flex gap-1">
-                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
-                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
             </div>
         </div>
     `;
@@ -642,10 +822,10 @@ function addBotMessage(messages, response) {
     const botMsg = document.createElement('div');
     botMsg.className = 'flex gap-2';
     botMsg.innerHTML = `
-        <div class="w-7 h-7 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-robot text-white text-xs"></i>
+        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-robot text-white text-sm"></i>
         </div>
-        <div class="chat-bubble-bot px-3 py-2 max-w-[85%]">
+        <div class="chat-bubble-bot px-3 py-2 max-w-[85%] bg-white rounded-2xl rounded-tl-none shadow-sm">
             <p class="text-gray-700 text-sm leading-relaxed">${response}</p>
         </div>
     `;
