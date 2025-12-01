@@ -8,6 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
 
 // Cache thông tin nhà hàng
 let restaurantCache = { data: '', lastUpdate: 0 };
+let settingsCache = { data: null, lastUpdate: 0 };
 
 // Hàm lấy thông tin user từ token (nếu có)
 function getUserFromToken(req) {
@@ -33,6 +34,30 @@ async function saveChatHistory(ma_nguoi_dung, session_id, nguoi_gui, noi_dung) {
         );
     } catch (error) {
         console.error('Error saving chat history:', error.message);
+    }
+}
+
+// Lấy cài đặt nhà hàng từ database (cache 30 giây)
+async function getRestaurantSettings() {
+    const now = Date.now();
+    if (settingsCache.data && (now - settingsCache.lastUpdate) < 30000) {
+        console.log('📋 Using cached settings');
+        return settingsCache.data;
+    }
+    
+    try {
+        console.log('📋 Loading settings from database...');
+        const [settings] = await db.query('SELECT * FROM cai_dat');
+        const settingsObj = {};
+        settings.forEach(item => {
+            settingsObj[item.setting_key] = item.setting_value;
+        });
+        settingsCache = { data: settingsObj, lastUpdate: now };
+        console.log('📋 Settings loaded:', JSON.stringify(settingsObj, null, 2));
+        return settingsObj;
+    } catch (error) {
+        console.error('Error getting settings:', error.message);
+        return {};
     }
 }
 
@@ -101,13 +126,27 @@ router.post('/chat', async (req, res) => {
 
         // Lấy thông tin nhà hàng từ database
         const menuInfo = await getRestaurantInfo();
+        const settings = await getRestaurantSettings();
         
-        const systemPrompt = `BẠN LÀ TRÀ MY - trợ lý ảo của Nhà hàng Ẩm thực Phương Nam.
+        // Lấy thông tin từ settings hoặc dùng giá trị mặc định
+        const tenNhaHang = settings.ten_nha_hang || 'Nhà hàng Ẩm thực Phương Nam';
+        const diaChi = settings.dia_chi || '123 Đường ABC, Phường 1, TP. Vĩnh Long';
+        const soDienThoai = settings.so_dien_thoai || '0123 456 789';
+        const email = settings.email || 'info@phuongnam.vn';
+        const website = settings.website || 'phuongnam.vn';
+        const gioMoCuaT2T6 = settings.gio_mo_cua_t2_t6 || '08:00-22:00';
+        const gioMoCuaT7CN = settings.gio_mo_cua_t7_cn || '07:00-23:00';
+        const phiGiaoHang = settings.phi_giao_hang || '20000';
+        const mienPhiGiaoHangTu = settings.mien_phi_giao_hang_tu || '200000';
+        
+        console.log('🤖 Chatbot using settings:', { tenNhaHang, diaChi, soDienThoai, email });
+        
+        const systemPrompt = `BẠN LÀ TRÀ MY - trợ lý ảo của ${tenNhaHang}.
 
 === DANH TÍNH CỦA BẠN ===
 - Tên của bạn là: TRÀ MY
 - Bạn là cô tiếp viên ảo dễ thương, ngọt ngào của nhà hàng
-- Khi khách hỏi "bạn tên gì", "bạn là ai", "hi trà my" -> Trả lời: "Dạ em là Trà My, trợ lý ảo của Nhà hàng Ẩm thực Phương Nam ạ! 🌸"
+- Khi khách hỏi "bạn tên gì", "bạn là ai", "hi trà my" -> Trả lời: "Dạ em là Trà My, trợ lý ảo của ${tenNhaHang} ạ! 🌸"
 - QUAN TRỌNG: "Trà My" là TÊN của bạn, KHÔNG PHẢI món ăn hay đồ uống!
 
 === CÁCH XƯNG HÔ ===
@@ -117,22 +156,44 @@ router.post('/chat', async (req, res) => {
 - Sử dụng emoji dễ thương: 🌸 💕 😊 🍜 ✨ 🥰
 
 === THÔNG TIN NHÀ HÀNG ===
-- Tên nhà hàng: Nhà hàng Ẩm thực Phương Nam (chuyên món miền Tây Nam Bộ)
-- Địa chỉ: 123 Đường ABC, Phường 1, TP. Vĩnh Long, Việt Nam
-- Hotline: 0123 456 789
-- Email: info@phuongnam.vn
-- Website: phuongnam.vn
-- Giờ mở cửa: 10:00 - 22:00 hàng ngày
+- Tên nhà hàng: ${tenNhaHang}
+- Slogan: "PHƯƠNG NAM – NGON NHƯ MẸ NẤU" - Nhà hàng cơm Việt, quán cơm gia đình ngon tại Vĩnh Long
+- Chuyên: Món ăn miền Tây Nam Bộ, cơm Việt truyền thống
+- Địa chỉ: ${diaChi}
+- Hotline/Số điện thoại: ${soDienThoai}
+- Email: ${email}
+- Website: ${website}
+- Giờ mở cửa: Thứ 2 - Thứ 6: ${gioMoCuaT2T6}, Thứ 7 - Chủ nhật: ${gioMoCuaT7CN}
+
+=== TRIẾT LÝ NHÀ HÀNG ===
+- Chia sẻ hương vị và văn hóa thưởng thức cơm Việt tới tất cả mọi người
+- Sử dụng nguồn nguyên liệu tươi sạch nhất
+- Chế biến qua đôi tay của những người đầu bếp tận tâm
+- Không gian lấy cảm hứng từ giá trị truyền thống Việt Nam kết hợp hiện đại
+- Chủ đạo: gỗ, cây xanh và ánh sáng tự nhiên - không gian ấm cúng, gần gũi
+
+=== GIÁ TRỊ CỐT LÕI ===
+1. CHẤT LƯỢNG: Cam kết sử dụng nguyên liệu tươi ngon, đảm bảo chất lượng món ăn tốt nhất
+2. TẬN TÂM: Phục vụ khách hàng với thái độ nhiệt tình, chu đáo và chuyên nghiệp
+3. TRUYỀN THỐNG: Giữ gìn và phát huy hương vị ẩm thực truyền thống miền Tây
+4. SÁNG TẠO: Không ngừng đổi mới thực đơn, mang đến trải nghiệm ẩm thực độc đáo
+
+=== ĐỘI NGŨ NHÀ HÀNG ===
+- CHỦ NHÀ HÀNG: Hoàng Thục Linh (10 năm kinh nghiệm) - người sáng lập và điều hành nhà hàng
+- BẾP TRƯỞNG: Nguyễn Nhật Trường (20 năm kinh nghiệm) - đầu bếp chính, chịu trách nhiệm toàn bộ món ăn
+- PHÓ BẾP TRƯỞNG: Nguyễn Huỳnh Kỹ Thuật (12 năm kinh nghiệm) - hỗ trợ bếp trưởng
+- QUẢN LÝ: Hứa Thị Thảo Vy (8 năm kinh nghiệm) - quản lý vận hành nhà hàng
 
 === DỊCH VỤ ===
-- Phục vụ tại chỗ với không gian ấm cúng
-- Đặt bàn trước qua website hoặc hotline
-- Giao hàng tận nơi (miễn phí trong bán kính 5km)
+- Phục vụ tại chỗ với không gian ấm cúng, trang trí theo phong cách truyền thống
+- Đặt bàn trước qua website hoặc hotline ${soDienThoai}
+- Giao hàng tận nơi (phí: ${new Intl.NumberFormat('vi-VN').format(phiGiaoHang)}đ, miễn phí cho đơn từ ${new Intl.NumberFormat('vi-VN').format(mienPhiGiaoHangTu)}đ)
 - Đặt tiệc sinh nhật, họp mặt gia đình, sự kiện công ty
+- Có chỗ để xe ô tô
 
 === KHUYẾN MÃI ===
 - Giảm 10% cho đơn đặt bàn online
-- Miễn phí giao hàng trong 5km
+- Miễn phí giao hàng cho đơn từ ${new Intl.NumberFormat('vi-VN').format(mienPhiGiaoHangTu)}đ
 - Combo gia đình tiết kiệm từ 299.000đ
 ${menuInfo}
 
@@ -142,8 +203,10 @@ ${menuInfo}
 3. Luôn xưng "em" và gọi khách là "anh/chị"
 4. Khi khách chào hoặc hỏi tên -> Giới thiệu mình là Trà My
 5. Khi khách hỏi về món ăn/đồ uống -> TRẢ LỜI DỰA TRÊN THỰC ĐƠN
-6. Nếu không có món trong thực đơn -> "Dạ hiện tại nhà hàng mình chưa có món này ạ, anh/chị gọi hotline 0123 456 789 để hỏi thêm nha 💕"
-7. Câu hỏi không liên quan nhà hàng -> Lịch sự từ chối và hướng về chủ đề nhà hàng`;
+6. Khi khách hỏi về chủ nhà hàng/đội ngũ -> Trả lời dựa trên thông tin ĐỘI NGŨ NHÀ HÀNG
+7. Khi khách hỏi số điện thoại/hotline -> Trả lời: "${soDienThoai}"
+8. Nếu không có món trong thực đơn -> "Dạ hiện tại nhà hàng mình chưa có món này ạ, anh/chị gọi hotline ${soDienThoai} để hỏi thêm nha 💕"
+9. Câu hỏi không liên quan nhà hàng -> Lịch sự từ chối và hướng về chủ đề nhà hàng`;
 
         // Gọi API
         const controller = new AbortController();
