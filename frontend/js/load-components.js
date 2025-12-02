@@ -109,7 +109,7 @@ async function loadAllComponents() {
     promises.push(loadComponent('footer-container', 'components/footer.html'));
     promises.push(loadComponent('chatbot-container', 'components/chatbot.html'));
     
-    // Load floating contact buttons - tự động tạo container nếu chưa có
+    // Load floating contact buttons (bao gồm cả nút scroll to top)
     let floatingContactContainer = document.getElementById('floating-contact-container');
     if (!floatingContactContainer) {
         floatingContactContainer = document.createElement('div');
