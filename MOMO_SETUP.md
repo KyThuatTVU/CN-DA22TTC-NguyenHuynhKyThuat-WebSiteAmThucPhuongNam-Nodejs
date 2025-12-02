@@ -84,6 +84,21 @@ MoMo cung cấp tài khoản test:
 - Số điện thoại: `0963181714`
 - OTP: `123456`
 
+#### Cách 3: Thanh toán bằng thẻ ATM/Visa test
+Khi chọn thanh toán bằng thẻ, dùng thông tin thẻ test sau:
+
+**Thẻ ATM Napas:**
+- Số thẻ: `9704 0000 0000 0018`
+- Tên chủ thẻ: `NGUYEN VAN A`
+- Ngày phát hành: `03/07`
+- OTP: `123456`
+
+**Thẻ Visa/Mastercard:**
+- Số thẻ: `5200 0000 0000 0114`
+- Tên chủ thẻ: `NGUYEN VAN A`
+- Ngày hết hạn: `12/25`
+- CVV: `123`
+
 ### 3.3. Kiểm tra kết quả
 - **Thành công**: Redirect về `/dat-hang-thanh-cong.html`
 - **Thất bại**: Redirect về `/don-hang-cua-toi.html` với thông báo lỗi
