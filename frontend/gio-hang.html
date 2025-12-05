@@ -202,10 +202,55 @@
 
 
     <!-- Page Header -->
-    <section class="bg-gradient-to-r from-orange-600 to-red-600 text-white py-12 sm:py-16 md:py-20">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="font-dancing text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4">Giỏ Hàng</h1>
-            <p class="text-base sm:text-lg md:text-xl">Xem lại đơn hàng của bạn</p>
+    <section class="relative bg-gradient-to-r from-orange-600 via-red-500 to-red-600 text-white py-16 sm:py-20 md:py-24 overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute top-1/2 right-0 w-60 h-60 bg-white rounded-full translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-1/4 w-32 h-32 bg-white rounded-full translate-y-1/2"></div>
+        </div>
+        
+        <!-- Floating Icons Background -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <i class="fas fa-shopping-bag absolute text-white/10 text-6xl top-10 left-[10%] animate-pulse"></i>
+            <i class="fas fa-utensils absolute text-white/10 text-4xl top-20 right-[15%] animate-bounce" style="animation-delay: 0.5s;"></i>
+            <i class="fas fa-heart absolute text-white/10 text-5xl bottom-10 left-[20%] animate-pulse" style="animation-delay: 1s;"></i>
+            <i class="fas fa-star absolute text-white/10 text-3xl bottom-16 right-[25%] animate-bounce" style="animation-delay: 0.3s;"></i>
+        </div>
+        
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <!-- Cart Icon with Animation -->
+            <div class="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white/20 backdrop-blur-sm rounded-full mb-4 sm:mb-6 shadow-lg border border-white/30 animate-bounce" style="animation-duration: 2s;">
+                <i class="fas fa-shopping-cart text-3xl sm:text-4xl text-white drop-shadow-lg"></i>
+            </div>
+            
+            <!-- Title -->
+            <h1 class="font-dancing text-4xl sm:text-5xl md:text-6xl font-bold mb-3 sm:mb-4 drop-shadow-lg">
+                Giỏ Hàng
+            </h1>
+            
+            <!-- Subtitle with Icon -->
+            <p class="text-base sm:text-lg md:text-xl text-white/90 flex items-center justify-center gap-2">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Xem lại và quản lý đơn hàng của bạn</span>
+            </p>
+            
+            <!-- Breadcrumb -->
+            <div class="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-white/80">
+                <a href="index.html" class="hover:text-white transition flex items-center gap-1">
+                    <i class="fas fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-white font-medium">Giỏ hàng</span>
+            </div>
+        </div>
+        
+        <!-- Bottom Wave -->
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                <path d="M0 60L60 55C120 50 240 40 360 35C480 30 600 30 720 33.3C840 36.7 960 43.3 1080 45C1200 46.7 1320 43.3 1380 41.7L1440 40V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" fill="#FFF7ED"/>
+            </svg>
         </div>
     </section>
 
@@ -240,7 +285,9 @@
                             <!-- Cart items will be rendered here by cartManager -->
                         </div>
                         <div id="empty-cart" class="text-center py-12 hidden">
-                            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                            <div class="inline-block mb-4">
+                                <i class="fas fa-shopping-cart text-6xl text-gray-300"></i>
+                            </div>
                             <p class="text-gray-500 text-xl mb-4">Giỏ hàng của bạn đang trống</p>
                             <a href="thuc-don.html"
                                 class="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition">
@@ -274,14 +321,14 @@
                                     <i class="fas fa-shopping-bag mr-2 text-orange-500"></i>
                                     Tạm tính
                                 </span>
-                                <span id="subtotal" class="text-gray-800 font-semibold">0đ</span>
+                                <span id="subtotal" class="text-gray-400 font-semibold">0đ</span>
                             </div>
                             <div class="flex justify-between items-center py-3">
                                 <span class="text-gray-700 font-medium flex items-center">
                                     <i class="fas fa-truck mr-2 text-blue-500"></i>
                                     Phí giao hàng
                                 </span>
-                                <span id="shipping" class="text-gray-800">30.000đ</span>
+                                <span id="shipping" class="text-gray-400">0đ</span>
                             </div>
                             <div class="flex justify-between items-center py-3">
                                 <span class="text-gray-700 font-medium flex items-center">
@@ -296,14 +343,14 @@
                                     Tổng cộng
                                 </span>
                                 <div id="total" class="text-right">
-                                    <span class="text-2xl font-bold text-orange-600">0đ</span>
-                                    <div class="text-sm text-gray-500 mt-1">Thanh toán ngay</div>
+                                    <span class="text-2xl font-bold text-gray-400">0đ</span>
+                                    <div class="text-sm text-gray-500 mt-1">Giỏ hàng trống</div>
                                 </div>
                             </div>
                         </div>
 
                         <a href="thanh-toan.html" id="checkout-btn"
-                            class="block w-full bg-gradient-to-r from-orange-600 to-red-600 text-white text-center py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:from-orange-700 hover:to-red-700 transition-all duration-300 mb-3 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            class="block w-full bg-gradient-to-r from-orange-600 to-red-600 text-white text-center py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:from-orange-700 hover:to-red-700 transition-all duration-300 mb-3 shadow-lg hover:shadow-xl transform hover:scale-105 opacity-50 cursor-not-allowed pointer-events-none">
                             <i class="fas fa-credit-card mr-2 sm:mr-3"></i>
                             <span class="hidden sm:inline">Tiến hành thanh toán</span>
                             <span class="sm:hidden">Thanh toán</span>
@@ -338,25 +385,50 @@
     </section>
 
     <!-- Recommended Products -->
-    <section class="py-12 bg-white">
+    <section class="py-12 bg-gradient-to-b from-white to-orange-50">
         <div class="container mx-auto px-4">
-            <h2 class="font-dancing text-3xl font-bold mb-8">Có thể bạn cũng thích</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- Product recommendations -->
-                <div class="bg-white border rounded-xl overflow-hidden hover:shadow-lg transition">
-                    <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400" alt="Món ăn"
-                        class="w-full h-48 object-cover">
+            <div class="text-center mb-8">
+                <h2 class="font-dancing text-3xl sm:text-4xl font-bold text-gray-800 mb-2">Có thể bạn cũng thích</h2>
+                <p class="text-gray-500">Khám phá thêm các món ăn ngon khác</p>
+            </div>
+            <div id="recommended-products" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Loading skeleton -->
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow">
+                    <div class="bg-gray-200 h-40 sm:h-48"></div>
                     <div class="p-4">
-                        <h3 class="font-medium mb-2">Súp Hải Sản</h3>
-                        <div class="flex items-center justify-between">
-                            <span class="text-orange-600 font-bold">150.000đ</span>
-                            <button
-                                class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700 transition">
-                                Thêm
-                            </button>
-                        </div>
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3"></div>
                     </div>
                 </div>
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow">
+                    <div class="bg-gray-200 h-40 sm:h-48"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                </div>
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow hidden md:block">
+                    <div class="bg-gray-200 h-40 sm:h-48"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                </div>
+                <div class="animate-pulse bg-white rounded-xl overflow-hidden shadow hidden lg:block">
+                    <div class="bg-gray-200 h-40 sm:h-48"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View More Button -->
+            <div class="text-center mt-8">
+                <a href="thuc-don.html" class="inline-flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700 transition shadow-lg hover:shadow-xl">
+                    <span>Xem tất cả món ăn</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
         </div>
     </section>
@@ -399,6 +471,37 @@
         // Function to load and render cart
         async function loadAndRenderCart() {
             try {
+                const emptyCart = document.getElementById('empty-cart');
+                const cartItems = document.getElementById('cart-items');
+                
+                // Kiểm tra đăng nhập trước
+                if (!cartManager.isAuthenticated()) {
+                    console.log('👤 User not authenticated');
+                    
+                    // Hiển thị thông báo yêu cầu đăng nhập
+                    if (emptyCart) {
+                        emptyCart.innerHTML = `
+                            <div class="inline-block mb-4">
+                                <i class="fas fa-user-lock text-6xl text-gray-300"></i>
+                            </div>
+                            <p class="text-gray-500 text-xl mb-2">Vui lòng đăng nhập</p>
+                            <p class="text-gray-400 text-sm mb-4">Đăng nhập để xem và quản lý giỏ hàng của bạn</p>
+                            <a href="dang-nhap.html?redirect=gio-hang.html"
+                                class="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition mr-2">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập
+                            </a>
+                            <a href="thuc-don.html"
+                                class="inline-block bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 transition">
+                                Xem thực đơn
+                            </a>
+                        `;
+                        emptyCart.classList.remove('hidden');
+                    }
+                    if (cartItems) cartItems.innerHTML = '';
+                    updateCartTotals();
+                    return;
+                }
+                
                 // Load cart data
                 await cartManager.loadCart();
                 console.log('📦 Cart data loaded:', cartManager.getCart());
@@ -417,13 +520,22 @@
                 updateCartTotals();
 
                 // Show/hide empty cart message
-                const emptyCart = document.getElementById('empty-cart');
-                const cartItems = document.getElementById('cart-items');
                 if (emptyCart && cartItems) {
                     const itemCount = cartManager.getCart().items.length;
                     console.log('📊 Cart has', itemCount, 'items');
 
                     if (itemCount === 0) {
+                        // Reset về nội dung mặc định cho giỏ hàng trống
+                        emptyCart.innerHTML = `
+                            <div class="inline-block mb-4">
+                                <i class="fas fa-shopping-cart text-6xl text-gray-300"></i>
+                            </div>
+                            <p class="text-gray-500 text-xl mb-4">Giỏ hàng của bạn đang trống</p>
+                            <a href="thuc-don.html"
+                                class="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition">
+                                Tiếp tục mua sắm
+                            </a>
+                        `;
                         emptyCart.classList.remove('hidden');
                         cartItems.innerHTML = '';
                         console.log('📭 Showing empty cart message');
@@ -461,31 +573,52 @@
         function updateCartTotals() {
             const cart = cartManager.getCart();
             const subtotal = cart.tong_tien || 0;
-            const shipping = subtotal > 200000 ? 0 : 30000; // Free shipping over 200k
+            const itemCount = cart.items ? cart.items.length : 0;
+            
+            // Không tính phí ship khi giỏ hàng trống hoặc free ship từ 150k
+            let shipping = 0;
+            if (itemCount > 0) {
+                shipping = subtotal >= 150000 ? 0 : 30000; // Free shipping từ 150k (đồng bộ với checkout.js)
+            }
+            
             const discount = 0; // TODO: Implement voucher system
             const total = subtotal + shipping - discount;
 
             // Update subtotal with better formatting
             const subtotalElement = document.getElementById('subtotal');
             if (subtotalElement) {
-                subtotalElement.innerHTML = `
-                    <span class="text-lg font-semibold text-gray-800">${formatPrice(subtotal)}</span>
-                `;
+                if (itemCount === 0) {
+                    subtotalElement.innerHTML = `
+                        <span class="text-lg font-semibold text-gray-400">0đ</span>
+                    `;
+                } else {
+                    subtotalElement.innerHTML = `
+                        <span class="text-lg font-semibold text-gray-800">${formatPrice(subtotal)}</span>
+                    `;
+                }
             }
 
             // Update shipping with icon and better styling
             const shippingElement = document.getElementById('shipping');
             if (shippingElement) {
-                if (shipping === 0) {
+                if (itemCount === 0) {
+                    // Giỏ hàng trống - không hiển thị phí ship
+                    shippingElement.innerHTML = `
+                        <span class="text-gray-400">0đ</span>
+                    `;
+                } else if (shipping === 0) {
+                    // Free ship khi đủ điều kiện
                     shippingElement.innerHTML = `
                         <span class="text-green-600 font-semibold flex items-center">
                             <i class="fas fa-truck mr-1"></i>
-                            Miễn phí giao hàng
+                            Miễn phí
                         </span>
                     `;
                 } else {
+                    // Có phí ship
                     shippingElement.innerHTML = `
                         <span class="text-gray-700">${formatPrice(shipping)}</span>
+                        <div class="text-xs text-gray-500 mt-1">Miễn phí từ 150.000đ</div>
                     `;
                 }
             }
@@ -507,13 +640,30 @@
             // Update total with prominent styling
             const totalElement = document.getElementById('total');
             if (totalElement) {
-                totalElement.innerHTML = `
-                    <span class="text-2xl font-bold text-orange-600">${formatPrice(total)}</span>
-                    <div class="text-sm text-gray-500 mt-1">Thanh toán ngay</div>
-                `;
+                if (itemCount === 0) {
+                    totalElement.innerHTML = `
+                        <span class="text-2xl font-bold text-gray-400">0đ</span>
+                        <div class="text-sm text-gray-500 mt-1">Giỏ hàng trống</div>
+                    `;
+                } else {
+                    totalElement.innerHTML = `
+                        <span class="text-2xl font-bold text-orange-600">${formatPrice(total)}</span>
+                        <div class="text-sm text-gray-500 mt-1">Thanh toán ngay</div>
+                    `;
+                }
+            }
+            
+            // Disable/enable checkout button based on cart status
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (checkoutBtn) {
+                if (itemCount === 0) {
+                    checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                } else {
+                    checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                }
             }
 
-            console.log('💰 Updated cart totals:', { subtotal, shipping, discount, total });
+            console.log('💰 Updated cart totals:', { subtotal, shipping, discount, total, itemCount });
         }
 
         // Function to clear entire cart
@@ -531,6 +681,142 @@
         function formatPrice(price) {
             return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
         }
+
+        // Load recommended products from API
+        async function loadRecommendedProducts() {
+            const container = document.getElementById('recommended-products');
+            if (!container) return;
+
+            try {
+                // Lấy danh sách món ăn từ API
+                const response = await fetch(`${window.API_URL || 'http://localhost:3000/api'}/menu`);
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.length > 0) {
+                    // Lấy các món trong giỏ hàng để loại trừ
+                    let cartItemIds = [];
+                    if (typeof cartManager !== 'undefined') {
+                        const cart = cartManager.getCart();
+                        cartItemIds = cart.items.map(item => item.ma_mon);
+                    }
+
+                    // Lọc bỏ các món đã có trong giỏ
+                    let availableProducts = result.data.filter(item => !cartItemIds.includes(item.ma_mon));
+                    
+                    // Nếu không còn món nào, dùng tất cả
+                    if (availableProducts.length === 0) {
+                        availableProducts = result.data;
+                    }
+
+                    // Shuffle array để random
+                    const shuffled = shuffleArray([...availableProducts]);
+                    
+                    // Lấy tối đa 4 món
+                    renderRecommendedProducts(shuffled.slice(0, 4));
+                } else {
+                    container.innerHTML = '<p class="text-center text-gray-500 col-span-full">Không có món ăn nào</p>';
+                }
+            } catch (error) {
+                console.error('Error loading recommended products:', error);
+                container.innerHTML = '<p class="text-center text-gray-500 col-span-full">Không thể tải món ăn gợi ý</p>';
+            }
+        }
+
+        // Shuffle array helper (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Render recommended products
+        function renderRecommendedProducts(products) {
+            const container = document.getElementById('recommended-products');
+            if (!container || !products.length) return;
+
+            container.innerHTML = products.map(item => {
+                const imageSrc = item.anh_mon 
+                    ? (item.anh_mon.startsWith('http') ? item.anh_mon : `http://localhost:3000${item.anh_mon}`)
+                    : 'images/default-dish.jpg';
+                
+                const rating = item.avg_rating ? parseFloat(item.avg_rating).toFixed(1) : '0';
+                const reviews = item.total_reviews || 0;
+
+                return `
+                    <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                        <a href="chitietmonan.html?id=${item.ma_mon}" class="block relative overflow-hidden">
+                            <img src="${imageSrc}" 
+                                 alt="${item.ten_mon}" 
+                                 class="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                                 onerror="this.src='images/default-dish.jpg'">
+                            ${item.so_luong_ton <= 5 && item.so_luong_ton > 0 ? 
+                                '<span class="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">Sắp hết</span>' : ''}
+                            ${item.so_luong_ton === 0 ? 
+                                '<span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">Hết hàng</span>' : ''}
+                        </a>
+                        <div class="p-3 sm:p-4">
+                            <a href="chitietmonan.html?id=${item.ma_mon}" class="block">
+                                <h3 class="font-semibold text-gray-800 mb-1 line-clamp-1 hover:text-orange-600 transition text-sm sm:text-base">${item.ten_mon}</h3>
+                            </a>
+                            <div class="flex items-center gap-1 mb-2">
+                                <div class="flex text-yellow-400 text-xs">
+                                    ${generateStars(rating)}
+                                </div>
+                                <span class="text-xs text-gray-500">(${reviews})</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-orange-600 font-bold text-sm sm:text-base">${formatPrice(item.gia_tien)}</span>
+                                <button onclick="addToCartFromRecommended(${item.ma_mon})" 
+                                        class="bg-orange-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm hover:bg-orange-700 transition flex items-center gap-1 ${item.so_luong_ton === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                        ${item.so_luong_ton === 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-plus"></i>
+                                    <span class="hidden sm:inline">Thêm</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Generate star rating HTML
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            
+            let html = '';
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="fas fa-star"></i>';
+            }
+            if (hasHalfStar) {
+                html += '<i class="fas fa-star-half-alt"></i>';
+            }
+            for (let i = 0; i < emptyStars; i++) {
+                html += '<i class="far fa-star"></i>';
+            }
+            return html;
+        }
+
+        // Add to cart from recommended products
+        async function addToCartFromRecommended(ma_mon) {
+            if (typeof cartManager !== 'undefined') {
+                await cartManager.addToCart(ma_mon, 1);
+                // Reload cart and recommended products
+                await loadAndRenderCart();
+                await loadRecommendedProducts();
+            } else {
+                alert('Vui lòng đăng nhập để thêm vào giỏ hàng');
+                window.location.href = 'dang-nhap.html?redirect=gio-hang.html';
+            }
+        }
+
+        // Load recommended products on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecommendedProducts();
+        });
     </script>
 
     <!-- GSAP Animation Library -->

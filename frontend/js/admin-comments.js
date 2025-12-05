@@ -109,27 +109,31 @@ function displayComments(comments) {
                 <p class="text-sm text-slate-600 max-w-[150px] truncate">${comment.tieu_de_tin_tuc || 'N/A'}</p>
             </td>
             <td class="py-4 px-4">
-                ${getStatusBadge(comment.trang_thai)}
+                <div class="flex flex-wrap gap-1">
+                    <button onclick="updateStatus(${comment.ma_binh_luan}, 'pending')" 
+                        class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${comment.trang_thai === 'pending' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}" 
+                        title="Chờ duyệt">
+                        <i class="fas fa-clock"></i>
+                    </button>
+                    <button onclick="updateStatus(${comment.ma_binh_luan}, 'approved')" 
+                        class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${comment.trang_thai === 'approved' ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}" 
+                        title="Đã duyệt">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button onclick="updateStatus(${comment.ma_binh_luan}, 'rejected')" 
+                        class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${comment.trang_thai === 'rejected' ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700 hover:bg-red-200'}" 
+                        title="Từ chối">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
             </td>
             <td class="py-4 px-4 text-sm text-slate-500">
                 ${formatDate(comment.ngay_binh_luan)}
             </td>
             <td class="py-4 px-4 text-center">
                 <div class="flex justify-center gap-2">
-                    ${comment.trang_thai !== 'approved' ? `
-                        <button onclick="updateStatus(${comment.ma_binh_luan}, 'approved')" 
-                            class="text-green-600 hover:text-green-800" title="Duyệt">
-                            <i class="fas fa-check"></i>
-                        </button>
-                    ` : ''}
-                    ${comment.trang_thai !== 'rejected' ? `
-                        <button onclick="updateStatus(${comment.ma_binh_luan}, 'rejected')" 
-                            class="text-yellow-600 hover:text-yellow-800" title="Từ chối">
-                            <i class="fas fa-ban"></i>
-                        </button>
-                    ` : ''}
                     <button onclick="deleteComment(${comment.ma_binh_luan})" 
-                        class="text-red-600 hover:text-red-800" title="Xóa">
+                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Xóa">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>

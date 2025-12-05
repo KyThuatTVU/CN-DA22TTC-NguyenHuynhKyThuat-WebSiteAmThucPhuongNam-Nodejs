@@ -466,12 +466,28 @@
                             ${hasImages ? `<span class="text-xs text-blue-500"><i class="fas fa-image mr-1"></i>${review.images.length} ảnh</span>` : ''}
                         </td>
                         <td class="px-4 py-4 text-sm text-slate-500">${formatDate(review.ngay_danh_gia)}</td>
-                        <td class="px-4 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[review.trang_thai]}">${statusText[review.trang_thai]}</span></td>
+                        <td class="px-4 py-4">
+                            <div class="flex flex-wrap gap-1">
+                                <button onclick="updateStatus(${review.ma_danh_gia}, 'pending')" 
+                                    class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${review.trang_thai === 'pending' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}" 
+                                    title="Chờ duyệt">
+                                    <i class="fas fa-clock"></i>
+                                </button>
+                                <button onclick="updateStatus(${review.ma_danh_gia}, 'approved')" 
+                                    class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${review.trang_thai === 'approved' ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}" 
+                                    title="Đã duyệt">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button onclick="updateStatus(${review.ma_danh_gia}, 'rejected')" 
+                                    class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${review.trang_thai === 'rejected' ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700 hover:bg-red-200'}" 
+                                    title="Đã khóa">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
+                        </td>
                         <td class="px-4 py-4">
                             <div class="flex items-center space-x-1">
                                 <button onclick="viewReview(${review.ma_danh_gia})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-                                ${review.trang_thai !== 'approved' ? `<button onclick="updateStatus(${review.ma_danh_gia}, 'approved')" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Duyệt"><i class="fas fa-check"></i></button>` : ''}
-                                ${review.trang_thai !== 'rejected' ? `<button onclick="updateStatus(${review.ma_danh_gia}, 'rejected')" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg" title="Khóa"><i class="fas fa-ban"></i></button>` : ''}
                                 <button onclick="deleteReview(${review.ma_danh_gia})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Xóa"><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
@@ -537,9 +553,6 @@
         }
 
         async function updateStatus(reviewId, status) {
-            const statusText = { approved: 'duyệt', rejected: 'khóa' };
-            if (!confirm(`Xác nhận ${statusText[status]} đánh giá này?`)) return;
-
             try {
                 const response = await fetch(`${API_URL}/reviews/admin/${reviewId}/status`, {
                     method: 'PUT',
@@ -549,7 +562,6 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    alert(data.message);
                     loadReviews();
                 } else {
                     alert('Lỗi: ' + data.message);

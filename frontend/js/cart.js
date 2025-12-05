@@ -369,7 +369,9 @@ class CartManager {
             container.innerHTML = `
                 <div class="text-center py-12">
                     <div class="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                        <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                        <div class="inline-block mb-4">
+                            <i class="fas fa-shopping-cart text-6xl text-gray-300"></i>
+                        </div>
                         <h3 class="text-xl font-semibold text-gray-600 mb-2">Giỏ hàng trống</h3>
                         <p class="text-gray-500 mb-6">Hãy thêm món ăn yêu thích vào giỏ hàng của bạn</p>
                         <a href="thuc-don.html" class="inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
@@ -391,14 +393,14 @@ class CartManager {
                 <div class="bg-white border border-gray-100 rounded-xl p-4 mb-4 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="relative">
+                            <div class="relative flex-shrink-0">
                                 <img src="${item.anh_mon ? 'http://localhost:3000' + item.anh_mon : '/images/default-dish.jpg'}"
                                      alt="${item.ten_mon}"
                                      class="w-20 h-20 object-cover rounded-lg shadow-sm"
                                      onerror="this.src='/images/default-dish.jpg'">
-                                <div class="absolute -top-2 -right-2 bg-orange-600 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
+                                <span class="absolute -top-1 -right-1 bg-orange-600 text-white text-[10px] min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center font-bold shadow-sm">
                                     ${item.so_luong}
-                                </div>
+                                </span>
                             </div>
                             <div class="flex-1">
                                 <h4 class="font-semibold text-gray-800 text-lg mb-1">${item.ten_mon}</h4>

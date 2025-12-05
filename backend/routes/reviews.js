@@ -120,14 +120,19 @@ router.get('/product/:productId', authenticateToken, async (req, res) => {
   }
 });
 
-// Kiểm tra user có thể bình luận không (cho phép nhiều bình luận)
+// Kiểm tra user có thể bình luận không (chỉ cho phép khi đã mua sản phẩm)
 router.get('/check/:productId', authenticateToken, async (req, res) => {
   try {
+    const productId = parseInt(req.params.productId);
+    
+    // Debug log
+    console.log('🔍 Check review - ProductId:', productId, '- User:', req.user ? req.user.ma_nguoi_dung : 'null');
+    
     if (!req.user) {
+      console.log('❌ User not logged in');
       return res.json({ success: true, canReview: false, reason: 'not_logged_in' });
     }
 
-    const productId = parseInt(req.params.productId);
     const userId = req.user.ma_nguoi_dung;
 
     // Đếm số bình luận của user cho sản phẩm này
@@ -136,19 +141,41 @@ router.get('/check/:productId', authenticateToken, async (req, res) => {
       WHERE ma_mon = ? AND ma_nguoi_dung = ?
     `, [productId, userId]);
 
-    // Kiểm tra đã mua món này chưa (tùy chọn)
+    // Kiểm tra đã mua món này chưa (BẮT BUỘC) - đơn hàng phải ở trạng thái 'delivered'
     const [purchased] = await db.query(`
-      SELECT ct.ma_ct_don FROM chi_tiet_don_hang ct
+      SELECT ct.ma_ct_don, dh.ma_don_hang, dh.trang_thai 
+      FROM chi_tiet_don_hang ct
       JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang
       WHERE ct.ma_mon = ? AND dh.ma_nguoi_dung = ? AND dh.trang_thai = 'delivered'
       LIMIT 1
     `, [productId, userId]);
 
-    // Cho phép bình luận nhiều lần
+    const hasPurchased = purchased.length > 0;
+    
+    // Debug log
+    console.log('📦 Purchase check - UserId:', userId, '- ProductId:', productId, '- HasPurchased:', hasPurchased);
+    if (purchased.length > 0) {
+      console.log('✅ Found order:', purchased[0]);
+    }
+
+    // Chỉ cho phép bình luận nếu đã mua sản phẩm
+    if (!hasPurchased) {
+      console.log('⚠️ User has not purchased this product');
+      return res.json({ 
+        success: true, 
+        canReview: false,
+        reason: 'not_purchased',
+        hasPurchased: false,
+        reviewCount: countResult[0].total
+      });
+    }
+
+    // Đã mua -> cho phép bình luận
+    console.log('✅ User can review this product');
     res.json({ 
       success: true, 
       canReview: true,
-      hasPurchased: purchased.length > 0,
+      hasPurchased: true,
       reviewCount: countResult[0].total
     });
   } catch (error) {
@@ -157,7 +184,7 @@ router.get('/check/:productId', authenticateToken, async (req, res) => {
   }
 });
 
-// Thêm bình luận mới với ảnh (yêu cầu đăng nhập, cho phép nhiều bình luận)
+// Thêm bình luận mới với ảnh (yêu cầu đăng nhập VÀ đã mua sản phẩm)
 router.post('/', authenticateToken, (req, res) => {
   uploadReviewImages(req, res, async function (err) {
     try {
@@ -179,6 +206,21 @@ router.post('/', authenticateToken, (req, res) => {
         return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
       }
 
+      // Kiểm tra đã mua sản phẩm chưa (BẮT BUỘC)
+      const [purchased] = await db.query(`
+        SELECT ct.ma_ct_don FROM chi_tiet_don_hang ct
+        JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang
+        WHERE ct.ma_mon = ? AND dh.ma_nguoi_dung = ? AND dh.trang_thai = 'delivered'
+        LIMIT 1
+      `, [ma_mon, userId]);
+
+      if (purchased.length === 0) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Bạn cần mua sản phẩm này trước khi đánh giá' 
+        });
+      }
+
       // Xử lý ảnh upload
       let imagesJson = null;
       if (req.files && req.files.length > 0) {
@@ -186,7 +228,7 @@ router.post('/', authenticateToken, (req, res) => {
         imagesJson = JSON.stringify(imagePaths);
       }
 
-      // Thêm bình luận (cho phép nhiều bình luận từ 1 user)
+      // Thêm bình luận (cho phép nhiều bình luận từ 1 user đã mua)
       const [result] = await db.query(`
         INSERT INTO danh_gia_san_pham (ma_mon, ma_nguoi_dung, so_sao, binh_luan, hinh_anh, trang_thai)
         VALUES (?, ?, ?, ?, ?, 'approved')

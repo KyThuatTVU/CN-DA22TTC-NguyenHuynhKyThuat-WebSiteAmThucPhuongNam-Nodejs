@@ -607,7 +607,7 @@ function formatDate(dateStr) {
     return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-// Check if user can review (cho phép nhiều bình luận)
+// Check if user can review (chỉ cho phép khi đã mua sản phẩm)
 async function checkCanReview() {
     try {
         const token = localStorage.getItem('token');
@@ -621,27 +621,24 @@ async function checkCanReview() {
         });
         const result = await response.json();
         
-        if (result.success) {
-            if (result.canReview) {
-                // Luôn hiển thị form bình luận cho user đã đăng nhập
-                document.getElementById('review-form-container').classList.remove('hidden');
-                setupReviewForm();
-                
-                // Hiển thị số bình luận đã viết nếu có
-                if (result.reviewCount > 0) {
-                    const countInfo = document.getElementById('user-review-count');
-                    if (countInfo) {
-                        countInfo.textContent = `Bạn đã viết ${result.reviewCount} bình luận cho món này`;
-                        countInfo.classList.remove('hidden');
-                    }
+        if (result.success && result.canReview) {
+            // Đã mua sản phẩm -> hiển thị form bình luận
+            document.getElementById('review-form-container').classList.remove('hidden');
+            setupReviewForm();
+            
+            // Hiển thị số bình luận đã viết nếu có
+            if (result.reviewCount > 0) {
+                const countInfo = document.getElementById('user-review-count');
+                if (countInfo) {
+                    countInfo.textContent = `Bạn đã viết ${result.reviewCount} bình luận cho món này`;
+                    countInfo.classList.remove('hidden');
                 }
-            } else if (result.reason === 'not_logged_in') {
-                document.getElementById('login-prompt').classList.remove('hidden');
             }
         }
+        // Không hiển thị gì nếu chưa đăng nhập hoặc chưa mua sản phẩm
+        // Form và login prompt giữ nguyên trạng thái hidden
     } catch (error) {
         console.error('Error checking review status:', error);
-        document.getElementById('login-prompt').classList.remove('hidden');
     }
 }
 
