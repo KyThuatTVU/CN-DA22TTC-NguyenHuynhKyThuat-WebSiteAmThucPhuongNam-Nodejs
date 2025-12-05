@@ -42,6 +42,10 @@ async function loadNewsDetail() {
             // Load comments and reactions
             loadComments(newsId);
             loadReactions(newsId);
+            // Load recent posts for sidebar
+            loadRecentPosts(newsId);
+            // Load contact info from settings
+            loadContactInfo();
         } else {
             showError('Không tìm thấy tin tức');
         }
@@ -90,13 +94,19 @@ function displayNewsDetail(news) {
     // Update article content
     const contentDiv = document.querySelector('.news-content');
     if (contentDiv) {
-        // If noi_dung contains HTML, use it directly
-        // Otherwise, wrap it in paragraphs
-        if (news.noi_dung) {
+        // Format content - convert plain text to HTML if needed
+        let formattedContent = news.noi_dung || '';
+        
+        // If content doesn't contain HTML tags, format it
+        if (formattedContent && !formattedContent.includes('<p>') && !formattedContent.includes('<div>')) {
+            formattedContent = formatPlainTextToHtml(formattedContent);
+        }
+        
+        if (formattedContent) {
             contentDiv.innerHTML = `
                 <div class="prose max-w-none mb-8">
-                    ${news.tom_tat ? `<p class="text-lg text-gray-700 leading-relaxed mb-6">${news.tom_tat}</p>` : ''}
-                    ${news.noi_dung}
+                    ${news.tom_tat ? `<p class="text-xl text-gray-600 leading-relaxed mb-8 font-medium border-l-4 border-orange-500 pl-4 italic">${news.tom_tat}</p>` : ''}
+                    ${formattedContent}
                 </div>
             `;
         } else {
@@ -109,6 +119,73 @@ function displayNewsDetail(news) {
             `;
         }
     }
+}
+
+// Format plain text to HTML with proper styling
+function formatPlainTextToHtml(text) {
+    if (!text) return '';
+    
+    // Split by double newlines to get paragraphs
+    const lines = text.split(/\n/);
+    let html = '';
+    let inList = false;
+    
+    lines.forEach((line, index) => {
+        line = line.trim();
+        if (!line) {
+            if (inList) {
+                html += '</ul>';
+                inList = false;
+            }
+            return;
+        }
+        
+        // Check if line is a heading (ends with : or starts with specific keywords)
+        const headingKeywords = ['Thông tin', 'Ưu đãi', 'Đặc biệt', 'Lưu ý', 'Chi tiết', 'Liên hệ', 'Địa chỉ', 'Thời gian', 'Giờ'];
+        const isHeading = headingKeywords.some(kw => line.startsWith(kw)) || 
+                         (line.endsWith(':') && line.length < 50);
+        
+        // Check if line is a list item (starts with -, •, *, or number.)
+        const isListItem = /^[-•*]\s/.test(line) || /^\d+[.)]\s/.test(line);
+        
+        // Check if line contains key-value (has : in middle)
+        const isKeyValue = line.includes(':') && !line.endsWith(':') && line.indexOf(':') < line.length / 2;
+        
+        if (isHeading) {
+            if (inList) {
+                html += '</ul>';
+                inList = false;
+            }
+            html += `<h3>${line}</h3>`;
+        } else if (isListItem) {
+            if (!inList) {
+                html += '<ul class="space-y-2 my-4">';
+                inList = true;
+            }
+            const itemText = line.replace(/^[-•*]\s*/, '').replace(/^\d+[.)]\s*/, '');
+            html += `<li class="flex items-start gap-2"><i class="fas fa-check-circle text-orange-500 mt-1 flex-shrink-0"></i><span>${itemText}</span></li>`;
+        } else if (isKeyValue) {
+            if (inList) {
+                html += '</ul>';
+                inList = false;
+            }
+            const [key, ...valueParts] = line.split(':');
+            const value = valueParts.join(':').trim();
+            html += `<p class="mb-2"><strong class="text-gray-800">${key}:</strong> ${value}</p>`;
+        } else {
+            if (inList) {
+                html += '</ul>';
+                inList = false;
+            }
+            html += `<p>${line}</p>`;
+        }
+    });
+    
+    if (inList) {
+        html += '</ul>';
+    }
+    
+    return html;
 }
 
 // Display related news
@@ -139,6 +216,70 @@ function displayRelatedNews(relatedNews) {
             <p class="text-sm text-gray-500 mt-2">${formatDate(news.ngay_dang)}</p>
         </a>
     `).join('');
+}
+
+// Load contact info from settings
+async function loadContactInfo() {
+    try {
+        const response = await fetch('http://localhost:3000/api/settings');
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            const hotline = result.data.hotline || result.data.phone || result.data.so_dien_thoai;
+            if (hotline) {
+                const hotlineEl = document.getElementById('contact-hotline');
+                if (hotlineEl) {
+                    hotlineEl.href = `tel:${hotline.replace(/\s/g, '')}`;
+                    hotlineEl.textContent = hotline;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Lỗi tải thông tin liên hệ:', error);
+    }
+}
+
+// Load recent posts for sidebar
+async function loadRecentPosts(currentNewsId) {
+    const container = document.getElementById('recent-posts-container');
+    if (!container) return;
+
+    try {
+        const response = await fetch(`${API_URL}?limit=5`);
+        const result = await response.json();
+
+        if (result.success && result.data && result.data.length > 0) {
+            // Filter out current news and take first 3
+            const recentNews = result.data
+                .filter(news => news.ma_tin_tuc != currentNewsId)
+                .slice(0, 3);
+
+            if (recentNews.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-sm">Chưa có bài viết nào khác</p>';
+                return;
+            }
+
+            container.innerHTML = recentNews.map(news => `
+                <div class="flex space-x-3">
+                    <img src="${news.anh_dai_dien ? `http://localhost:3000/${news.anh_dai_dien}` : 'images/default-news.jpg'}" 
+                         alt="${news.tieu_de}"
+                         class="w-20 h-20 rounded-lg object-cover"
+                         onerror="this.src='images/default-news.jpg'">
+                    <div class="flex-1">
+                        <a href="tin-tuc-chi-tiet.html?id=${news.ma_tin_tuc}" class="font-medium hover:text-orange-600 line-clamp-2">
+                            ${news.tieu_de}
+                        </a>
+                        <p class="text-sm text-gray-500 mt-1">${formatDate(news.ngay_dang)}</p>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<p class="text-gray-500 text-sm">Chưa có bài viết nào</p>';
+        }
+    } catch (error) {
+        console.error('Lỗi tải bài viết gần đây:', error);
+        container.innerHTML = '<p class="text-gray-500 text-sm">Không thể tải bài viết</p>';
+    }
 }
 
 // Share functions
@@ -261,6 +402,11 @@ function renderComment(comment, isReply = false) {
     const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.ten_nguoi_binh_luan)}&size=50&background=f97316&color=fff`;
     const timeAgo = getTimeAgo(comment.ngay_binh_luan);
     
+    // Check if this is an admin reply
+    const isAdminReply = comment.email_nguoi_binh_luan === 'admin@phuongnam.vn' || 
+                         comment.ten_nguoi_binh_luan === 'Admin' ||
+                         comment.ten_nguoi_binh_luan === 'Quản trị viên';
+    
     // Reaction icons
     const reactionIcons = { like: '👍', love: '❤️', haha: '😄', wow: '😮', sad: '😢', angry: '😠' };
     
@@ -278,27 +424,79 @@ function renderComment(comment, isReply = false) {
         reactionsSummary = topReactions.map(([type, _]) => reactionIcons[type]).join('') + ` ${totalReactions}`;
     }
 
-    // Render replies
-    const repliesHtml = (comment.replies && comment.replies.length > 0) 
-        ? `<div class="ml-8 mt-4 space-y-4">${comment.replies.map(reply => renderComment(reply, true)).join('')}</div>`
+    // Separate admin replies and user replies
+    const adminReplies = (comment.replies || []).filter(r => 
+        r.email_nguoi_binh_luan === 'admin@phuongnam.vn' || 
+        r.ten_nguoi_binh_luan === 'Admin' ||
+        r.ten_nguoi_binh_luan === 'Quản trị viên'
+    );
+    const userReplies = (comment.replies || []).filter(r => 
+        r.email_nguoi_binh_luan !== 'admin@phuongnam.vn' && 
+        r.ten_nguoi_binh_luan !== 'Admin' &&
+        r.ten_nguoi_binh_luan !== 'Quản trị viên'
+    );
+
+    // Render admin replies section (hiển thị ngay dưới comment, trong box riêng)
+    let adminRepliesHtml = '';
+    if (adminReplies.length > 0 && !isReply) {
+        adminRepliesHtml = `
+            <div class="mt-3 ml-4 border-l-4 border-green-500 bg-green-50 rounded-r-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-store text-green-600"></i>
+                    <span class="font-semibold text-green-700 text-sm">Phản hồi từ Nhà hàng Phương Nam</span>
+                </div>
+                <div class="space-y-3">
+                    ${adminReplies.map(reply => `
+                        <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=Admin&size=32&background=22c55e&color=fff" 
+                                         class="w-8 h-8 rounded-full">
+                                    <span class="font-semibold text-green-700 text-sm">Admin</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-400 italic">Tác giả: ${reply.ten_nguoi_binh_luan}</span>
+                                    <span class="text-xs text-gray-500">${getTimeAgo(reply.ngay_binh_luan)}</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 text-sm">${escapeHtml(reply.noi_dung)}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Render user replies
+    const userRepliesHtml = userReplies.length > 0 
+        ? `<div class="ml-8 mt-4 space-y-4">${userReplies.map(reply => renderComment(reply, true)).join('')}</div>`
         : '';
+
+    // Admin reply styling
+    const adminBadge = isAdminReply ? `<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">Admin</span>` : '';
+    const bgColor = isAdminReply ? 'bg-green-50 border border-green-200' : 'bg-gray-50';
+    const adminAvatar = isAdminReply ? 'https://ui-avatars.com/api/?name=Admin&size=50&background=22c55e&color=fff' : avatar;
 
     return `
         <div class="comment-item ${isReply ? 'ml-8' : ''} mb-6" data-comment-id="${comment.ma_binh_luan}">
             <div class="flex space-x-4">
-                <img src="${avatar}" alt="${comment.ten_nguoi_binh_luan}"
-                    class="${isReply ? 'w-10 h-10' : 'w-12 h-12'} rounded-full flex-shrink-0 object-cover"
+                <img src="${isAdminReply ? adminAvatar : avatar}" alt="${comment.ten_nguoi_binh_luan}"
+                    class="${isReply ? 'w-10 h-10' : 'w-12 h-12'} rounded-full flex-shrink-0 object-cover ${isAdminReply ? 'ring-2 ring-green-400' : ''}"
                     onerror="this.onerror=null; this.src='${fallbackAvatar}'">
                 <div class="flex-1">
-                    <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="${bgColor} rounded-lg p-4">
                         <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-bold text-gray-800 ${isReply ? 'text-sm' : ''}">${comment.ten_nguoi_binh_luan}</h4>
+                            <div class="flex items-center">
+                                <h4 class="font-bold ${isAdminReply ? 'text-green-700' : 'text-gray-800'} ${isReply ? 'text-sm' : ''}">${comment.ten_nguoi_binh_luan}</h4>
+                                ${adminBadge}
+                            </div>
                             <span class="text-sm text-gray-500">${timeAgo}</span>
                         </div>
                         <p class="text-gray-700">${escapeHtml(comment.noi_dung)}</p>
                     </div>
                     
-                    <!-- Actions: Reactions & Reply -->
+                    ${!isAdminReply ? `
+                    <!-- Actions: Reactions & Reply (chỉ hiện cho comment của user) -->
                     <div class="flex items-center gap-4 mt-2 text-sm">
                         <!-- Reaction button with picker -->
                         <div class="relative reaction-wrapper">
@@ -349,9 +547,12 @@ function renderComment(comment, isReply = false) {
                             </button>
                         </div>
                     </div>
+                    ` : ''}
+                    
+                    ${adminRepliesHtml}
                 </div>
             </div>
-            ${repliesHtml}
+            ${userRepliesHtml}
         </div>
     `;
 }
@@ -543,7 +744,7 @@ function setupReactionInteractions() {
 
     // Hide picker khi mouse leave
     document.addEventListener('mouseleave', (e) => {
-        if (e.target.closest('.reaction-wrapper')) {
+        if (e.target && e.target.closest && e.target.closest('.reaction-wrapper')) {
             setTimeout(() => {
                 const wrapper = e.target.closest('.reaction-wrapper');
                 if (wrapper && !wrapper.matches(':hover')) {
@@ -559,6 +760,7 @@ function setupReactionInteractions() {
 
     // Show picker on hover (sau 500ms)
     document.addEventListener('mouseenter', (e) => {
+        if (!e.target || !e.target.closest) return;
         const wrapper = e.target.closest('.reaction-wrapper');
         if (wrapper) {
             setTimeout(() => {

@@ -98,6 +98,139 @@
         /* Reaction wrapper hover */
         .reaction-wrapper:hover .reaction-picker-popup {
             opacity: 1 !important;
+        }
+
+        /* News Content Styling */
+        .news-content .prose {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #374151;
+        }
+        
+        .news-content .prose p {
+            margin-bottom: 1.25rem;
+        }
+        
+        .news-content .prose h2,
+        .news-content .prose h3,
+        .news-content .prose h4 {
+            color: #1f2937;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .news-content .prose h2 {
+            font-size: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f97316;
+        }
+        
+        .news-content .prose h3 {
+            font-size: 1.25rem;
+            color: #f97316;
+        }
+        
+        .news-content .prose ul,
+        .news-content .prose ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .news-content .prose li {
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        
+        .news-content .prose ul li::before {
+            content: "•";
+            color: #f97316;
+            font-weight: bold;
+            position: absolute;
+            left: -1rem;
+        }
+        
+        .news-content .prose ol {
+            list-style: decimal;
+        }
+        
+        .news-content .prose ol li::marker {
+            color: #f97316;
+            font-weight: 600;
+        }
+        
+        .news-content .prose strong,
+        .news-content .prose b {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .news-content .prose em,
+        .news-content .prose i {
+            color: #6b7280;
+        }
+        
+        .news-content .prose blockquote {
+            border-left: 4px solid #f97316;
+            background: #fff7ed;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #92400e;
+        }
+        
+        .news-content .prose a {
+            color: #f97316;
+            text-decoration: underline;
+        }
+        
+        .news-content .prose a:hover {
+            color: #ea580c;
+        }
+        
+        .news-content .prose img {
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .news-content .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        .news-content .prose th,
+        .news-content .prose td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        
+        .news-content .prose th {
+            background: #f97316;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .news-content .prose tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        /* Info box styling */
+        .news-content .info-box {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 1px solid #fed7aa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .news-content .info-box h4 {
+            color: #c2410c;
+            margin-top: 0;
+        }
             visibility: visible !important;
         }
     </style>
@@ -302,36 +435,9 @@
                     <!-- Recent Posts -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h3 class="font-bold text-xl mb-4">Bài viết gần đây</h3>
-                        <div class="space-y-4">
-                            <div class="flex space-x-3">
-                                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100" alt="Post"
-                                    class="w-20 h-20 rounded-lg object-cover">
-                                <div class="flex-1">
-                                    <a href="#" class="font-medium hover:text-orange-600 line-clamp-2">
-                                        Món ăn mới cho mùa thu
-                                    </a>
-                                    <p class="text-sm text-gray-500 mt-1">8 Oct 2025</p>
-                                </div>
-                            </div>
-                            <div class="flex space-x-3">
-                                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=100" alt="Post"
-                                    class="w-20 h-20 rounded-lg object-cover">
-                                <div class="flex-1">
-                                    <a href="#" class="font-medium hover:text-orange-600 line-clamp-2">
-                                        Khuyến mãi cuối tuần
-                                    </a>
-                                    <p class="text-sm text-gray-500 mt-1">5 Oct 2025</p>
-                                </div>
-                            </div>
-                            <div class="flex space-x-3">
-                                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=100" alt="Post"
-                                    class="w-20 h-20 rounded-lg object-cover">
-                                <div class="flex-1">
-                                    <a href="#" class="font-medium hover:text-orange-600 line-clamp-2">
-                                        Lớp học nấu ăn miễn phí
-                                    </a>
-                                    <p class="text-sm text-gray-500 mt-1">1 Oct 2025</p>
-                                </div>
+                        <div id="recent-posts-container" class="space-y-4">
+                            <div class="text-center py-4 text-gray-400">
+                                <i class="fas fa-spinner fa-spin"></i> Đang tải...
                             </div>
                         </div>
                     </div>
@@ -384,8 +490,8 @@
                         <i class="fas fa-phone-alt text-4xl text-orange-600 mb-4"></i>
                         <h3 class="font-bold text-xl mb-2">Cần hỗ trợ?</h3>
                         <p class="text-gray-600 mb-4">Liên hệ với chúng tôi</p>
-                        <a href="tel:1900xxxx" class="text-2xl font-bold text-orange-600 hover:text-orange-700">
-                            1900 xxxx
+                        <a id="contact-hotline" href="tel:0123456789" class="text-2xl font-bold text-orange-600 hover:text-orange-700">
+                            0123 456 789
                         </a>
                     </div>
                 </aside>

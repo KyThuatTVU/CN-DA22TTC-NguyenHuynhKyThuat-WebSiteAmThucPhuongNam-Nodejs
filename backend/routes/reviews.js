@@ -75,12 +75,33 @@ router.get('/product/:productId', authenticateToken, async (req, res) => {
       WHERE dg.ma_mon = ? AND dg.trang_thai = 'approved'
       ORDER BY dg.ngay_danh_gia DESC
     `, [productId]);
+
+    // Lấy replies của admin cho mỗi review
+    const reviewIds = reviews.map(r => r.ma_danh_gia);
+    let repliesMap = {};
     
-    // Đánh dấu đánh giá nào là của user hiện tại và parse ảnh
+    if (reviewIds.length > 0) {
+      const [replies] = await db.query(`
+        SELECT ma_tra_loi, ma_danh_gia, noi_dung, ten_admin, ngay_tra_loi
+        FROM tra_loi_danh_gia
+        WHERE ma_danh_gia IN (?)
+        ORDER BY ngay_tra_loi ASC
+      `, [reviewIds]);
+
+      replies.forEach(reply => {
+        if (!repliesMap[reply.ma_danh_gia]) {
+          repliesMap[reply.ma_danh_gia] = [];
+        }
+        repliesMap[reply.ma_danh_gia].push(reply);
+      });
+    }
+    
+    // Đánh dấu đánh giá nào là của user hiện tại và parse ảnh, thêm replies
     const reviewsWithOwnership = reviews.map(r => ({
       ...r,
       is_owner: currentUserId && r.ma_nguoi_dung === currentUserId,
-      images: r.hinh_anh ? JSON.parse(r.hinh_anh) : []
+      images: r.hinh_anh ? JSON.parse(r.hinh_anh) : [],
+      replies: repliesMap[r.ma_danh_gia] || []
     }));
 
     // Tính điểm trung bình và thống kê
@@ -363,7 +384,7 @@ router.get('/my-review/:productId', authenticateToken, async (req, res) => {
 
 // ==================== ADMIN ROUTES ====================
 
-// Lấy tất cả đánh giá (Admin)
+// Lấy tất cả đánh giá (Admin) - bao gồm số lượng replies
 router.get('/admin/all', async (req, res) => {
   try {
     const { status, search, product_id } = req.query;
@@ -372,7 +393,8 @@ router.get('/admin/all', async (req, res) => {
       SELECT dg.ma_danh_gia, dg.ma_mon, dg.ma_nguoi_dung, dg.so_sao, dg.binh_luan, 
              dg.ngay_danh_gia, dg.trang_thai, dg.hinh_anh,
              nd.ten_nguoi_dung, nd.email, nd.anh_dai_dien,
-             ma.ten_mon
+             ma.ten_mon,
+             (SELECT COUNT(*) FROM tra_loi_danh_gia WHERE ma_danh_gia = dg.ma_danh_gia) as reply_count
       FROM danh_gia_san_pham dg
       JOIN nguoi_dung nd ON dg.ma_nguoi_dung = nd.ma_nguoi_dung
       JOIN mon_an ma ON dg.ma_mon = ma.ma_mon
@@ -574,6 +596,138 @@ router.post('/admin/bulk-status', async (req, res) => {
     console.error('Error bulk updating review status:', error);
     res.status(500).json({ success: false, message: error.message });
   }
+});
+
+// Admin trả lời đánh giá sản phẩm (Cho phép nhiều replies)
+router.post('/:reviewId/reply', async (req, res) => {
+    try {
+        // Kiểm tra admin đăng nhập
+        if (!req.session || !req.session.admin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized - Admin only'
+            });
+        }
+
+        const { reviewId } = req.params;
+        const { noi_dung } = req.body;
+        const adminName = req.session.admin.ten_hien_thi || 'Admin';
+
+        if (!noi_dung) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng nhập nội dung trả lời'
+            });
+        }
+
+        // Kiểm tra đánh giá có tồn tại không
+        const [review] = await db.query(
+            'SELECT ma_danh_gia FROM danh_gia_san_pham WHERE ma_danh_gia = ?',
+            [reviewId]
+        );
+
+        if (review.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy đánh giá'
+            });
+        }
+
+        // Tạo reply mới (cho phép nhiều replies)
+        const [result] = await db.query(
+            `INSERT INTO tra_loi_danh_gia (ma_danh_gia, noi_dung, ten_admin) 
+            VALUES (?, ?, ?)`,
+            [reviewId, noi_dung, adminName]
+        );
+
+        res.json({
+            success: true,
+            message: 'Trả lời đánh giá thành công',
+            data: {
+                ma_tra_loi: result.insertId,
+                noi_dung,
+                ten_admin: adminName,
+                ngay_tra_loi: new Date(),
+                is_update: false
+            }
+        });
+    } catch (error) {
+        console.error('Error replying to review:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
+// Lấy trả lời của admin cho một đánh giá
+router.get('/:reviewId/replies', async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+
+        const [replies] = await db.query(
+            `SELECT ma_tra_loi, noi_dung, ten_admin, ngay_tra_loi
+            FROM tra_loi_danh_gia
+            WHERE ma_danh_gia = ?
+            ORDER BY ngay_tra_loi ASC`,
+            [reviewId]
+        );
+
+        res.json({
+            success: true,
+            data: replies
+        });
+    } catch (error) {
+        console.error('Error fetching review replies:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server'
+        });
+    }
+});
+
+// Xóa trả lời của admin
+router.delete('/replies/:replyId', async (req, res) => {
+    try {
+        // Kiểm tra admin đăng nhập
+        if (!req.session || !req.session.admin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized - Admin only'
+            });
+        }
+
+        const { replyId } = req.params;
+
+        // Kiểm tra reply có tồn tại không
+        const [reply] = await db.query(
+            'SELECT ma_tra_loi FROM tra_loi_danh_gia WHERE ma_tra_loi = ?',
+            [replyId]
+        );
+
+        if (reply.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy trả lời'
+            });
+        }
+
+        // Xóa reply
+        await db.query('DELETE FROM tra_loi_danh_gia WHERE ma_tra_loi = ?', [replyId]);
+
+        res.json({
+            success: true,
+            message: 'Xóa trả lời thành công'
+        });
+    } catch (error) {
+        console.error('Error deleting reply:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
 });
 
 module.exports = router;

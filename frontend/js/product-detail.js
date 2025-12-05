@@ -543,6 +543,37 @@ function renderReviews(data) {
             avatarHtml = `<div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center"><i class="fas fa-user text-orange-600"></i></div>`;
         }
         
+        // Render admin replies
+        let repliesHtml = '';
+        if (review.replies && review.replies.length > 0) {
+            repliesHtml = `
+                <div class="mt-3 ml-4 border-l-4 border-green-500 bg-green-50 rounded-r-lg p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-store text-green-600"></i>
+                        <span class="font-semibold text-green-700 text-sm">Phản hồi từ Nhà hàng Phương Nam</span>
+                    </div>
+                    <div class="space-y-3">
+                        ${review.replies.map(reply => `
+                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://ui-avatars.com/api/?name=Admin&size=32&background=22c55e&color=fff" 
+                                             class="w-8 h-8 rounded-full">
+                                        <span class="font-semibold text-green-700 text-sm">Admin</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-400 italic">Tác giả: ${reply.ten_admin}</span>
+                                        <span class="text-xs text-gray-500">${formatDate(reply.ngay_tra_loi)}</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-sm">${reply.noi_dung}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
         return `
         <div class="border-b pb-4 mb-4 last:border-0" id="review-${review.ma_danh_gia}">
             <div class="flex items-start gap-3">
@@ -579,6 +610,7 @@ function renderReviews(data) {
                         </div>
                     ` : ''}
                     <span class="text-gray-400 text-xs">${formatDate(review.ngay_danh_gia)}</span>
+                    ${repliesHtml}
                 </div>
             </div>
         </div>

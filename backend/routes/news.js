@@ -504,6 +504,7 @@ router.get('/:id/comments', async (req, res) => {
                 bl.so_sao,
                 bl.ngay_binh_luan,
                 bl.ten_nguoi_binh_luan,
+                bl.email_nguoi_binh_luan,
                 bl.ma_nguoi_dung,
                 nd.anh_dai_dien
             FROM binh_luan_tin_tuc bl
@@ -596,6 +597,67 @@ router.get('/:id/comments', async (req, res) => {
 
     } catch (error) {
         console.error('Lỗi lấy bình luận:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+});
+
+// Admin trả lời bình luận tin tức (Cho phép nhiều replies)
+router.post('/comments/:commentId/reply', async (req, res) => {
+    try {
+        // Kiểm tra admin đăng nhập
+        if (!req.session || !req.session.admin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized - Admin only'
+            });
+        }
+
+        const { commentId } = req.params;
+        const { noi_dung } = req.body;
+        const adminName = req.session.admin.ten_hien_thi || 'Admin';
+
+        if (!noi_dung) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng nhập nội dung trả lời'
+            });
+        }
+
+        // Kiểm tra bình luận cha có tồn tại không
+        const [parentComment] = await db.query(
+            'SELECT ma_tin_tuc FROM binh_luan_tin_tuc WHERE ma_binh_luan = ?',
+            [commentId]
+        );
+
+        if (parentComment.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy bình luận'
+            });
+        }
+
+        // Tạo reply mới (cho phép nhiều replies)
+        const [result] = await db.query(
+            `INSERT INTO binh_luan_tin_tuc 
+            (ma_tin_tuc, ma_binh_luan_cha, ten_nguoi_binh_luan, email_nguoi_binh_luan, noi_dung, trang_thai) 
+            VALUES (?, ?, ?, ?, ?, 'approved')`,
+            [parentComment[0].ma_tin_tuc, commentId, adminName, 'admin@phuongnam.vn', noi_dung]
+        );
+
+        res.json({
+            success: true,
+            message: 'Trả lời bình luận thành công',
+            data: {
+                ma_binh_luan: result.insertId,
+                is_update: false
+            }
+        });
+    } catch (error) {
+        console.error('Error replying to comment:', error);
         res.status(500).json({
             success: false,
             message: 'Lỗi server',
@@ -893,12 +955,13 @@ router.post('/:id/reactions', async (req, res) => {
 
 // ===== ADMIN - QUẢN LÝ BÌNH LUẬN =====
 
-// Lấy tất cả bình luận (Admin)
+// Lấy tất cả bình luận (Admin) - bao gồm cả replies
 router.get('/admin/comments/all', requireAdmin, async (req, res) => {
     try {
         const [comments] = await db.query(
             `SELECT 
                 bl.ma_binh_luan,
+                bl.ma_binh_luan_cha,
                 bl.ma_tin_tuc,
                 t.tieu_de as tieu_de_tin_tuc,
                 bl.ten_nguoi_binh_luan,
