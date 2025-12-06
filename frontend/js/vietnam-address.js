@@ -6,6 +6,14 @@ let vietnamWards = {};
 // API endpoint - sử dụng provinces.open-api.vn (miễn phí)
 const API_BASE = 'https://provinces.open-api.vn/api';
 
+// Cấu hình giới hạn khu vực giao hàng
+const DELIVERY_CONFIG = {
+    // Chỉ giao hàng trong tỉnh Trà Vinh
+    allowedProvinceCode: '84', // Mã tỉnh Trà Vinh
+    allowedProvinceName: 'Trà Vinh',
+    restrictDelivery: true // Bật/tắt giới hạn khu vực
+};
+
 // Load provinces from API
 async function loadProvinces() {
     try {
@@ -179,6 +187,19 @@ async function initAddressSelectors() {
         return;
     }
 
+    // Kiểm tra nếu giới hạn khu vực giao hàng
+    if (DELIVERY_CONFIG.restrictDelivery) {
+        // Chỉ hiển thị tỉnh Trà Vinh
+        provinceSelect.innerHTML = `<option value="${DELIVERY_CONFIG.allowedProvinceCode}" selected>Tỉnh ${DELIVERY_CONFIG.allowedProvinceName}</option>`;
+        provinceSelect.disabled = true; // Không cho đổi tỉnh
+        
+        console.log('🚚 Delivery restricted to:', DELIVERY_CONFIG.allowedProvinceName);
+        
+        // Tự động load quận/huyện của Trà Vinh
+        await updateDistrictsRestricted(DELIVERY_CONFIG.allowedProvinceCode);
+        return;
+    }
+
     // Show loading
     provinceSelect.innerHTML = '<option value="">Đang tải dữ liệu...</option>';
     provinceSelect.disabled = true;
@@ -270,6 +291,37 @@ async function initAddressSelectors() {
                 wardSelect.appendChild(option);
             });
         }
+    }
+
+    // Hàm cập nhật quận/huyện khi giới hạn khu vực
+    async function updateDistrictsRestricted(provinceCode) {
+        districtSelect.innerHTML = '<option value="">Đang tải...</option>';
+        districtSelect.disabled = true;
+        if (wardSelect) {
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+            wardSelect.disabled = true;
+        }
+
+        // Load districts from API
+        const districts = await loadDistricts(provinceCode);
+        
+        districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+        districtSelect.disabled = false;
+
+        if (districts && districts.length > 0) {
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district.code;
+                option.textContent = district.nameWithType || district.name;
+                option.dataset.districtName = district.nameWithType || district.name;
+                districtSelect.appendChild(option);
+            });
+        }
+
+        // District change handler
+        districtSelect.addEventListener('change', async function() {
+            await updateWards(this.value);
+        });
     }
 }
 

@@ -357,27 +357,28 @@ router.get('/news-views-monthly', requireAdmin, async (req, res) => {
 router.get('/payment-methods', requireAdmin, async (req, res) => {
     try {
         const { year, month } = req.query;
-        let whereClause = "trang_thai_thanh_toan = 'success'";
+        let whereClause = "tt.trang_thai = 'success'";
         const params = [];
 
         if (year) {
-            whereClause += ' AND YEAR(thoi_gian_tao) = ?';
+            whereClause += ' AND YEAR(dh.thoi_gian_tao) = ?';
             params.push(parseInt(year));
         }
 
         if (month && parseInt(month) > 0) {
-            whereClause += ' AND MONTH(thoi_gian_tao) = ?';
+            whereClause += ' AND MONTH(dh.thoi_gian_tao) = ?';
             params.push(parseInt(month));
         }
 
         const [paymentData] = await db.query(`
             SELECT 
-                phuong_thuc_thanh_toan,
+                tt.phuong_thuc as phuong_thuc_thanh_toan,
                 COUNT(*) as so_luong,
-                COALESCE(SUM(tong_tien), 0) as tong_tien
-            FROM don_hang
+                COALESCE(SUM(tt.so_tien), 0) as tong_tien
+            FROM thanh_toan tt
+            JOIN don_hang dh ON tt.ma_don_hang = dh.ma_don_hang
             WHERE ${whereClause}
-            GROUP BY phuong_thuc_thanh_toan
+            GROUP BY tt.phuong_thuc
             ORDER BY so_luong DESC
         `, params);
 

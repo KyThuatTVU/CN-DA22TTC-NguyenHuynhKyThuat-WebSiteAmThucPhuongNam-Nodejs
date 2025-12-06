@@ -44,8 +44,12 @@ function renderCheckoutItems() {
     }
 
     container.innerHTML = cart.items.map(item => {
-        const imageSrc = item.anh_mon
-            ? (item.anh_mon.startsWith('http') ? item.anh_mon : `http://localhost:3000${item.anh_mon}`)
+        let imgPath = item.anh_mon || '';
+        if (imgPath && !imgPath.startsWith('http') && !imgPath.startsWith('/')) {
+            imgPath = '/images/' + imgPath;
+        }
+        const imageSrc = imgPath
+            ? (imgPath.startsWith('http') ? imgPath : `http://localhost:3000${imgPath}`)
             : '/images/default-dish.jpg';
 
         return `
@@ -255,10 +259,19 @@ async function submitOrder(event) {
             if (label.includes('Họ và tên')) formData.ten_nguoi_nhan = input.value;
             else if (label.includes('Số điện thoại')) formData.so_dien_thoai = input.value;
             else if (label.includes('Email')) formData.email = input.value;
-            else if (label.includes('Địa chỉ') && !label.includes('giao')) formData.dia_chi = input.value;
+            else if (label.includes('Địa chỉ') && !label.includes('giao') && !label.includes('chi tiết')) formData.dia_chi = input.value;
+            else if (label.includes('Mô tả chi tiết')) formData.dia_chi_chi_tiet = input.value;
             else if (label.includes('Ghi chú')) formData.ghi_chu = input.value;
         }
     });
+
+    // Kết hợp mô tả địa chỉ chi tiết vào ghi chú nếu có
+    const addressDetail = formData.address_detail || formData.dia_chi_chi_tiet;
+    if (addressDetail && addressDetail.trim()) {
+        formData.ghi_chu = formData.ghi_chu 
+            ? `[Địa chỉ chi tiết: ${addressDetail.trim()}] ${formData.ghi_chu}`
+            : `[Địa chỉ chi tiết: ${addressDetail.trim()}]`;
+    }
 
     // Get payment method
     const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;

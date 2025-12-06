@@ -43,7 +43,7 @@
 <body>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 transition-all duration-300">
+        <aside id="sidebar" class="sidebar w-72 flex-shrink-0 transition-all duration-300">
             <div class="h-full flex flex-col">
                 <!-- Logo -->
                 <div class="p-5 border-b border-white/10">
@@ -327,8 +327,8 @@
                                 <p class="filter-label">Năm</p>
                                 <div class="flex flex-wrap gap-2">
                                     <button class="filter-btn" data-year="2023">2023</button>
-                                    <button class="filter-btn active" data-year="2024">2024</button>
-                                    <button class="filter-btn" data-year="2025">2025</button>
+                                    <button class="filter-btn" data-year="2024">2024</button>
+                                    <button class="filter-btn active" data-year="2025">2025</button>
                                 </div>
                             </div>
                             <div class="filter-group">
@@ -363,7 +363,7 @@
                             <!-- Filter Summary -->
                             <div id="filter-summary" class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-xs">
                                 <p class="font-semibold text-blue-800 mb-1">Đang xem:</p>
-                                <p class="text-blue-700" id="filter-summary-text">Tất cả dữ liệu năm 2024</p>
+                                <p class="text-blue-700" id="filter-summary-text">Tất cả dữ liệu năm 2025</p>
                             </div>
                         </div>
                     </div>
@@ -537,16 +537,20 @@
 
         async function loadDashboardData() {
             try {
-                // Load tất cả dữ liệu song song
+                // Lấy filter hiện tại (mặc định năm 2025)
+                const filters = getFilterValues();
+                const yearParam = `?year=${filters.year || 2025}`;
+                
+                // Load tất cả dữ liệu song song với filter năm
                 const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes, newsViewsRes, newsViewsMonthlyRes, reviewsRes] = await Promise.all([
-                    fetch(`${API_BASE}/orders/stats`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/orders/stats${yearParam}`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/customers/stats`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/reservations/stats`, { credentials: 'include' }).catch(() => null),
-                    fetch(`${API_BASE}/stats/revenue-monthly`, { credentials: 'include' }).catch(() => null),
-                    fetch(`${API_BASE}/stats/customers-monthly`, { credentials: 'include' }).catch(() => null),
-                    fetch(`${API_BASE}/stats/reservations-by-time`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/revenue-monthly${yearParam}`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/customers-monthly${yearParam}`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/reservations-by-time${yearParam}`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/stats/news-views`, { credentials: 'include' }).catch(() => null),
-                    fetch(`${API_BASE}/stats/news-views-monthly`, { credentials: 'include' }).catch(() => null),
+                    fetch(`${API_BASE}/stats/news-views-monthly${yearParam}`, { credentials: 'include' }).catch(() => null),
                     fetch(`${API_BASE}/reviews/admin/all`, { credentials: 'include' }).catch(() => null)
                 ]);
 
@@ -640,8 +644,8 @@
                     }
                 }
 
-                // Load payment methods stats
-                const paymentMethodsRes2 = await fetch(`${API_BASE}/stats/payment-methods`, { credentials: 'include' }).catch(() => null);
+                // Load payment methods stats với filter năm
+                const paymentMethodsRes2 = await fetch(`${API_BASE}/stats/payment-methods${yearParam}`, { credentials: 'include' }).catch(() => null);
                 if (paymentMethodsRes2 && paymentMethodsRes2.ok) {
                     const data = await paymentMethodsRes2.json();
                     if (data.success && data.data) {
@@ -662,10 +666,12 @@
         function updateRevenueChart(data) {
             // Tạo mảng 12 tháng với giá trị 0
             const monthlyData = new Array(12).fill(0);
-            const currentYear = new Date().getFullYear();
+            // Lấy năm từ filter hiện tại, mặc định 2025 (năm có dữ liệu)
+            const filters = getFilterValues();
+            const targetYear = filters.year || 2025;
             
             data.forEach(item => {
-                if (item.nam === currentYear && item.thang >= 1 && item.thang <= 12) {
+                if (item.nam === targetYear && item.thang >= 1 && item.thang <= 12) {
                     monthlyData[item.thang - 1] = Math.round((item.doanh_thu || 0) / 1000000); // Chuyển sang triệu
                 }
             });
@@ -676,10 +682,12 @@
 
         function updateCustomerChart(data) {
             const monthlyData = new Array(12).fill(0);
-            const currentYear = new Date().getFullYear();
+            // Lấy năm từ filter hiện tại, mặc định 2025 (năm có dữ liệu)
+            const filters = getFilterValues();
+            const targetYear = filters.year || 2025;
             
             data.forEach(item => {
-                if (item.nam === currentYear && item.thang >= 1 && item.thang <= 12) {
+                if (item.nam === targetYear && item.thang >= 1 && item.thang <= 12) {
                     monthlyData[item.thang - 1] = item.so_luong || 0;
                 }
             });
@@ -701,10 +709,12 @@
 
         function updateNewsViewsChart(data) {
             const monthlyData = new Array(12).fill(0);
-            const currentYear = new Date().getFullYear();
+            // Lấy năm từ filter hiện tại, mặc định 2025 (năm có dữ liệu)
+            const filters = getFilterValues();
+            const targetYear = filters.year || 2025;
             
             data.forEach(item => {
-                if (item.nam === currentYear && item.thang >= 1 && item.thang <= 12) {
+                if (item.nam === targetYear && item.thang >= 1 && item.thang <= 12) {
                     monthlyData[item.thang - 1] = item.tong_luot_xem || 0;
                 }
             });
@@ -807,7 +817,10 @@
         async function renderTopProducts() {
             const container = document.getElementById('top-products');
             try {
-                const response = await fetch(`${API_BASE}/stats/top-products`, { credentials: 'include' });
+                // Lấy filter hiện tại
+                const filters = getFilterValues();
+                const yearParam = `?year=${filters.year || 2025}`;
+                const response = await fetch(`${API_BASE}/stats/top-products${yearParam}`, { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && data.data && data.data.length > 0) {
@@ -984,13 +997,13 @@
         }
 
         function resetFilters() {
-            // Reset về mặc định: năm hiện tại, tháng All, trạng thái All
-            const currentYear = new Date().getFullYear();
+            // Reset về mặc định: năm 2025 (năm có dữ liệu), tháng All, trạng thái All
+            const defaultYear = 2025;
             
             // Reset year
             document.querySelectorAll('.filter-btn[data-year]').forEach(btn => {
                 btn.classList.remove('active');
-                if (parseInt(btn.dataset.year) === currentYear) {
+                if (parseInt(btn.dataset.year) === defaultYear) {
                     btn.classList.add('active');
                 }
             });
@@ -1204,29 +1217,50 @@
         }
 
         function updatePaymentMethodsChart(data) {
-            if (!paymentMethodsChart || !data || data.length === 0) return;
+            if (!paymentMethodsChart || !data || data.length === 0) {
+                // Nếu không có dữ liệu, hiển thị chart rỗng
+                paymentMethodsChart.data.labels = ['Chưa có dữ liệu'];
+                paymentMethodsChart.data.datasets[0].data = [1];
+                paymentMethodsChart.data.datasets[0].backgroundColor = ['#e2e8f0'];
+                paymentMethodsChart.update();
+                return;
+            }
 
-            // Map tên phương thức thanh toán
+            // Map tên phương thức thanh toán (theo dữ liệu trong bảng thanh_toan)
             const methodNames = {
-                'cod': 'Tiền mặt',
+                'cod': 'Tiền mặt (COD)',
                 'momo': 'MoMo',
+                'vnpay': 'VNPay',
+                'zalopay': 'ZaloPay',
                 'bank_transfer': 'Chuyển khoản',
                 'cash': 'Tiền mặt'
             };
 
+            // Map màu cho từng phương thức
+            const methodColors = {
+                'cod': '#10b981',
+                'momo': '#a855f7',
+                'vnpay': '#3b82f6',
+                'zalopay': '#06b6d4',
+                'bank_transfer': '#f59e0b',
+                'cash': '#10b981'
+            };
+
             const labels = [];
             const values = [];
-            const colors = ['#10b981', '#a855f7', '#3b82f6', '#f59e0b'];
+            const colors = [];
 
-            data.forEach((item, index) => {
-                const methodName = methodNames[item.phuong_thuc_thanh_toan] || item.phuong_thuc_thanh_toan || 'Khác';
+            data.forEach((item) => {
+                const method = item.phuong_thuc_thanh_toan || 'Khác';
+                const methodName = methodNames[method] || method;
                 labels.push(methodName);
                 values.push(item.so_luong || 0);
+                colors.push(methodColors[method] || '#9ca3af');
             });
 
             paymentMethodsChart.data.labels = labels;
             paymentMethodsChart.data.datasets[0].data = values;
-            paymentMethodsChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+            paymentMethodsChart.data.datasets[0].backgroundColor = colors;
             paymentMethodsChart.update();
         }
 

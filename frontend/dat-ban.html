@@ -169,7 +169,7 @@
                             <ul class="space-y-2 sm:space-y-3 text-gray-700">
                                 <li class="flex items-start bg-white rounded-lg p-2.5 sm:p-3">
                                     <i class="fas fa-check-circle text-orange-600 mr-2 sm:mr-3 mt-0.5 sm:mt-1 text-base sm:text-lg"></i>
-                                    <span class="text-sm sm:text-base">Vui lòng đặt bàn trước ít nhất 2 giờ</span>
+                                    <span class="text-sm sm:text-base">Vui lòng đặt bàn trước ít nhất <strong>3 tiếng</strong></span>
                                 </li>
                                 <li class="flex items-start bg-white rounded-lg p-2.5 sm:p-3">
                                     <i class="fas fa-check-circle text-orange-600 mr-2 sm:mr-3 mt-0.5 sm:mt-1 text-base sm:text-lg"></i>
@@ -199,6 +199,249 @@
     <!-- GSAP Animation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="js/gsap-dat-ban.js"></script>
+    
+    <script>
+        // Cấu hình thời gian đặt bàn tối thiểu (3 tiếng)
+        const MIN_HOURS_ADVANCE = 3;
+        
+        // Lấy các input
+        const dateInput = document.querySelector('input[type="date"]');
+        const timeInput = document.querySelector('input[type="time"]');
+        const bookingForm = document.getElementById('booking-form');
+        
+        // Thiết lập ngày tối thiểu là hôm nay
+        function setMinDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            dateInput.min = `${yyyy}-${mm}-${dd}`;
+            dateInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+        
+        // Thiết lập giờ tối thiểu dựa trên ngày được chọn
+        function updateMinTime() {
+            const selectedDate = dateInput.value;
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            if (selectedDate === todayStr) {
+                // Nếu chọn hôm nay, giờ tối thiểu = giờ hiện tại + 3 tiếng
+                const minTime = new Date(today.getTime() + MIN_HOURS_ADVANCE * 60 * 60 * 1000);
+                const hours = String(minTime.getHours()).padStart(2, '0');
+                const minutes = String(minTime.getMinutes()).padStart(2, '0');
+                timeInput.min = `${hours}:${minutes}`;
+                
+                // Nếu giờ hiện tại đã quá muộn (sau 21:00), không cho đặt hôm nay
+                if (minTime.getHours() >= 23) {
+                    showTimeWarning('Đã quá muộn để đặt bàn hôm nay. Vui lòng chọn ngày mai.');
+                    // Tự động chuyển sang ngày mai
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                    dateInput.value = tomorrowStr;
+                    timeInput.min = '07:00';
+                    timeInput.value = '10:00';
+                }
+            } else {
+                // Nếu chọn ngày khác, giờ mở cửa bình thường
+                timeInput.min = '07:00';
+            }
+        }
+        
+        // Hiển thị cảnh báo thời gian
+        function showTimeWarning(message) {
+            // Xóa cảnh báo cũ nếu có
+            const oldWarning = document.getElementById('time-warning');
+            if (oldWarning) oldWarning.remove();
+            
+            const warning = document.createElement('div');
+            warning.id = 'time-warning';
+            warning.className = 'bg-amber-50 border border-amber-300 text-amber-800 px-4 py-3 rounded-lg mb-4 flex items-start';
+            warning.innerHTML = `
+                <i class="fas fa-exclamation-triangle text-amber-500 mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">Lưu ý về thời gian đặt bàn</p>
+                    <p class="text-sm">${message}</p>
+                </div>
+            `;
+            
+            // Chèn cảnh báo trước form
+            bookingForm.insertBefore(warning, bookingForm.firstChild);
+            
+            // Tự động ẩn sau 5 giây
+            setTimeout(() => {
+                warning.style.transition = 'opacity 0.5s';
+                warning.style.opacity = '0';
+                setTimeout(() => warning.remove(), 500);
+            }, 5000);
+        }
+        
+        // Validate thời gian đặt bàn
+        function validateBookingTime() {
+            const selectedDate = dateInput.value;
+            const selectedTime = timeInput.value;
+            
+            if (!selectedDate || !selectedTime) return false;
+            
+            const bookingDateTime = new Date(`${selectedDate}T${selectedTime}`);
+            const now = new Date();
+            const minBookingTime = new Date(now.getTime() + MIN_HOURS_ADVANCE * 60 * 60 * 1000);
+            
+            if (bookingDateTime < minBookingTime) {
+                const diffMs = minBookingTime - bookingDateTime;
+                const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+                
+                showTimeWarning(`Vui lòng đặt bàn trước ít nhất ${MIN_HOURS_ADVANCE} tiếng. Thời gian bạn chọn sớm hơn ${diffHours} tiếng so với yêu cầu.`);
+                return false;
+            }
+            
+            // Kiểm tra giờ mở cửa (7:00 - 23:00)
+            const hours = bookingDateTime.getHours();
+            if (hours < 7 || hours >= 23) {
+                showTimeWarning('Nhà hàng mở cửa từ 7:00 đến 23:00. Vui lòng chọn giờ trong khung giờ hoạt động.');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Khởi tạo khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            setMinDate();
+            updateMinTime();
+            
+            // Hiển thị thông báo về quy định thời gian
+            const infoBox = document.createElement('div');
+            infoBox.className = 'bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-4 flex items-start';
+            infoBox.innerHTML = `
+                <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">Quy định đặt bàn</p>
+                    <p class="text-sm">Quý khách vui lòng đặt bàn trước ít nhất <strong>${MIN_HOURS_ADVANCE} tiếng</strong> để nhà hàng chuẩn bị phục vụ tốt nhất.</p>
+                </div>
+            `;
+            bookingForm.insertBefore(infoBox, bookingForm.firstChild);
+            
+            // Lắng nghe sự kiện thay đổi ngày
+            dateInput.addEventListener('change', updateMinTime);
+            
+            // Lắng nghe sự kiện thay đổi giờ
+            timeInput.addEventListener('change', function() {
+                validateBookingTime();
+            });
+            
+            // Xử lý submit form
+            bookingForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Validate thời gian
+                if (!validateBookingTime()) {
+                    return;
+                }
+                
+                // Lấy dữ liệu form
+                const formData = {
+                    ten_nguoi_dat: bookingForm.querySelector('input[type="text"]').value,
+                    so_dien_thoai: bookingForm.querySelector('input[type="tel"]').value,
+                    email: bookingForm.querySelector('input[type="email"]').value || null,
+                    ngay_dat: dateInput.value,
+                    gio_den: timeInput.value,
+                    so_luong: bookingForm.querySelector('select').value,
+                    khu_vuc: bookingForm.querySelectorAll('select')[1]?.value || null,
+                    ghi_chu: bookingForm.querySelector('textarea').value || null
+                };
+                
+                try {
+                    // Hiển thị loading
+                    const submitBtn = bookingForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý...';
+                    submitBtn.disabled = true;
+                    
+                    const response = await fetch('http://localhost:3000/api/reservations/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Hiển thị thông báo thành công
+                        showSuccessModal(formData);
+                        bookingForm.reset();
+                        setMinDate();
+                        updateMinTime();
+                    } else {
+                        alert('Lỗi: ' + (result.message || 'Không thể đặt bàn'));
+                    }
+                    
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                    const submitBtn = bookingForm.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<i class="fas fa-calendar-check mr-2"></i> Xác nhận đặt bàn';
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+        
+        // Hiển thị modal thành công
+        function showSuccessModal(data) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-center">
+                        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-white text-4xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">Đặt bàn thành công!</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between py-2 border-b">
+                                <span class="text-gray-600">Họ tên:</span>
+                                <span class="font-medium">${data.ten_nguoi_dat}</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b">
+                                <span class="text-gray-600">Số điện thoại:</span>
+                                <span class="font-medium">${data.so_dien_thoai}</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b">
+                                <span class="text-gray-600">Ngày đặt:</span>
+                                <span class="font-medium">${new Date(data.ngay_dat).toLocaleDateString('vi-VN')}</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b">
+                                <span class="text-gray-600">Giờ đến:</span>
+                                <span class="font-medium">${data.gio_den}</span>
+                            </div>
+                            <div class="flex justify-between py-2">
+                                <span class="text-gray-600">Số khách:</span>
+                                <span class="font-medium">${data.so_luong} người</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 text-center mb-4">
+                            Nhà hàng sẽ liên hệ xác nhận trong thời gian sớm nhất.
+                        </p>
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-xl font-medium hover:opacity-90 transition">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+    </script>
 </body>
 </html>

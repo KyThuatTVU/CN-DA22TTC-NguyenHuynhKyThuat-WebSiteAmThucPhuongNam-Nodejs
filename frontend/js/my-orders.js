@@ -477,7 +477,7 @@ function renderOrderDetail(order) {
                     <div class="flex items-center justify-between bg-gray-50 rounded-lg p-4">
                         <div class="flex items-center gap-4 flex-1">
                             ${item.anh_mon ? `
-                                <img src="${item.anh_mon.startsWith('http') ? item.anh_mon : 'http://localhost:3000' + item.anh_mon}" 
+                                <img src="${item.anh_mon.startsWith('http') ? item.anh_mon : 'http://localhost:3000' + (item.anh_mon.startsWith('/') ? item.anh_mon : '/images/' + item.anh_mon)}" 
                                      alt="${item.ten_mon}" 
                                      class="w-16 h-16 object-cover rounded"
                                      onerror="this.src='/images/default-dish.jpg'">

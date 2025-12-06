@@ -58,10 +58,10 @@ body { background: #f0f4f8; }
 @media (max-width: 1023px) {
     #sidebar {
         position: fixed;
-        left: -280px;
+        left: -288px;
         top: 0;
         bottom: 0;
-        width: 280px;
+        width: 288px;
         z-index: 1000;
         transition: left 0.3s ease;
     }

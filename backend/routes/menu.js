@@ -307,23 +307,45 @@ router.patch('/:id/stock', requireAdmin, async (req, res) => {
     const productId = req.params.id;
     const { so_luong_ton } = req.body;
     
+    // Không cho phép số âm
     if (so_luong_ton === undefined || so_luong_ton < 0) {
-      return res.status(400).json({ success: false, message: 'Số lượng không hợp lệ' });
+      return res.status(400).json({ success: false, message: 'Số lượng không hợp lệ! Không được nhập số âm.' });
     }
     
-    const [result] = await db.query(
-      'UPDATE mon_an SET so_luong_ton = ? WHERE ma_mon = ?', 
-      [so_luong_ton, productId]
-    );
-    
-    if (result.affectedRows === 0) {
+    // Kiểm tra món ăn tồn tại
+    const [current] = await db.query('SELECT ten_mon, trang_thai FROM mon_an WHERE ma_mon = ?', [productId]);
+    if (current.length === 0) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
+    }
+    
+    const tenMon = current[0].ten_mon;
+    let message = 'Cập nhật số lượng thành công';
+    let outOfStock = false;
+    
+    // Nếu số lượng = 0, tự động ẩn món ăn và thông báo
+    if (so_luong_ton === 0) {
+      await db.query(
+        'UPDATE mon_an SET so_luong_ton = 0, trang_thai = 0 WHERE ma_mon = ?', 
+        [productId]
+      );
+      message = `⚠️ Món "${tenMon}" đã HẾT HÀNG và đã được tự động ẩn khỏi thực đơn!`;
+      outOfStock = true;
+    } else {
+      await db.query(
+        'UPDATE mon_an SET so_luong_ton = ? WHERE ma_mon = ?', 
+        [so_luong_ton, productId]
+      );
+      
+      // Cảnh báo nếu sắp hết hàng
+      if (so_luong_ton <= 5) {
+        message = `⚠️ Cập nhật thành công! Lưu ý: Món "${tenMon}" sắp hết hàng (còn ${so_luong_ton})`;
+      }
     }
     
     res.json({ 
       success: true, 
-      message: 'Cập nhật số lượng thành công',
-      data: { so_luong_ton }
+      message,
+      data: { so_luong_ton, outOfStock }
     });
   } catch (error) {
     console.error('Error updating stock:', error);
@@ -354,15 +376,35 @@ router.get('/:id', async (req, res) => {
 router.post('/', requireAdmin, upload.single('anh_mon'), async (req, res) => {
   try {
     const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai } = req.body;
-    const anh_mon = req.file ? req.file.filename : null;
+    // Lưu path đầy đủ /images/filename để frontend hiển thị đúng
+    const anh_mon = req.file ? '/images/' + req.file.filename : null;
+    
+    // Validate số lượng tồn - không cho phép số âm
+    const stockQty = parseInt(so_luong_ton) || 0;
+    if (stockQty < 0) {
+      return res.status(400).json({ success: false, message: 'Số lượng tồn không được là số âm!' });
+    }
+    
+    // Nếu số lượng = 0, tự động set trạng thái = 0 (ẩn)
+    let finalStatus = trang_thai;
+    let warningMessage = '';
+    if (stockQty === 0) {
+      finalStatus = 0;
+      warningMessage = ' ⚠️ Món ăn đã được tự động ẩn vì số lượng tồn = 0.';
+    }
     
     const [result] = await db.query(
       `INSERT INTO mon_an (ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [ten_mon, ma_danh_muc, gia_tien, so_luong_ton || 0, mo_ta_chi_tiet, trang_thai, anh_mon]
+      [ten_mon, ma_danh_muc, gia_tien, stockQty, mo_ta_chi_tiet, finalStatus, anh_mon]
     );
     
-    res.json({ success: true, message: 'Thêm món ăn thành công', id: result.insertId });
+    res.json({ 
+      success: true, 
+      message: 'Thêm món ăn thành công!' + warningMessage, 
+      id: result.insertId,
+      outOfStock: stockQty === 0
+    });
   } catch (error) {
     console.error('Error adding product:', error);
     res.status(500).json({ success: false, message: error.message });
@@ -373,21 +415,42 @@ router.post('/', requireAdmin, upload.single('anh_mon'), async (req, res) => {
 router.put('/:id', requireAdmin, upload.single('anh_mon'), async (req, res) => {
   try {
     const { ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai } = req.body;
-    const anh_mon = req.file ? req.file.filename : null;
+    // Lưu path đầy đủ /images/filename để frontend hiển thị đúng
+    const anh_mon = req.file ? '/images/' + req.file.filename : null;
+    
+    // Validate số lượng tồn - không cho phép số âm
+    const stockQty = parseInt(so_luong_ton) || 0;
+    if (stockQty < 0) {
+      return res.status(400).json({ success: false, message: 'Số lượng tồn không được là số âm!' });
+    }
+    
+    // Nếu số lượng = 0, tự động set trạng thái = 0 (ẩn)
+    let finalStatus = trang_thai;
+    let warningMessage = '';
+    if (stockQty === 0) {
+      finalStatus = 0;
+      warningMessage = ' ⚠️ Món ăn đã được tự động ẩn vì số lượng tồn = 0.';
+    } else if (stockQty <= 5) {
+      warningMessage = ` ⚠️ Lưu ý: Món ăn sắp hết hàng (còn ${stockQty}).`;
+    }
     
     const [result] = await db.query(
       `UPDATE mon_an 
        SET ten_mon = ?, ma_danh_muc = ?, gia_tien = ?, so_luong_ton = ?, 
            mo_ta_chi_tiet = ?, trang_thai = ?, anh_mon = COALESCE(?, anh_mon)
        WHERE ma_mon = ?`,
-      [ten_mon, ma_danh_muc, gia_tien, so_luong_ton, mo_ta_chi_tiet, trang_thai, anh_mon, req.params.id]
+      [ten_mon, ma_danh_muc, gia_tien, stockQty, mo_ta_chi_tiet, finalStatus, anh_mon, req.params.id]
     );
     
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy món ăn' });
     }
     
-    res.json({ success: true, message: 'Cập nhật món ăn thành công' });
+    res.json({ 
+      success: true, 
+      message: 'Cập nhật món ăn thành công!' + warningMessage,
+      outOfStock: stockQty === 0
+    });
   } catch (error) {
     console.error('Error updating product:', error);
     res.status(500).json({ success: false, message: error.message });

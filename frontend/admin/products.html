@@ -13,7 +13,7 @@
 <body>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 flex-shrink-0">
+        <aside id="sidebar" class="sidebar w-72 flex-shrink-0">
             <div class="h-full flex flex-col">
                 <div class="p-5 border-b border-white/10">
                     <div class="flex items-center space-x-3">
@@ -146,11 +146,13 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Giá (VNĐ) *</label>
-                        <input type="number" id="gia" required min="0" step="1000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <input type="number" id="gia" required min="0" step="1000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500" oninput="showPriceInWords(this.value)">
+                        <p id="price-in-words" class="text-xs mt-1 text-blue-600 italic hidden"></p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Số lượng tồn</label>
-                        <input type="number" id="so_luong_ton" min="0" value="0" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <input type="number" id="so_luong_ton" min="0" value="0" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500" onchange="checkStockWarning(this)">
+                        <p id="stock-warning" class="text-xs mt-1 hidden"></p>
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-slate-700 mb-2">Mô tả chi tiết</label>
@@ -177,6 +179,65 @@
         // API_URL đã được khai báo trong admin-layout.js
         let products = [];
         let categories = [];
+
+        // Chuyển số thành chữ tiếng Việt
+        function numberToVietnameseWords(num) {
+            if (num === 0) return 'Không đồng';
+            if (!num || isNaN(num)) return '';
+            
+            const ones = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            const tens = ['', 'mười', 'hai mươi', 'ba mươi', 'bốn mươi', 'năm mươi', 'sáu mươi', 'bảy mươi', 'tám mươi', 'chín mươi'];
+            
+            function readThreeDigits(n) {
+                let str = '';
+                const hundred = Math.floor(n / 100);
+                const ten = Math.floor((n % 100) / 10);
+                const one = n % 10;
+                
+                if (hundred > 0) str += ones[hundred] + ' trăm ';
+                if (ten > 1) {
+                    str += tens[ten] + ' ';
+                    if (one === 1) str += 'mốt';
+                    else if (one === 5) str += 'lăm';
+                    else if (one > 0) str += ones[one];
+                } else if (ten === 1) {
+                    str += 'mười ';
+                    if (one === 5) str += 'lăm';
+                    else if (one > 0) str += ones[one];
+                } else if (ten === 0 && hundred > 0 && one > 0) {
+                    str += 'lẻ ' + ones[one];
+                } else if (one > 0) {
+                    str += ones[one];
+                }
+                return str.trim();
+            }
+            
+            let result = '';
+            const billion = Math.floor(num / 1000000000);
+            const million = Math.floor((num % 1000000000) / 1000000);
+            const thousand = Math.floor((num % 1000000) / 1000);
+            const remainder = num % 1000;
+            
+            if (billion > 0) result += readThreeDigits(billion) + ' tỷ ';
+            if (million > 0) result += readThreeDigits(million) + ' triệu ';
+            if (thousand > 0) result += readThreeDigits(thousand) + ' nghìn ';
+            if (remainder > 0) result += readThreeDigits(remainder);
+            
+            result = result.trim();
+            // Viết hoa chữ cái đầu
+            return result.charAt(0).toUpperCase() + result.slice(1) + ' đồng';
+        }
+        
+        function showPriceInWords(value) {
+            const priceEl = document.getElementById('price-in-words');
+            const num = parseInt(value) || 0;
+            if (num > 0) {
+                priceEl.textContent = '💰 ' + numberToVietnameseWords(num);
+                priceEl.classList.remove('hidden');
+            } else {
+                priceEl.classList.add('hidden');
+            }
+        }
 
         async function loadCategories() {
             try {
@@ -262,8 +323,21 @@
         }
 
         function formatPrice(price) { return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price); }
-        function openAddModal() { document.getElementById('modal-title').textContent = 'Thêm món mới'; document.getElementById('product-form').reset(); document.getElementById('product-id').value = ''; document.getElementById('product-modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('product-modal').classList.add('hidden'); }
+        
+        function openAddModal() { 
+            document.getElementById('modal-title').textContent = 'Thêm món mới'; 
+            document.getElementById('product-form').reset(); 
+            document.getElementById('product-id').value = ''; 
+            document.getElementById('price-in-words').classList.add('hidden');
+            document.getElementById('stock-warning').classList.add('hidden');
+            document.getElementById('product-modal').classList.remove('hidden'); 
+        }
+        
+        function closeModal() { 
+            document.getElementById('product-modal').classList.add('hidden'); 
+            document.getElementById('price-in-words').classList.add('hidden');
+            document.getElementById('stock-warning').classList.add('hidden');
+        }
 
         async function editProduct(id) {
             const product = products.find(p => p.ma_mon === id);
@@ -272,8 +346,12 @@
             document.getElementById('product-id').value = product.ma_mon;
             document.getElementById('ten_mon').value = product.ten_mon || '';
             document.getElementById('ma_danh_muc').value = product.ma_danh_muc || '';
-            document.getElementById('gia').value = product.gia_tien || product.gia || '';
-            document.getElementById('so_luong_ton').value = product.so_luong_ton || 0;
+            const price = product.gia_tien || product.gia || '';
+            document.getElementById('gia').value = price;
+            showPriceInWords(price); // Hiển thị giá bằng chữ
+            const stock = product.so_luong_ton || 0;
+            document.getElementById('so_luong_ton').value = stock;
+            checkStockWarning(document.getElementById('so_luong_ton')); // Hiển thị cảnh báo số lượng
             document.getElementById('mo_ta').value = product.mo_ta_chi_tiet || product.mo_ta || '';
             document.getElementById('trang_thai').value = product.trang_thai == 1 ? 'con_hang' : 'het_hang';
             document.getElementById('product-modal').classList.remove('hidden');
@@ -290,11 +368,26 @@
         document.getElementById('product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('product-id').value;
+            const stockValue = parseInt(document.getElementById('so_luong_ton').value) || 0;
+            
+            // Validate số lượng tồn - không cho phép số âm
+            if (stockValue < 0) {
+                showToast('Số lượng tồn không được là số âm!', 'error');
+                return;
+            }
+            
+            // Cảnh báo nếu số lượng = 0
+            if (stockValue === 0) {
+                if (!confirm('⚠️ Số lượng tồn = 0!\n\nMón ăn sẽ được đánh dấu "Hết hàng" và tự động ẩn khỏi thực đơn cho khách hàng.\n\nBạn có muốn tiếp tục?')) {
+                    return;
+                }
+            }
+            
             const formData = new FormData();
             formData.append('ten_mon', document.getElementById('ten_mon').value);
             formData.append('ma_danh_muc', document.getElementById('ma_danh_muc').value);
             formData.append('gia_tien', document.getElementById('gia').value);
-            formData.append('so_luong_ton', document.getElementById('so_luong_ton').value || 0);
+            formData.append('so_luong_ton', stockValue);
             formData.append('mo_ta_chi_tiet', document.getElementById('mo_ta').value);
             formData.append('trang_thai', document.getElementById('trang_thai').value === 'con_hang' ? 1 : 0);
             const fileInput = document.getElementById('anh_dai_dien');
@@ -302,8 +395,15 @@
             try {
                 const url = id ? `${API_URL}/menu/${id}` : `${API_URL}/menu`;
                 const response = await fetch(url, { method: id ? 'PUT' : 'POST', body: formData, credentials: 'include' });
-                if (response.ok) { alert(id ? 'Cập nhật thành công!' : 'Thêm mới thành công!'); closeModal(); loadProducts(); } else { alert('Có lỗi xảy ra!'); }
-            } catch (error) { console.error('Error:', error); alert('Có lỗi xảy ra!'); }
+                const data = await response.json();
+                if (data.success) { 
+                    showToast(data.message, data.outOfStock ? 'warning' : 'success');
+                    closeModal(); 
+                    loadProducts(); 
+                } else { 
+                    showToast(data.message || 'Có lỗi xảy ra!', 'error'); 
+                }
+            } catch (error) { console.error('Error:', error); showToast('Có lỗi xảy ra!', 'error'); }
         });
 
         function applyFilters() {
@@ -352,13 +452,28 @@
 
         // Cập nhật số lượng tồn kho
         async function updateStock(productId, currentStock) {
-            const newStock = prompt(`Nhập số lượng tồn kho mới cho món này:\n(Hiện tại: ${currentStock})`, currentStock);
+            const product = products.find(p => p.ma_mon === productId);
+            const productName = product ? product.ten_mon : 'món ăn';
+            
+            const newStock = prompt(`Nhập số lượng tồn kho mới cho "${productName}":\n(Hiện tại: ${currentStock})\n\n⚠️ Lưu ý: Nếu nhập 0, món ăn sẽ tự động ẩn khỏi thực đơn!`, currentStock);
             if (newStock === null) return; // User cancelled
             
             const stockNum = parseInt(newStock);
-            if (isNaN(stockNum) || stockNum < 0) {
-                showToast('Số lượng không hợp lệ!', 'error');
+            if (isNaN(stockNum)) {
+                showToast('Vui lòng nhập số hợp lệ!', 'error');
                 return;
+            }
+            
+            if (stockNum < 0) {
+                showToast('❌ Số lượng không được là số âm!', 'error');
+                return;
+            }
+            
+            // Xác nhận nếu số lượng = 0
+            if (stockNum === 0) {
+                if (!confirm(`⚠️ Bạn đang đặt số lượng = 0 cho "${productName}"!\n\nMón ăn sẽ được đánh dấu "Hết hàng" và tự động ẩn khỏi thực đơn.\n\nBạn có chắc chắn?`)) {
+                    return;
+                }
             }
 
             try {
@@ -371,14 +486,16 @@
                 const data = await response.json();
                 if (data.success) {
                     // Cập nhật local data
-                    const product = products.find(p => p.ma_mon === productId);
                     if (product) {
                         product.so_luong_ton = stockNum;
+                        if (data.outOfStock) {
+                            product.trang_thai = 0;
+                        }
                     }
                     renderProducts(products);
-                    showToast('Cập nhật số lượng thành công!', 'success');
+                    showToast(data.message, data.outOfStock ? 'warning' : 'success');
                 } else {
-                    showToast('Có lỗi xảy ra: ' + data.message, 'error');
+                    showToast(data.message || 'Có lỗi xảy ra!', 'error');
                 }
             } catch (error) {
                 console.error('Error updating stock:', error);
@@ -389,18 +506,42 @@
         // Toast notification
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 transition-all transform translate-y-0 ${
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 transition-all transform translate-y-0 max-w-md ${
                 type === 'success' ? 'bg-emerald-500 text-white' : 
                 type === 'error' ? 'bg-red-500 text-white' : 
+                type === 'warning' ? 'bg-amber-500 text-white' :
                 'bg-slate-800 text-white'
             }`;
-            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'} mr-2"></i>${message}`;
             document.body.appendChild(toast);
             
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, type === 'warning' ? 5000 : 3000);
+        }
+        
+        // Kiểm tra và hiển thị cảnh báo số lượng tồn
+        function checkStockWarning(input) {
+            const value = parseInt(input.value) || 0;
+            const warning = document.getElementById('stock-warning');
+            
+            if (value < 0) {
+                input.value = 0;
+                warning.textContent = '❌ Không được nhập số âm!';
+                warning.className = 'text-xs mt-1 text-red-600';
+                warning.classList.remove('hidden');
+            } else if (value === 0) {
+                warning.textContent = '⚠️ Số lượng = 0: Món ăn sẽ được đánh dấu "Hết hàng" và tự động ẩn';
+                warning.className = 'text-xs mt-1 text-amber-600';
+                warning.classList.remove('hidden');
+            } else if (value <= 5) {
+                warning.textContent = `⚠️ Sắp hết hàng! Chỉ còn ${value} sản phẩm`;
+                warning.className = 'text-xs mt-1 text-amber-600';
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
         }
 
         loadCategories();

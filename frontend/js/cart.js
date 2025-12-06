@@ -5,6 +5,8 @@ if (typeof window.API_URL === 'undefined') {
 
 // Giới hạn số lượng tối đa mỗi món
 const MAX_QUANTITY_PER_ITEM = 10;
+// Giới hạn tổng số món để gợi ý đặt bàn
+const MAX_ITEMS_BEFORE_RESERVATION_SUGGEST = 10;
 
 // Cart management functions
 class CartManager {
@@ -16,6 +18,8 @@ class CartManager {
             so_luong: 0
         };
         this.maxQuantityPerItem = MAX_QUANTITY_PER_ITEM;
+        this.maxItemsBeforeReservation = MAX_ITEMS_BEFORE_RESERVATION_SUGGEST;
+        this.hasShownReservationSuggestion = false; // Chỉ hiển thị 1 lần mỗi session
         this.init();
     }
 
@@ -140,6 +144,9 @@ class CartManager {
                 this.showNotification('Đã thêm vào giỏ hàng!', 'success');
                 // Reload cart to get updated data
                 await this.loadCart();
+                
+                // Kiểm tra nếu tổng số món vượt quá giới hạn, gợi ý đặt bàn
+                this.checkAndSuggestReservation();
             }
         } catch (error) {
             // Hide loading toast on error
@@ -149,6 +156,116 @@ class CartManager {
             console.error('Lỗi thêm vào giỏ hàng:', error);
             this.showNotification(error.message, 'error');
         }
+    }
+
+    // Kiểm tra và gợi ý đặt bàn nếu đặt quá nhiều món
+    checkAndSuggestReservation() {
+        // Chỉ hiển thị 1 lần mỗi session
+        if (this.hasShownReservationSuggestion) return;
+        
+        // Tính tổng số lượng món (không phải số loại món)
+        const totalQuantity = this.cart.so_luong || 0;
+        
+        if (totalQuantity > this.maxItemsBeforeReservation) {
+            this.hasShownReservationSuggestion = true;
+            this.showReservationSuggestionModal(totalQuantity);
+        }
+    }
+
+    // Hiển thị modal gợi ý đặt bàn
+    showReservationSuggestionModal(totalQuantity) {
+        // Tạo modal overlay
+        const modalOverlay = document.createElement('div');
+        modalOverlay.id = 'reservation-suggestion-modal';
+        modalOverlay.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] animate-fadeIn';
+        modalOverlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden transform animate-scaleIn">
+                <!-- Header với icon -->
+                <div class="bg-gradient-to-r from-orange-500 to-red-500 p-6 text-center">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-utensils text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Đặt nhiều món quá!</h3>
+                </div>
+                
+                <!-- Body -->
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <p class="text-gray-600 mb-3">
+                            Bạn đang đặt <span class="font-bold text-orange-600 text-lg">${totalQuantity} món</span> ăn.
+                        </p>
+                        <p class="text-gray-500 text-sm">
+                            Với số lượng lớn như vậy, việc giao hàng có thể mất nhiều thời gian và món ăn có thể không còn nóng hổi.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lightbulb text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-orange-800 mb-1">Gợi ý cho bạn</p>
+                                <p class="text-sm text-orange-700">
+                                    Hãy <strong>đặt bàn</strong> tại nhà hàng để thưởng thức món ăn ngon nhất, phục vụ chu đáo và không gian thoải mái!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="flex flex-col space-y-3">
+                        <a href="dat-ban.html" 
+                           class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-6 rounded-xl font-semibold text-center hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Đặt bàn ngay</span>
+                        </a>
+                        <button onclick="document.getElementById('reservation-suggestion-modal').remove()" 
+                                class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Tiếp tục đặt giao hàng</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Footer note -->
+                <div class="bg-gray-50 px-6 py-3 text-center">
+                    <p class="text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Đặt bàn trước để được phục vụ tốt nhất!
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        // Thêm CSS animation nếu chưa có
+        if (!document.getElementById('reservation-modal-styles')) {
+            const style = document.createElement('style');
+            style.id = 'reservation-modal-styles';
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+                .animate-scaleIn { animation: scaleIn 0.3s ease-out; }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Thêm modal vào body
+        document.body.appendChild(modalOverlay);
+        
+        // Đóng modal khi click bên ngoài
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.remove();
+            }
+        });
     }
 
     // Update cart item quantity
@@ -394,7 +511,7 @@ class CartManager {
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
                             <div class="relative flex-shrink-0">
-                                <img src="${item.anh_mon ? 'http://localhost:3000' + item.anh_mon : '/images/default-dish.jpg'}"
+                                <img src="${item.anh_mon ? 'http://localhost:3000' + (item.anh_mon.startsWith('/') ? item.anh_mon : '/images/' + item.anh_mon) : '/images/default-dish.jpg'}"
                                      alt="${item.ten_mon}"
                                      class="w-20 h-20 object-cover rounded-lg shadow-sm"
                                      onerror="this.src='/images/default-dish.jpg'">

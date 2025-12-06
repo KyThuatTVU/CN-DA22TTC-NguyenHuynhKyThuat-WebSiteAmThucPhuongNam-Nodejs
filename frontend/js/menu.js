@@ -187,12 +187,19 @@ function renderMenuProducts() {
         return;
     }
 
-    container.innerHTML = paginatedProducts.map(product => `
+    container.innerHTML = paginatedProducts.map(product => {
+        // Xử lý đường dẫn ảnh - đảm bảo có /images/ prefix
+        let imagePath = product.anh_mon || '/images/placeholder.jpg';
+        if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+            imagePath = '/images/' + imagePath;
+        }
+        
+        return `
         <div class="dish-card bg-white rounded-2xl overflow-hidden shadow-md">
             <!-- Image Container -->
             <a href="chitietmonan.html?id=${product.ma_mon}" class="block">
                 <div class="dish-image-container">
-                <img src="http://localhost:3000${product.anh_mon || '/images/placeholder.jpg'}" 
+                <img src="http://localhost:3000${imagePath}" 
                      alt="${product.ten_mon}" 
                      class="dish-image"
                      loading="lazy"
@@ -262,7 +269,7 @@ function renderMenuProducts() {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Show loading skeleton

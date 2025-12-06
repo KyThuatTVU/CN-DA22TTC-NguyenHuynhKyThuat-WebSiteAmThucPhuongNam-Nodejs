@@ -13,7 +13,7 @@
 <body>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 flex-shrink-0">
+        <aside id="sidebar" class="sidebar w-72 flex-shrink-0">
             <div class="h-full flex flex-col">
                 <div class="p-5 border-b border-white/10">
                     <div class="flex items-center space-x-3">
@@ -131,6 +131,51 @@
                         <div class="flex justify-end mt-4"><button onclick="saveDeliverySettings()" class="btn-primary"><i class="fas fa-save mr-2"></i>Lưu thay đổi</button></div>
                     </div>
 
+                    <!-- Social Media Links -->
+                    <div class="content-card">
+                        <h3 class="text-lg font-bold mb-4 flex items-center text-slate-800"><i class="fas fa-share-alt text-blue-600 mr-2"></i>Mạng xã hội</h3>
+                        <p class="text-sm text-slate-500 mb-4">Cập nhật liên kết mạng xã hội hiển thị ở footer website</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl">
+                                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-facebook-f text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Facebook</label>
+                                    <input type="url" id="facebook_url" placeholder="https://facebook.com/yourpage" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl">
+                                <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-youtube text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">YouTube</label>
+                                    <input type="url" id="youtube_url" placeholder="https://youtube.com/@yourchannel" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-instagram text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Instagram</label>
+                                    <input type="url" id="instagram_url" placeholder="https://instagram.com/yourprofile" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl">
+                                <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-tiktok text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">TikTok</label>
+                                    <input type="url" id="tiktok_url" placeholder="https://tiktok.com/@yourprofile" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-4"><button onclick="saveSocialMedia()" class="btn-primary"><i class="fas fa-save mr-2"></i>Lưu thay đổi</button></div>
+                    </div>
+
                     <!-- Payment Methods -->
                     <div class="content-card">
                         <h3 class="text-lg font-bold mb-4 flex items-center text-slate-800"><i class="fas fa-credit-card text-blue-600 mr-2"></i>Phương thức thanh toán</h3>
@@ -203,6 +248,12 @@
                     document.getElementById('thanh_toan_tien_mat').checked = s.thanh_toan_tien_mat === '1';
                     document.getElementById('thanh_toan_chuyen_khoan').checked = s.thanh_toan_chuyen_khoan === '1';
                     document.getElementById('thanh_toan_momo').checked = s.thanh_toan_momo === '1';
+                    
+                    // Mạng xã hội
+                    document.getElementById('facebook_url').value = s.facebook_url || '';
+                    document.getElementById('youtube_url').value = s.youtube_url || '';
+                    document.getElementById('instagram_url').value = s.instagram_url || '';
+                    document.getElementById('tiktok_url').value = s.tiktok_url || '';
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
@@ -294,6 +345,31 @@
                 });
             } catch (error) {
                 console.error('Error:', error);
+            }
+        }
+
+        // Lưu mạng xã hội
+        async function saveSocialMedia() {
+            try {
+                const settings = {
+                    facebook_url: document.getElementById('facebook_url').value.trim(),
+                    youtube_url: document.getElementById('youtube_url').value.trim(),
+                    instagram_url: document.getElementById('instagram_url').value.trim(),
+                    tiktok_url: document.getElementById('tiktok_url').value.trim()
+                };
+                
+                const response = await fetch(`${API_URL}/settings/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                alert(result.success ? 'Đã lưu liên kết mạng xã hội!' : 'Lỗi: ' + result.message);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra!');
             }
         }
 

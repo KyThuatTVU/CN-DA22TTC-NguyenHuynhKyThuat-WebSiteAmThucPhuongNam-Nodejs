@@ -53,6 +53,16 @@
                             <i class="fas fa-shipping-fast text-orange-600 mr-2"></i>
                             Thông tin giao hàng
                         </h2>
+                        
+                        <!-- Thông báo khu vực giao hàng -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4 flex items-start">
+                            <i class="fas fa-map-marker-alt text-amber-500 mr-3 mt-0.5 text-lg"></i>
+                            <div>
+                                <p class="font-medium text-amber-800">Khu vực giao hàng</p>
+                                <p class="text-sm text-amber-700">Hiện tại nhà hàng chỉ giao hàng trong phạm vi <strong>tỉnh Trà Vinh</strong>. Quý khách ở khu vực khác vui lòng đến nhà hàng hoặc đặt bàn để thưởng thức.</p>
+                            </div>
+                        </div>
+                        
                         <form id="checkout-form">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                                 <div>
@@ -96,8 +106,13 @@
                                 </div>
                             </div>
                             <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Mô tả chi tiết địa chỉ</label>
+                                <input type="text" name="address_detail" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Ví dụ: Gần chợ, đối diện trường học, cạnh tiệm tạp hóa...">
+                                <p class="text-xs text-gray-500 mt-1">Giúp shipper tìm địa chỉ dễ dàng hơn</p>
+                            </div>
+                            <div class="mb-4">
                                 <label class="block text-sm font-medium mb-2">Ghi chú đơn hàng</label>
-                                <textarea rows="3" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn"></textarea>
+                                <textarea name="order_note" rows="3" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:border-orange-600" placeholder="Ghi chú về đơn hàng, ví dụ: thời gian giao hàng mong muốn, yêu cầu đặc biệt..."></textarea>
                             </div>
                         </form>
                     </div>

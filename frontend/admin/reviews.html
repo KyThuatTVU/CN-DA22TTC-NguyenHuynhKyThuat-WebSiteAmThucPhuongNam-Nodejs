@@ -14,7 +14,7 @@
 <body>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 flex-shrink-0">
+        <aside id="sidebar" class="sidebar w-72 flex-shrink-0">
             <div class="h-full flex flex-col">
                 <div class="p-5 border-b border-white/10">
                     <div class="flex items-center space-x-3">
@@ -755,136 +755,16 @@
                         <p class="bg-slate-50 rounded-xl p-4">${review.binh_luan || '<em class="text-slate-400">Không có nội dung</em>'}</p>
                     </div>
                     ${imagesHtml}
-                    ${repliesHtml}lex">${renderStars(review.so_sao)}</div></td>
-                        <td class="px-4 py-4 text-sm text-slate-600 max-w-[200px]">
-                            <p class="truncate" title="${review.binh_luan || ''}">${review.binh_luan || '<em class="text-slate-400">Không có nội dung</em>'}</p>
-                            ${hasImages ? `<span class="text-xs text-blue-500"><i class="fas fa-image mr-1"></i>${review.images.length} ảnh</span>` : ''}
-                        </td>
-                        <td class="px-4 py-4 text-sm text-slate-500">${formatDate(review.ngay_danh_gia)}</td>
-                        <td class="px-4 py-4">
-                            <div class="flex flex-wrap gap-1">
-                                <button type="button" onclick="event.preventDefault(); updateStatus(${review.ma_danh_gia}, 'pending')" 
-                                    class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${review.trang_thai === 'pending' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}" 
-                                    title="Chờ duyệt">
-                                    <i class="fas fa-clock"></i>
-                                </button>
-                                <button type="button" onclick="event.preventDefault(); updateStatus(${review.ma_danh_gia}, 'approved')" 
-                                    class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${review.trang_thai === 'approved' ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}" 
-                                    title="Đã duyệt">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button type="button" onclick="event.preventDefault(); updateStatus(${review.ma_danh_gia}, 'rejected')" 
-                                    class="px-2 py-1 rounded-lg text-xs font-medium transition-all ${review.trang_thai === 'rejected' ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700 hover:bg-red-200'}" 
-                                    title="Đã khóa">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="flex items-center space-x-1">
-                                <button type="button" onclick="event.preventDefault(); viewReview(${review.ma_danh_gia})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-                                <button type="button" onclick="event.preventDefault(); toggleRepliesSection(${review.ma_danh_gia})" class="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Trả lời"><i class="fas fa-reply"></i></button>
-                                <button type="button" onclick="event.preventDefault(); deleteReview(${review.ma_danh_gia})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Xóa"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Replies Section -->
-                    <tr id="replies-${review.ma_danh_gia}" class="hidden bg-green-50/30">
-                        <td colspan="8" class="px-4 py-4">
-                            <div class="bg-white rounded-lg border-2 border-green-200 p-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <h4 class="font-semibold text-slate-700">
-                                        <i class="fas fa-reply text-green-600 mr-2"></i>
-                                        Trả lời cho đánh giá của ${review.ten_nguoi_dung}
-                                    </h4>
-                                    <button type="button" onclick="event.preventDefault(); toggleRepliesSection(${review.ma_danh_gia})" 
-                                            class="text-slate-400 hover:text-slate-600">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                
-                                <!-- Replies List -->
-                                <div id="replies-list-${review.ma_danh_gia}" class="space-y-3 mb-4">
-                                    <div class="text-center py-4 text-slate-400">
-                                        <i class="fas fa-spinner fa-spin"></i> Đang tải...
-                                    </div>
-                                </div>
-                                
-                                <!-- Reply Form -->
-                                <div class="border-t pt-4">
-                                    <textarea id="reply-input-${review.ma_danh_gia}" 
-                                              class="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" 
-                                              rows="3" 
-                                              placeholder="Nhập nội dung trả lời..."></textarea>
-                                    <div class="flex justify-end gap-2 mt-2">
-                                        <button type="button" onclick="event.preventDefault(); submitReplyInline(${review.ma_danh_gia})" 
-                                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-medium">
-                                            <i class="fas fa-paper-plane mr-1"></i>Gửi trả lời
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>`;
-            }).join('');
+                    ${repliesHtml}
+                </div>
+            `;
+
+            document.getElementById('review-modal').classList.remove('hidden');
         }
 
-        async function toggleRepliesSection(reviewId) {
-            const repliesRow = document.getElementById(`replies-${reviewId}`);
-            const isHidden = repliesRow.classList.contains('hidden');
-            
-            if (isHidden) {
-                repliesRow.classList.remove('hidden');
-                await loadRepliesInline(reviewId);
-            } else {
-                repliesRow.classList.add('hidden');
-            }
-        }
-
-        async function loadRepliesInline(reviewId) {
-            const repliesList = document.getElementById(`replies-list-${reviewId}`);
-            
-            try {
-                const response = await fetch(`${API_URL}/reviews/${reviewId}/replies`, { credentials: 'include' });
-                const data = await response.json();
-                
-                if (data.success && data.data && data.data.length > 0) {
-                    repliesList.innerHTML = data.data.map(reply => `
-                        <div class="bg-green-50 border-l-4 border-green-500 rounded-lg p-3">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-user-shield text-green-600"></i>
-                                    <p class="font-semibold text-green-800 text-sm">Admin</p>
-                                    <span class="text-xs text-slate-400 italic">Tác giả: ${reply.ten_admin}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-xs text-slate-500">${formatDate(reply.ngay_tra_loi)}</p>
-                                    <button type="button" onclick="event.preventDefault(); deleteReply(${reply.ma_tra_loi}, ${reviewId})" 
-                                            class="text-red-600 hover:text-red-800 text-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="text-slate-700 text-sm">${reply.noi_dung}</p>
-                        </div>
-                    `).join('');
-                } else {
-                    repliesList.innerHTML = `
-                        <div class="text-center py-4 text-slate-400 text-sm">
-                            <i class="fas fa-comment-slash text-2xl mb-2"></i>
-                            <p>Chưa có trả lời nào. Hãy là người đầu tiên trả lời!</p>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error loading replies:', error);
-                repliesList.innerHTML = `
-                    <div class="text-center py-4 text-red-500 text-sm">
-                        <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
-                        <p>Không thể tải trả lời</p>
-                    </div>
-                `;
-            }
+        // Xóa hàm renderReviewsOld - không cần nữa
+        function renderReviewsOldRemoved(items) {
+            // Đã được thay thế bởi renderReviews mới
         }
 
         async function submitReplyInline(reviewId) {

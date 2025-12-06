@@ -149,10 +149,14 @@ function renderProductDetail() {
         breadcrumbName.textContent = currentProduct.ten_mon;
     }
     
-    // Main image
+    // Main image - xử lý đường dẫn ảnh
     const mainImage = document.getElementById('main-image');
     if (mainImage) {
-        mainImage.src = `http://localhost:3000${currentProduct.anh_mon}`;
+        let imagePath = currentProduct.anh_mon || '/images/placeholder.jpg';
+        if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+            imagePath = '/images/' + imagePath;
+        }
+        mainImage.src = `http://localhost:3000${imagePath}`;
         mainImage.alt = currentProduct.ten_mon;
         mainImage.onerror = function() {
             this.src = 'images/placeholder.svg';
@@ -219,21 +223,31 @@ function renderProductDetail() {
 function renderThumbnails(images) {
     const container = document.getElementById('thumbnails');
     
+    // Helper function để xử lý đường dẫn ảnh
+    function getImagePath(path) {
+        if (!path) return '/images/placeholder.jpg';
+        if (path.startsWith('http')) return path;
+        if (path.startsWith('/')) return path;
+        return '/images/' + path;
+    }
+    
     // Add main image first
     const allImages = [
         { duong_dan_anh: currentProduct.anh_mon },
         ...images.filter(img => img.duong_dan_anh !== currentProduct.anh_mon)
     ];
     
-    container.innerHTML = allImages.slice(0, 4).map((img, index) => `
+    container.innerHTML = allImages.slice(0, 4).map((img, index) => {
+        const imgPath = getImagePath(img.duong_dan_anh);
+        return `
         <div class="thumbnail ${index === 0 ? 'thumbnail-active' : ''} rounded-lg overflow-hidden border-2 border-gray-200"
-             onclick="changeMainImage('${img.duong_dan_anh}', this)">
-            <img src="http://localhost:3000${img.duong_dan_anh}" 
+             onclick="changeMainImage('${imgPath}', this)">
+            <img src="http://localhost:3000${imgPath}" 
                  alt="Ảnh ${index + 1}" 
                  class="w-full h-24 object-cover"
                  onerror="this.src='images/placeholder.svg'">
         </div>
-    `).join('');
+    `}).join('');
     
     // Animate thumbnails after render
     if (typeof window.animateProductDetail === 'function') {
@@ -255,7 +269,12 @@ function renderThumbnails(images) {
 // Change main image
 function changeMainImage(imagePath, element) {
     const mainImage = document.getElementById('main-image');
-    mainImage.src = `http://localhost:3000${imagePath}`;
+    // Xử lý đường dẫn ảnh
+    let imgPath = imagePath || '/images/placeholder.jpg';
+    if (!imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+        imgPath = '/images/' + imgPath;
+    }
+    mainImage.src = `http://localhost:3000${imgPath}`;
     
     // Update active thumbnail
     document.querySelectorAll('.thumbnail').forEach(thumb => {

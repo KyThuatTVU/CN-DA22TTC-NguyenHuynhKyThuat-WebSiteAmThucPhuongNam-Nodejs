@@ -11,6 +11,80 @@ const requireAdmin = (req, res, next) => {
     }
 };
 
+// Tạo đặt bàn mới (Public - không cần đăng nhập)
+router.post('/create', async (req, res) => {
+    try {
+        const { ten_nguoi_dat, so_dien_thoai, email, ngay_dat, gio_den, so_luong, khu_vuc, ghi_chu } = req.body;
+
+        // Validate dữ liệu bắt buộc
+        if (!ten_nguoi_dat || !so_dien_thoai || !ngay_dat || !gio_den || !so_luong) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng điền đầy đủ thông tin bắt buộc'
+            });
+        }
+
+        // Validate thời gian đặt bàn (phải trước ít nhất 3 tiếng)
+        const MIN_HOURS_ADVANCE = 3;
+        const bookingDateTime = new Date(`${ngay_dat}T${gio_den}`);
+        const now = new Date();
+        const minBookingTime = new Date(now.getTime() + MIN_HOURS_ADVANCE * 60 * 60 * 1000);
+
+        if (bookingDateTime < minBookingTime) {
+            return res.status(400).json({
+                success: false,
+                message: `Vui lòng đặt bàn trước ít nhất ${MIN_HOURS_ADVANCE} tiếng`
+            });
+        }
+
+        // Validate giờ mở cửa (7:00 - 23:00)
+        const hours = bookingDateTime.getHours();
+        if (hours < 7 || hours >= 23) {
+            return res.status(400).json({
+                success: false,
+                message: 'Nhà hàng mở cửa từ 7:00 đến 23:00'
+            });
+        }
+
+        // Thêm ghi chú về khu vực nếu có
+        let fullGhiChu = ghi_chu || '';
+        if (khu_vuc) {
+            const khuVucMap = {
+                'indoor': 'Khu vực trong nhà',
+                'outdoor': 'Khu vực sân vườn',
+                'vip': 'Phòng VIP'
+            };
+            fullGhiChu = `[${khuVucMap[khu_vuc] || khu_vuc}] ${fullGhiChu}`.trim();
+        }
+
+        // Insert vào database
+        const [result] = await db.query(
+            `INSERT INTO dat_ban (ten_nguoi_dat, so_dien_thoai, so_luong, ngay_dat, gio_den, ghi_chu, trang_thai)
+             VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+            [ten_nguoi_dat, so_dien_thoai, parseInt(so_luong), ngay_dat, gio_den, fullGhiChu || null]
+        );
+
+        res.json({
+            success: true,
+            message: 'Đặt bàn thành công! Nhà hàng sẽ liên hệ xác nhận.',
+            data: {
+                ma_dat_ban: result.insertId,
+                ten_nguoi_dat,
+                so_dien_thoai,
+                ngay_dat,
+                gio_den,
+                so_luong
+            }
+        });
+    } catch (error) {
+        console.error('Error creating reservation:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi khi tạo đặt bàn'
+        });
+    }
+});
+
 // Thống kê đặt bàn - PHẢI ĐẶT TRƯỚC /:id
 router.get('/stats', requireAdmin, async (req, res) => {
     try {
