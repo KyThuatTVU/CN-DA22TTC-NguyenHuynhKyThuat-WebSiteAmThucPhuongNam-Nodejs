@@ -218,15 +218,41 @@
                             </div>
                         </div>
 
-                        <!-- Row 2: Gauge + Revenue Chart -->
+                        <!-- Row 2: 5 Mục tiêu tháng -->
+                        <div class="chart-card mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="chart-title mb-0"><i class="fas fa-bullseye text-purple-500 mr-2"></i>5 Mục tiêu tháng <span id="goals-month-year"></span></p>
+                                <div class="flex items-center gap-2">
+                                    <span id="total-progress-badge" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">0%</span>
+                                    <button onclick="generateGoals()" id="btn-generate-goals" class="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-xs hover:opacity-90 transition">
+                                        <i class="fas fa-magic mr-1"></i>AI Tạo mục tiêu
+                                    </button>
+                                    <button onclick="resetGoals()" id="btn-reset-goals" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs hover:bg-red-200 transition hidden" title="Xóa mục tiêu để tạo lại">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <button onclick="refreshGoals()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs hover:bg-gray-200 transition">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="goals-container" class="grid grid-cols-5 gap-4">
+                                <!-- Goals will be loaded here -->
+                                <div class="col-span-5 text-center py-8 text-gray-400">
+                                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                    <p class="text-sm">Đang tải mục tiêu...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Gauge + Revenue Chart -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-bullseye text-blue-500 mr-2"></i>Tỷ lệ hoàn thành mục tiêu</p>
+                                <p class="chart-title"><i class="fas fa-bullseye text-blue-500 mr-2"></i>Tỷ lệ hoàn thành tổng</p>
                                 <div style="height: 160px; position: relative;">
                                     <canvas id="gaugeChart"></canvas>
                                     <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); text-align: center;">
                                         <p class="text-3xl font-bold text-blue-600" id="gauge-value">0%</p>
-                                        <p class="text-xs text-gray-500">Doanh thu tháng</p>
+                                        <p class="text-xs text-gray-500">Hoàn thành mục tiêu</p>
                                     </div>
                                 </div>
                             </div>
@@ -1299,6 +1325,483 @@
             }
             container.innerHTML = '<p class="text-center text-gray-500 py-4">Không có đơn hàng phù hợp</p>';
         }
+
+        // ========== 5 MỤC TIÊU THÁNG ==========
+        async function loadGoals() {
+            try {
+                const response = await fetch(`${API_BASE}/admin-chatbot/goals`, { credentials: 'include' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const { goals, actual, totalProgress = 0, month, year, hasGoals } = result.data;
+                    
+                    // Cập nhật tiêu đề
+                    document.getElementById('goals-month-year').textContent = `(Tháng ${month}/${year})`;
+                    document.getElementById('total-progress-badge').textContent = `${totalProgress || 0}%`;
+                    
+                    // Ẩn/hiện nút tạo mục tiêu và nút reset dựa trên hasGoals
+                    const btnGenerate = document.getElementById('btn-generate-goals');
+                    const btnReset = document.getElementById('btn-reset-goals');
+                    
+                    if (hasGoals) {
+                        // Đã có mục tiêu -> đổi thành nút "Đề xuất chiến lược"
+                        btnGenerate.innerHTML = '<i class="fas fa-lightbulb mr-1"></i>AI Đề xuất';
+                        btnGenerate.onclick = () => openAIStrategy();
+                        btnGenerate.className = 'px-3 py-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-xs hover:opacity-90 transition';
+                        // Hiện nút reset
+                        btnReset.classList.remove('hidden');
+                    } else {
+                        // Chưa có mục tiêu -> nút tạo mới
+                        btnGenerate.innerHTML = '<i class="fas fa-magic mr-1"></i>AI Tạo mục tiêu';
+                        btnGenerate.onclick = () => generateGoals();
+                        btnGenerate.className = 'px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-xs hover:opacity-90 transition';
+                        // Ẩn nút reset
+                        btnReset.classList.add('hidden');
+                    }
+                    
+                    // Cập nhật gauge chart với tổng tiến độ
+                    if (hasGoals) {
+                        updateGaugeChart(totalProgress || 0, 100);
+                        document.getElementById('gauge-value').textContent = (totalProgress || 0) + '%';
+                    }
+                    
+                    const container = document.getElementById('goals-container');
+                    
+                    if (!hasGoals || goals.length === 0) {
+                        container.innerHTML = `
+                            <div class="col-span-5 text-center py-8">
+                                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-bullseye text-purple-500 text-2xl"></i>
+                                </div>
+                                <p class="text-gray-500 mb-3">Chưa có mục tiêu cho tháng này</p>
+                                <p class="text-xs text-gray-400 mb-3">Mỗi tháng chỉ được tạo mục tiêu 1 lần</p>
+                                <button onclick="generateGoals()" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm hover:opacity-90 transition">
+                                    <i class="fas fa-magic mr-2"></i>AI Tạo 5 mục tiêu
+                                </button>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Render 5 mục tiêu
+                    container.innerHTML = goals.map(goal => {
+                        const progressColor = goal.tien_do >= 100 ? 'bg-green-500' : goal.tien_do >= 70 ? 'bg-blue-500' : goal.tien_do >= 40 ? 'bg-yellow-500' : 'bg-red-500';
+                        const statusIcon = goal.hoan_thanh ? '✅' : goal.tien_do >= 70 ? '🔥' : goal.tien_do >= 40 ? '⚡' : '🎯';
+                        
+                        return `
+                            <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl">${goal.icon}</span>
+                                    <span class="text-xs font-bold ${goal.hoan_thanh ? 'text-green-600' : 'text-gray-500'}">${statusIcon} ${goal.tien_do}%</span>
+                                </div>
+                                <h4 class="font-semibold text-sm text-gray-800 mb-1">${goal.ten_muc_tieu}</h4>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                    <div class="${progressColor} h-2 rounded-full transition-all duration-500" style="width: ${goal.tien_do}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>${formatGoalValue(goal.gia_tri_hien_tai, goal.loai_muc_tieu)}</span>
+                                    <span>/ ${formatGoalValue(goal.gia_tri_muc_tieu, goal.loai_muc_tieu)}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading goals:', error);
+                document.getElementById('goals-container').innerHTML = `
+                    <div class="col-span-5 text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+                        <p class="text-sm">Lỗi tải mục tiêu</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Mở AI đề xuất chiến lược
+        function openAIStrategy() {
+            // Mở chatbot và gửi câu hỏi đề xuất chiến lược
+            if (!adminChatOpen) {
+                toggleAdminChat();
+            }
+            setTimeout(() => {
+                document.getElementById('admin-chat-input').value = 'Đề xuất chiến lược cải thiện để đạt mục tiêu tháng này';
+                sendAdminChat();
+            }, 300);
+        }
+        
+        function formatGoalValue(value, type) {
+            if (type === 'doanh_thu') {
+                if (value >= 1000000) {
+                    return (value / 1000000).toFixed(1) + 'tr';
+                }
+                return new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+            }
+            return value;
+        }
+        
+        async function generateGoals() {
+            const btn = document.getElementById('btn-generate-goals');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Đang tạo...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin-chatbot/goals/generate`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reload goals
+                    await loadGoals();
+                    // Thông báo thành công
+                    showToast('✅ Đã tạo 5 mục tiêu mới cho tháng này!', 'success');
+                } else {
+                    // Nếu mục tiêu đã tồn tại
+                    if (result.alreadyExists) {
+                        showToast('⚠️ ' + result.message, 'warning');
+                    } else {
+                        showToast('❌ ' + result.message, 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error generating goals:', error);
+                showToast('❌ Không thể tạo mục tiêu', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic mr-1"></i>AI Tạo mục tiêu';
+            }
+        }
+        
+        // Hàm hiển thị toast notification
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+        
+        function refreshGoals() {
+            loadGoals();
+        }
+        
+        // Xóa mục tiêu để tạo lại
+        async function resetGoals() {
+            if (!confirm('Bạn có chắc muốn xóa tất cả mục tiêu tháng này?\nSau khi xóa, bạn có thể tạo lại mục tiêu mới.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin-chatbot/goals`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ Đã xóa mục tiêu. Bạn có thể tạo lại!', 'success');
+                    await loadGoals();
+                } else {
+                    showToast('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error resetting goals:', error);
+                showToast('❌ Không thể xóa mục tiêu', 'error');
+            }
+        }
+        
+        // Load goals khi trang load
+        setTimeout(loadGoals, 500);
+
+        // ========== ADMIN AI CHATBOT ==========
+        let adminChatOpen = false;
+        
+        function toggleAdminChat() {
+            const chatWindow = document.getElementById('admin-chat-window');
+            adminChatOpen = !adminChatOpen;
+            
+            if (adminChatOpen) {
+                chatWindow.classList.remove('hidden', 'scale-95', 'opacity-0');
+                chatWindow.classList.add('scale-100', 'opacity-100');
+                // Load mục tiêu khi mở chat
+                loadTargetForGauge();
+            } else {
+                chatWindow.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => chatWindow.classList.add('hidden'), 200);
+            }
+        }
+        
+        async function sendAdminChat() {
+            const input = document.getElementById('admin-chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            // Hiển thị tin nhắn người dùng
+            appendAdminMessage(message, 'user');
+            input.value = '';
+            
+            // Hiển thị loading
+            const loadingId = appendAdminMessage('<i class="fas fa-spinner fa-spin"></i> Đang phân tích...', 'bot', true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin-chatbot/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ message })
+                });
+                
+                const result = await response.json();
+                
+                // Xóa loading
+                document.getElementById(loadingId)?.remove();
+                
+                if (result.success) {
+                    appendAdminMessage(result.data.message, 'bot');
+                    
+                    // Hiển thị suggestions
+                    if (result.data.suggestions) {
+                        appendSuggestions(result.data.suggestions);
+                    }
+                    
+                    // Nếu có đề xuất mục tiêu, hiển thị nút đặt mục tiêu
+                    if (result.data.suggestedTarget) {
+                        appendTargetButtons(result.data.suggestedTarget);
+                    }
+                    
+                    // Nếu cần hiển thị nút tạo mục tiêu
+                    if (result.data.showGenerateButton || result.data.action === 'generate_goals') {
+                        appendGenerateGoalsButton();
+                    }
+                } else {
+                    appendAdminMessage('❌ ' + (result.message || 'Có lỗi xảy ra'), 'bot');
+                }
+            } catch (error) {
+                document.getElementById(loadingId)?.remove();
+                appendAdminMessage('❌ Không thể kết nối server', 'bot');
+            }
+        }
+        
+        function appendAdminMessage(content, type, isLoading = false) {
+            const container = document.getElementById('admin-chat-messages');
+            const id = 'msg-' + Date.now();
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.id = id;
+            msgDiv.className = `flex ${type === 'user' ? 'justify-end' : 'justify-start'} mb-3`;
+            
+            const bubble = type === 'user' 
+                ? `<div class="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-sm max-w-[85%] text-sm">${content}</div>`
+                : `<div class="flex items-start space-x-2 max-w-[90%]">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-100 px-4 py-2 rounded-2xl rounded-tl-sm text-sm text-gray-800 whitespace-pre-line">${content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+                </div>`;
+            
+            msgDiv.innerHTML = bubble;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            return id;
+        }
+        
+        function appendSuggestions(suggestions) {
+            const container = document.getElementById('admin-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex flex-wrap gap-2 mb-3 ml-10';
+            div.innerHTML = suggestions.map(s => 
+                `<button onclick="quickAdminChat('${s}')" class="bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded-full text-xs hover:bg-blue-50 transition">${s}</button>`
+            ).join('');
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function appendTargetButtons(target) {
+            const container = document.getElementById('admin-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 mb-3 ml-10';
+            div.innerHTML = `
+                <button onclick="setMonthlyTarget(${target.revenue}, ${target.orders})" class="bg-green-500 text-white px-4 py-2 rounded-lg text-xs hover:bg-green-600 transition">
+                    <i class="fas fa-check mr-1"></i> Đặt mục tiêu này
+                </button>
+                <button onclick="quickAdminChat('Điều chỉnh mục tiêu cao hơn')" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-xs hover:bg-gray-300 transition">
+                    Điều chỉnh
+                </button>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function quickAdminChat(message) {
+            document.getElementById('admin-chat-input').value = message;
+            sendAdminChat();
+        }
+        
+        function appendGenerateGoalsButton() {
+            const container = document.getElementById('admin-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 mb-3 ml-10';
+            div.innerHTML = `
+                <button onclick="generateGoalsFromChat()" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg text-xs hover:opacity-90 transition">
+                    <i class="fas fa-magic mr-1"></i> Tạo 5 mục tiêu ngay
+                </button>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function generateGoalsFromChat() {
+            appendAdminMessage('Đang tạo 5 mục tiêu...', 'user');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin-chatbot/goals/generate`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    appendAdminMessage('✅ Đã tạo 5 mục tiêu mới!\n\n' + result.data.map(g => `${g.icon} ${g.ten_muc_tieu}: ${g.loai_muc_tieu === 'doanh_thu' ? new Intl.NumberFormat('vi-VN').format(g.gia_tri_muc_tieu) + 'đ' : g.gia_tri_muc_tieu + ' ' + g.don_vi}`).join('\n'), 'bot');
+                    appendSuggestions(['Xem tiến độ mục tiêu', 'Báo cáo tháng này']);
+                    // Reload goals trên dashboard
+                    loadGoals();
+                } else {
+                    appendAdminMessage('❌ Lỗi: ' + result.message, 'bot');
+                }
+            } catch (error) {
+                appendAdminMessage('❌ Không thể tạo mục tiêu', 'bot');
+            }
+        }
+        
+        async function setMonthlyTarget(revenue, orders) {
+            try {
+                const response = await fetch(`${API_BASE}/admin-chatbot/target`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ 
+                        muc_tieu_doanh_thu: revenue, 
+                        muc_tieu_don_hang: orders,
+                        ghi_chu: 'Đặt bởi AI Assistant'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    appendAdminMessage('✅ Đã đặt mục tiêu thành công! Biểu đồ tỷ lệ hoàn thành đã được cập nhật.', 'bot');
+                    // Cập nhật biểu đồ gauge
+                    loadTargetForGauge();
+                } else {
+                    appendAdminMessage('❌ Không thể đặt mục tiêu: ' + result.message, 'bot');
+                }
+            } catch (error) {
+                appendAdminMessage('❌ Lỗi kết nối server', 'bot');
+            }
+        }
+        
+        async function loadTargetForGauge() {
+            try {
+                // Lấy dữ liệu từ goals API để cập nhật gauge
+                const response = await fetch(`${API_BASE}/admin-chatbot/goals`, { credentials: 'include' });
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.hasGoals) {
+                    const totalProgress = result.data.totalProgress || 0;
+                    updateGaugeChart(totalProgress, 100);
+                    document.getElementById('gauge-value').textContent = totalProgress + '%';
+                } else {
+                    // Fallback to old gauge-data API
+                    const gaugeResponse = await fetch(`${API_BASE}/admin-chatbot/gauge-data`, { credentials: 'include' });
+                    const gaugeResult = await gaugeResponse.json();
+                    
+                    if (gaugeResult.success && gaugeResult.data) {
+                        updateGaugeChart(gaugeResult.data.current, gaugeResult.data.target);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading gauge data:', error);
+            }
+        }
+        
+        // Load gauge data khi trang load (sau khi load goals)
+        setTimeout(loadTargetForGauge, 1500);
     </script>
+    
+    <!-- Admin AI Chatbot Button -->
+    <button onclick="toggleAdminChat()" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all z-50 flex items-center justify-center group">
+        <i class="fas fa-robot text-xl group-hover:scale-110 transition-transform"></i>
+        <span class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></span>
+    </button>
+    
+    <!-- Admin AI Chat Window -->
+    <div id="admin-chat-window" class="fixed bottom-24 right-6 w-96 bg-white rounded-2xl shadow-2xl z-50 hidden scale-95 opacity-0 transition-all duration-200 overflow-hidden" style="max-height: 600px;">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4 text-white">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-robot text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">AI Business Assistant</h3>
+                        <p class="text-xs text-purple-200">Trợ lý phân tích kinh doanh</p>
+                    </div>
+                </div>
+                <button onclick="toggleAdminChat()" class="text-white/80 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        <div id="admin-chat-messages" class="p-4 overflow-y-auto" style="height: 350px;">
+            <!-- Welcome message -->
+            <div class="flex justify-start mb-3">
+                <div class="flex items-start space-x-2 max-w-[90%]">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-100 px-4 py-2 rounded-2xl rounded-tl-sm text-sm text-gray-800">
+                        👋 Xin chào! Tôi là trợ lý AI của bạn.<br><br>
+                        Tôi có thể giúp bạn:<br>
+                        📊 Xem báo cáo kinh doanh<br>
+                        🎯 Đặt và theo dõi mục tiêu<br>
+                        📈 Đề xuất chiến lược tăng doanh thu
+                    </div>
+                </div>
+            </div>
+            <!-- Quick suggestions -->
+            <div class="flex flex-wrap gap-2 mb-3 ml-10">
+                <button onclick="quickAdminChat('Báo cáo tháng này')" class="bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded-full text-xs hover:bg-blue-50 transition">📊 Báo cáo</button>
+                <button onclick="quickAdminChat('Tiến độ mục tiêu')" class="bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded-full text-xs hover:bg-blue-50 transition">🎯 Tiến độ</button>
+                <button onclick="quickAdminChat('Đề xuất chiến lược')" class="bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded-full text-xs hover:bg-blue-50 transition">📈 Chiến lược</button>
+            </div>
+        </div>
+        
+        <!-- Input -->
+        <div class="p-4 border-t bg-gray-50">
+            <div class="flex space-x-2">
+                <input type="text" id="admin-chat-input" placeholder="Hỏi về doanh thu, chiến lược..." 
+                       class="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 text-sm"
+                       onkeypress="if(event.key==='Enter') sendAdminChat()">
+                <button onclick="sendAdminChat()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-xl hover:opacity-90 transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
