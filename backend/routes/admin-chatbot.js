@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const OpenAI = require('openai');
+
+// Khởi tạo Groq client (tương thích OpenAI SDK)
+const groq = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: 'https://api.groq.com/openai/v1'
+});
 
 // Tự động tạo các bảng mục tiêu nếu chưa tồn tại
 async function initTables() {
@@ -197,7 +204,8 @@ async function getBusinessStats() {
                 
                 return {
                     ...goal,
-                    gia_tri_hien_tai: actual,
+                    gia_tri_muc_tieu: Math.round(target), // Làm tròn số
+                    gia_tri_hien_tai: Math.round(actual), // Làm tròn số
                     tien_do: progress
                 };
             });
@@ -513,7 +521,7 @@ function generateAIResponse(query, stats) {
     };
 }
 
-// API: Chat với AI
+// API: Chat với AI (Groq - Llama 3)
 router.post('/chat', requireAdmin, async (req, res) => {
     try {
         const { message } = req.body;
@@ -529,16 +537,101 @@ router.post('/chat', requireAdmin, async (req, res) => {
             return res.status(500).json({ success: false, message: 'Không thể lấy dữ liệu thống kê' });
         }
         
-        // Tạo phản hồi AI
-        const response = generateAIResponse(message, stats);
+        // Tạo context từ dữ liệu thống kê
+        const revenueThisMonth = stats.revenue?.thisMonth || 0;
+        const revenueLastMonth = stats.revenue?.lastMonth || 0;
+        const revenueGrowth = stats.revenue?.change || 0;
+        const ordersThisMonth = stats.orders?.thisMonth || 0;
+        const ordersLastMonth = stats.orders?.lastMonth || 0;
+        const ordersGrowth = ordersLastMonth > 0 ? Math.round(((ordersThisMonth - ordersLastMonth) / ordersLastMonth) * 100) : 0;
+        const newCustomers = stats.customers?.newThisMonth || 0;
+        const reservationsThisMonth = stats.reservations?.thisMonth || 0;
+        
+        const businessContext = `
+Dữ liệu kinh doanh nhà hàng "Ẩm Thực Phương Nam" (Tháng ${stats.currentMonth}/${stats.currentYear}):
+
+📊 DOANH THU:
+- Tháng này: ${new Intl.NumberFormat('vi-VN').format(revenueThisMonth)}đ
+- Tháng trước: ${new Intl.NumberFormat('vi-VN').format(revenueLastMonth)}đ
+- Tăng trưởng: ${revenueGrowth > 0 ? '+' : ''}${revenueGrowth}%
+
+📦 ĐƠN HÀNG:
+- Tháng này: ${ordersThisMonth} đơn
+- Tháng trước: ${ordersLastMonth} đơn
+- Tăng trưởng: ${ordersGrowth > 0 ? '+' : ''}${ordersGrowth}%
+
+👥 KHÁCH HÀNG:
+- Mới tháng này: ${newCustomers} người
+
+🍽️ ĐẶT BÀN:
+- Tháng này: ${reservationsThisMonth} lượt
+
+⭐ ĐÁNH GIÁ:
+- Trung bình: ${stats.avgRating || 0}/5 sao
+- Tổng đánh giá: ${stats.totalReviews || 0}
+
+🏆 TOP MÓN BÁN CHẠY:
+${stats.topProducts && stats.topProducts.length > 0 ? stats.topProducts.map((p, i) => `${i+1}. ${p.ten_mon} - ${p.so_luong_ban} lượt`).join('\n') : 'Chưa có dữ liệu'}
+
+📈 MỤC TIÊU THÁNG:
+${stats.goals && stats.goals.length > 0 ? stats.goals.map(g => `- ${g.ten_muc_tieu}: ${g.tien_do}% (${g.gia_tri_hien_tai}/${g.gia_tri_muc_tieu})`).join('\n') : 'Chưa đặt mục tiêu'}
+`;
+
+        // Gọi Groq AI
+        const completion = await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Bạn là "Phương Nam" - trợ lý AI thông minh của nhà hàng "Ẩm Thực Phương Nam".
+Chủ nhà hàng là chị Linh. Hãy xưng hô thân thiện: "chị Linh", "em" (em là Phương Nam).
+
+Nhiệm vụ của bạn:
+- Phân tích dữ liệu kinh doanh và đưa ra nhận xét
+- Đề xuất chiến lược cải thiện doanh thu, thu hút khách hàng
+- Trả lời câu hỏi về tình hình kinh doanh
+- Đưa ra lời khuyên thực tế, cụ thể
+
+Quy tắc:
+- Trả lời bằng tiếng Việt
+- Xưng "em", gọi chủ là "chị Linh"
+- Ngắn gọn, súc tích, dễ hiểu, thân thiện
+- Sử dụng emoji phù hợp
+- Dựa trên dữ liệu thực tế được cung cấp
+- Nếu không có dữ liệu, hãy nói rõ và đề xuất hành động
+
+${businessContext}`
+                },
+                {
+                    role: 'user',
+                    content: message
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 1024
+        });
+
+        const aiResponse = completion.choices[0]?.message?.content || 'Xin lỗi, tôi không thể xử lý yêu cầu này.';
         
         res.json({
             success: true,
-            data: response
+            data: {
+                type: 'ai_response',
+                message: aiResponse,
+                suggestions: ['Phân tích doanh thu', 'Đề xuất chiến lược', 'Xem mục tiêu', 'Top sản phẩm']
+            }
         });
     } catch (error) {
         console.error('Error in admin chatbot:', error);
-        res.status(500).json({ success: false, message: 'Lỗi xử lý tin nhắn' });
+        
+        // Fallback về response cũ nếu Groq lỗi
+        if (error.message?.includes('API') || error.message?.includes('fetch')) {
+            const stats = await getBusinessStats();
+            const response = generateAIResponse(req.body.message, stats);
+            return res.json({ success: true, data: response });
+        }
+        
+        res.status(500).json({ success: false, message: 'Lỗi xử lý tin nhắn: ' + error.message });
     }
 });
 
@@ -748,7 +841,8 @@ router.get('/goals', requireAdmin, async (req, res) => {
             
             return {
                 ...goal,
-                gia_tri_hien_tai: actual,
+                gia_tri_muc_tieu: Math.round(target), // Làm tròn số, bỏ .00
+                gia_tri_hien_tai: Math.round(actual), // Làm tròn số
                 tien_do: progress,
                 hoan_thanh: progress >= 100
             };
@@ -868,18 +962,33 @@ router.post('/goals/generate', requireAdmin, async (req, res) => {
         let targetRevenue, targetOrders, targetCustomers, targetReservations, targetReviews;
         let revenueDesc, ordersDesc, customersDesc, reservationsDesc, reviewsDesc;
         
-        // Doanh thu
+        // Doanh thu - LUÔN đưa ra con số cụ thể
         if (prevRevenueVal > 0) {
-            targetRevenue = Math.round(prevRevenueVal * 1.1 / 1000000) * 1000000; // Tăng 10%, làm tròn triệu
+            // Có dữ liệu tháng trước -> tăng 10%
+            targetRevenue = Math.round(prevRevenueVal * 1.1 / 1000000) * 1000000; // Làm tròn triệu
+            if (targetRevenue < 1000000) targetRevenue = Math.round(prevRevenueVal * 1.1 / 100000) * 100000; // Làm tròn trăm nghìn nếu nhỏ
             revenueDesc = `Tăng 10% so với tháng trước (${new Intl.NumberFormat('vi-VN').format(prevRevenueVal)}đ)`;
         } else if (currentRevenueVal > 0 && progressRatio > 0.1) {
             // Ước tính doanh thu cả tháng dựa trên hiện tại
             const estimatedRevenue = Math.round(currentRevenueVal / progressRatio);
             targetRevenue = Math.round(estimatedRevenue * 1.05 / 1000000) * 1000000; // Tăng 5%
+            if (targetRevenue < 1000000) targetRevenue = Math.round(estimatedRevenue * 1.05 / 100000) * 100000;
             revenueDesc = `Dựa trên xu hướng hiện tại (${new Intl.NumberFormat('vi-VN').format(currentRevenueVal)}đ đã đạt)`;
+        } else if (currentRevenueVal > 0) {
+            // Có doanh thu nhưng còn ít ngày -> ước tính dựa trên trung bình ngày
+            const avgPerDay = currentRevenueVal / Math.max(1, dayOfMonth);
+            targetRevenue = Math.round(avgPerDay * daysInMonth * 1.1 / 100000) * 100000;
+            if (targetRevenue < 500000) targetRevenue = 500000;
+            revenueDesc = `Ước tính từ doanh thu hiện tại (${new Intl.NumberFormat('vi-VN').format(currentRevenueVal)}đ)`;
         } else {
-            targetRevenue = 5000000; // Mục tiêu khởi đầu 5 triệu
-            revenueDesc = 'Mục tiêu khởi đầu cho quán mới';
+            // Không có dữ liệu -> đặt mục tiêu khởi đầu cụ thể
+            targetRevenue = 10000000; // 10 triệu - mục tiêu khởi đầu rõ ràng
+            revenueDesc = 'Mục tiêu khởi đầu: 10 triệu đồng/tháng';
+        }
+        // Đảm bảo luôn có giá trị tối thiểu
+        if (!targetRevenue || targetRevenue <= 0) {
+            targetRevenue = 10000000;
+            revenueDesc = 'Mục tiêu mặc định: 10 triệu đồng/tháng';
         }
         
         // Đơn hàng
@@ -1035,6 +1144,779 @@ router.delete('/goals', requireAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error deleting goals:', error);
         res.status(500).json({ success: false, message: 'Lỗi xóa mục tiêu' });
+    }
+});
+
+// ========== API BÁO CÁO TỔNG HỢP MỤC TIÊU ==========
+
+// API: Báo cáo tổng hợp mục tiêu theo tháng/năm
+router.get('/goals/report', requireAdmin, async (req, res) => {
+    try {
+        const { month, year } = req.query;
+        const currentDate = new Date();
+        const reportMonth = parseInt(month) || currentDate.getMonth() + 1;
+        const reportYear = parseInt(year) || currentDate.getFullYear();
+        
+        // Lấy mục tiêu của tháng được chọn
+        const [goals] = await db.query(`
+            SELECT * FROM muc_tieu_chi_tiet 
+            WHERE thang = ? AND nam = ?
+            ORDER BY thu_tu ASC
+        `, [reportMonth, reportYear]);
+        
+        if (goals.length === 0) {
+            return res.json({
+                success: true,
+                data: {
+                    hasData: false,
+                    message: `Chưa có mục tiêu cho tháng ${reportMonth}/${reportYear}`,
+                    month: reportMonth,
+                    year: reportYear
+                }
+            });
+        }
+        
+        // Lấy dữ liệu thực tế của tháng đó
+        const [revenueData] = await db.query(`
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+        `, [reportMonth, reportYear]);
+        
+        const [ordersData] = await db.query(`
+            SELECT COUNT(*) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+        `, [reportMonth, reportYear]);
+        
+        const [customersData] = await db.query(`
+            SELECT COUNT(*) as total FROM nguoi_dung 
+            WHERE MONTH(ngay_tao) = ? AND YEAR(ngay_tao) = ?
+        `, [reportMonth, reportYear]);
+        
+        const [reservationsData] = await db.query(`
+            SELECT COUNT(*) as total FROM dat_ban 
+            WHERE MONTH(ngay_dat) = ? AND YEAR(ngay_dat) = ?
+        `, [reportMonth, reportYear]);
+        
+        const [reviewsData] = await db.query(`
+            SELECT COUNT(*) as total FROM danh_gia_san_pham 
+            WHERE MONTH(ngay_danh_gia) = ? AND YEAR(ngay_danh_gia) = ? AND trang_thai = 'approved'
+        `, [reportMonth, reportYear]);
+        
+        // Map dữ liệu thực tế
+        const actualData = {
+            doanh_thu: parseFloat(revenueData[0].total) || 0,
+            don_hang: parseInt(ordersData[0].total) || 0,
+            khach_hang_moi: parseInt(customersData[0].total) || 0,
+            dat_ban: parseInt(reservationsData[0].total) || 0,
+            danh_gia: parseInt(reviewsData[0].total) || 0
+        };
+        
+        // Tính tiến độ và đánh giá từng mục tiêu
+        const goalsReport = goals.map(goal => {
+            const actual = actualData[goal.loai_muc_tieu] || 0;
+            const target = parseFloat(goal.gia_tri_muc_tieu) || 1;
+            const progress = Math.round((actual / target) * 100);
+            const difference = actual - target;
+            
+            let status, statusColor, evaluation;
+            if (progress >= 100) {
+                status = 'Hoàn thành';
+                statusColor = 'green';
+                evaluation = '🎉 Xuất sắc! Vượt mục tiêu';
+            } else if (progress >= 80) {
+                status = 'Gần đạt';
+                statusColor = 'blue';
+                evaluation = '👍 Tốt! Cần cố gắng thêm một chút';
+            } else if (progress >= 50) {
+                status = 'Đang tiến triển';
+                statusColor = 'yellow';
+                evaluation = '⚡ Cần tăng tốc để đạt mục tiêu';
+            } else {
+                status = 'Cần cải thiện';
+                statusColor = 'red';
+                evaluation = '🔴 Cần xem xét lại chiến lược';
+            }
+            
+            return {
+                ...goal,
+                gia_tri_thuc_te: actual,
+                tien_do: progress,
+                chenh_lech: difference,
+                trang_thai: status,
+                mau_trang_thai: statusColor,
+                danh_gia: evaluation,
+                hoan_thanh: progress >= 100
+            };
+        });
+        
+        // Tính tổng hợp
+        const totalProgress = Math.round(goalsReport.reduce((sum, g) => sum + g.tien_do, 0) / goalsReport.length);
+        const completedCount = goalsReport.filter(g => g.hoan_thanh).length;
+        const nearCompletedCount = goalsReport.filter(g => g.tien_do >= 80 && g.tien_do < 100).length;
+        const needImprovementCount = goalsReport.filter(g => g.tien_do < 50).length;
+        
+        // Đánh giá tổng thể
+        let overallEvaluation, overallStatus;
+        if (totalProgress >= 100) {
+            overallStatus = 'Xuất sắc';
+            overallEvaluation = '🏆 Tháng này hoàn thành xuất sắc tất cả mục tiêu!';
+        } else if (totalProgress >= 80) {
+            overallStatus = 'Tốt';
+            overallEvaluation = '✨ Kết quả tốt! Hầu hết mục tiêu đã đạt hoặc gần đạt.';
+        } else if (totalProgress >= 60) {
+            overallStatus = 'Khá';
+            overallEvaluation = '📊 Kết quả khá. Cần cải thiện một số mục tiêu.';
+        } else if (totalProgress >= 40) {
+            overallStatus = 'Trung bình';
+            overallEvaluation = '⚠️ Kết quả trung bình. Cần xem xét lại chiến lược kinh doanh.';
+        } else {
+            overallStatus = 'Cần cải thiện';
+            overallEvaluation = '🔴 Kết quả chưa đạt. Cần phân tích nguyên nhân và điều chỉnh.';
+        }
+        
+        res.json({
+            success: true,
+            data: {
+                hasData: true,
+                month: reportMonth,
+                year: reportYear,
+                goals: goalsReport,
+                summary: {
+                    totalProgress,
+                    completedCount,
+                    nearCompletedCount,
+                    needImprovementCount,
+                    totalGoals: goalsReport.length,
+                    overallStatus,
+                    overallEvaluation
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error getting goals report:', error);
+        res.status(500).json({ success: false, message: 'Lỗi lấy báo cáo: ' + error.message });
+    }
+});
+
+// API: Lấy lịch sử mục tiêu các tháng trước
+router.get('/goals/history', requireAdmin, async (req, res) => {
+    try {
+        // Lấy danh sách các tháng đã có mục tiêu
+        const [months] = await db.query(`
+            SELECT DISTINCT thang, nam, 
+                   COUNT(*) as so_muc_tieu,
+                   MIN(ngay_tao) as ngay_tao
+            FROM muc_tieu_chi_tiet 
+            GROUP BY thang, nam
+            ORDER BY nam DESC, thang DESC
+            LIMIT 12
+        `);
+        
+        // Lấy tiến độ tổng hợp cho mỗi tháng
+        const historyWithProgress = await Promise.all(months.map(async (m) => {
+            const [goals] = await db.query(`
+                SELECT loai_muc_tieu, gia_tri_muc_tieu FROM muc_tieu_chi_tiet 
+                WHERE thang = ? AND nam = ?
+            `, [m.thang, m.nam]);
+            
+            // Lấy dữ liệu thực tế
+            const [revenue] = await db.query(`
+                SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+                WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+            `, [m.thang, m.nam]);
+            
+            const [orders] = await db.query(`
+                SELECT COUNT(*) as total FROM don_hang 
+                WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+            `, [m.thang, m.nam]);
+            
+            const actualData = {
+                doanh_thu: parseFloat(revenue[0].total) || 0,
+                don_hang: parseInt(orders[0].total) || 0
+            };
+            
+            // Tính tiến độ trung bình
+            let totalProgress = 0;
+            let count = 0;
+            goals.forEach(g => {
+                const actual = actualData[g.loai_muc_tieu] || 0;
+                const target = parseFloat(g.gia_tri_muc_tieu) || 1;
+                totalProgress += Math.min(100, Math.round((actual / target) * 100));
+                count++;
+            });
+            
+            return {
+                thang: m.thang,
+                nam: m.nam,
+                so_muc_tieu: m.so_muc_tieu,
+                tien_do_trung_binh: count > 0 ? Math.round(totalProgress / count) : 0,
+                ngay_tao: m.ngay_tao
+            };
+        }));
+        
+        res.json({
+            success: true,
+            data: historyWithProgress
+        });
+    } catch (error) {
+        console.error('Error getting goals history:', error);
+        res.status(500).json({ success: false, message: 'Lỗi lấy lịch sử: ' + error.message });
+    }
+});
+
+// API: AI phân tích và đề xuất chiến lược dựa trên mục tiêu
+router.post('/goals/ai-strategy', requireAdmin, async (req, res) => {
+    try {
+        const stats = await getBusinessStats();
+        
+        if (!stats || !stats.goals || stats.goals.length === 0) {
+            return res.json({
+                success: true,
+                data: {
+                    message: 'Chưa có mục tiêu để phân tích. Hãy tạo mục tiêu trước!',
+                    suggestions: ['Tạo mục tiêu']
+                }
+            });
+        }
+        
+        // Phân tích mục tiêu
+        const lowGoals = stats.goals.filter(g => g.tien_do < 50);
+        const mediumGoals = stats.goals.filter(g => g.tien_do >= 50 && g.tien_do < 80);
+        const highGoals = stats.goals.filter(g => g.tien_do >= 80);
+        
+        // Tạo context cho AI
+        const analysisContext = `
+Phân tích mục tiêu tháng ${stats.currentMonth}/${stats.currentYear}:
+
+📊 TỔNG QUAN:
+- Tiến độ trung bình: ${Math.round(stats.goals.reduce((sum, g) => sum + g.tien_do, 0) / stats.goals.length)}%
+- Hoàn thành: ${stats.goals.filter(g => g.tien_do >= 100).length}/${stats.goals.length} mục tiêu
+
+🔴 CẦN CẢI THIỆN GẤP (< 50%):
+${lowGoals.length > 0 ? lowGoals.map(g => `- ${g.ten_muc_tieu}: ${g.tien_do}% (${g.gia_tri_hien_tai}/${g.gia_tri_muc_tieu})`).join('\n') : 'Không có'}
+
+🟡 ĐANG TIẾN TRIỂN (50-80%):
+${mediumGoals.length > 0 ? mediumGoals.map(g => `- ${g.ten_muc_tieu}: ${g.tien_do}%`).join('\n') : 'Không có'}
+
+🟢 SẮP HOÀN THÀNH (> 80%):
+${highGoals.length > 0 ? highGoals.map(g => `- ${g.ten_muc_tieu}: ${g.tien_do}%`).join('\n') : 'Không có'}
+
+DỮ LIỆU BỔ SUNG:
+- Doanh thu tháng này: ${new Intl.NumberFormat('vi-VN').format(stats.revenueThisMonth)}đ
+- Doanh thu tháng trước: ${new Intl.NumberFormat('vi-VN').format(stats.revenueLastMonth)}đ
+- Số đơn hàng: ${stats.ordersThisMonth} (tháng trước: ${stats.ordersLastMonth})
+- Ngày còn lại trong tháng: ${new Date(stats.currentYear, stats.currentMonth, 0).getDate() - new Date().getDate()}
+`;
+
+        // Gọi Groq AI để phân tích
+        const completion = await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Bạn là "Phương Nam" - trợ lý AI của nhà hàng "Ẩm Thực Phương Nam".
+Chủ nhà hàng là chị Linh. Xưng "em", gọi "chị Linh".
+
+Hãy phân tích dữ liệu và đưa ra chiến lược CỤ THỂ, THỰC TẾ để đạt mục tiêu.
+
+Quy tắc:
+- Trả lời bằng tiếng Việt, thân thiện
+- Xưng "em", gọi "chị Linh"
+- Đưa ra 3-5 hành động cụ thể, có thể thực hiện ngay
+- Ưu tiên các mục tiêu đang thấp nhất
+- Đề xuất phải phù hợp với nhà hàng Việt Nam
+- Sử dụng emoji và format rõ ràng`
+                },
+                {
+                    role: 'user',
+                    content: `Dựa trên dữ liệu sau, hãy đề xuất chiến lược cụ thể để cải thiện các mục tiêu:\n\n${analysisContext}`
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 1024
+        });
+
+        const aiStrategy = completion.choices[0]?.message?.content || 'Không thể tạo chiến lược. Vui lòng thử lại.';
+        
+        res.json({
+            success: true,
+            data: {
+                type: 'ai_strategy',
+                message: aiStrategy,
+                analysis: {
+                    lowGoals: lowGoals.length,
+                    mediumGoals: mediumGoals.length,
+                    highGoals: highGoals.length,
+                    totalProgress: Math.round(stats.goals.reduce((sum, g) => sum + g.tien_do, 0) / stats.goals.length)
+                },
+                suggestions: ['Xem chi tiết mục tiêu', 'Báo cáo tháng', 'Lịch sử mục tiêu']
+            }
+        });
+    } catch (error) {
+        console.error('Error generating AI strategy:', error);
+        res.status(500).json({ success: false, message: 'Lỗi tạo chiến lược: ' + error.message });
+    }
+});
+
+// ========== CHIẾN LƯỢC DOANH THU CHI TIẾT ==========
+
+// Hàm phân tích doanh thu chuyên sâu
+async function analyzeRevenueData() {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    const dayOfMonth = currentDate.getDate();
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const daysRemaining = daysInMonth - dayOfMonth;
+    
+    // Tháng trước
+    let prevMonth = currentMonth - 1;
+    let prevYear = currentYear;
+    if (prevMonth === 0) {
+        prevMonth = 12;
+        prevYear = currentYear - 1;
+    }
+    
+    // 1. Doanh thu theo thời gian
+    const [revenueThisMonth] = await db.query(`
+        SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+        WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+    `, [currentMonth, currentYear]);
+    
+    const [revenueLastMonth] = await db.query(`
+        SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+        WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+    `, [prevMonth, prevYear]);
+    
+    // 2. Doanh thu theo ngày trong tuần (phân tích xu hướng)
+    const [revenueByDayOfWeek] = await db.query(`
+        SELECT 
+            DAYOFWEEK(thoi_gian_tao) as ngay_trong_tuan,
+            DAYNAME(thoi_gian_tao) as ten_ngay,
+            COUNT(*) as so_don,
+            COALESCE(SUM(tong_tien), 0) as doanh_thu
+        FROM don_hang 
+        WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+        GROUP BY DAYOFWEEK(thoi_gian_tao), DAYNAME(thoi_gian_tao)
+        ORDER BY doanh_thu DESC
+    `, [currentMonth, currentYear]);
+    
+    // 3. Doanh thu theo khung giờ
+    const [revenueByHour] = await db.query(`
+        SELECT 
+            HOUR(thoi_gian_tao) as gio,
+            COUNT(*) as so_don,
+            COALESCE(SUM(tong_tien), 0) as doanh_thu
+        FROM don_hang 
+        WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+        GROUP BY HOUR(thoi_gian_tao)
+        ORDER BY doanh_thu DESC
+    `, [currentMonth, currentYear]);
+    
+    // 4. Top sản phẩm bán chạy (đóng góp doanh thu)
+    const [topProducts] = await db.query(`
+        SELECT 
+            sp.ten_san_pham,
+            sp.gia,
+            SUM(ctdh.so_luong) as so_luong_ban,
+            SUM(ctdh.so_luong * ctdh.gia) as doanh_thu_sp
+        FROM chi_tiet_don_hang ctdh
+        JOIN san_pham sp ON ctdh.san_pham_id = sp.id
+        JOIN don_hang dh ON ctdh.don_hang_id = dh.id
+        WHERE MONTH(dh.thoi_gian_tao) = ? AND YEAR(dh.thoi_gian_tao) = ? AND dh.trang_thai = 'delivered'
+        GROUP BY sp.id, sp.ten_san_pham, sp.gia
+        ORDER BY doanh_thu_sp DESC
+        LIMIT 10
+    `, [currentMonth, currentYear]);
+    
+    // 5. Sản phẩm ít bán (cần đẩy mạnh)
+    const [lowSellingProducts] = await db.query(`
+        SELECT 
+            sp.ten_san_pham,
+            sp.gia,
+            COALESCE(SUM(ctdh.so_luong), 0) as so_luong_ban
+        FROM san_pham sp
+        LEFT JOIN chi_tiet_don_hang ctdh ON sp.id = ctdh.san_pham_id
+        LEFT JOIN don_hang dh ON ctdh.don_hang_id = dh.id 
+            AND MONTH(dh.thoi_gian_tao) = ? AND YEAR(dh.thoi_gian_tao) = ?
+        WHERE sp.trang_thai = 'active'
+        GROUP BY sp.id, sp.ten_san_pham, sp.gia
+        HAVING so_luong_ban < 3
+        ORDER BY so_luong_ban ASC
+        LIMIT 10
+    `, [currentMonth, currentYear]);
+    
+    // 6. Giá trị đơn hàng trung bình
+    const [avgOrderValue] = await db.query(`
+        SELECT 
+            COALESCE(AVG(tong_tien), 0) as trung_binh,
+            COALESCE(MAX(tong_tien), 0) as cao_nhat,
+            COALESCE(MIN(tong_tien), 0) as thap_nhat,
+            COUNT(*) as tong_don
+        FROM don_hang 
+        WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+    `, [currentMonth, currentYear]);
+    
+    // 7. Tỷ lệ đơn hàng thành công vs hủy
+    const [orderStatus] = await db.query(`
+        SELECT 
+            trang_thai,
+            COUNT(*) as so_luong,
+            COALESCE(SUM(tong_tien), 0) as gia_tri
+        FROM don_hang 
+        WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+        GROUP BY trang_thai
+    `, [currentMonth, currentYear]);
+    
+    // 8. Khách hàng quay lại vs khách mới
+    const [customerAnalysis] = await db.query(`
+        SELECT 
+            CASE 
+                WHEN order_count = 1 THEN 'Khách mới'
+                ELSE 'Khách quay lại'
+            END as loai_khach,
+            COUNT(*) as so_khach,
+            SUM(total_spent) as tong_chi_tieu
+        FROM (
+            SELECT 
+                nguoi_dung_id,
+                COUNT(*) as order_count,
+                SUM(tong_tien) as total_spent
+            FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+            GROUP BY nguoi_dung_id
+        ) as customer_orders
+        GROUP BY loai_khach
+    `, [currentMonth, currentYear]);
+    
+    // 9. Mục tiêu doanh thu
+    const [revenueGoal] = await db.query(`
+        SELECT gia_tri_muc_tieu FROM muc_tieu_chi_tiet 
+        WHERE thang = ? AND nam = ? AND loai_muc_tieu = 'doanh_thu'
+    `, [currentMonth, currentYear]);
+    
+    // Tính toán các chỉ số
+    const currentRevenue = parseFloat(revenueThisMonth[0].total) || 0;
+    const lastMonthRevenue = parseFloat(revenueLastMonth[0].total) || 0;
+    const targetRevenue = parseFloat(revenueGoal[0]?.gia_tri_muc_tieu) || 0;
+    const avgDaily = dayOfMonth > 0 ? currentRevenue / dayOfMonth : 0;
+    const projectedRevenue = avgDaily * daysInMonth;
+    const revenueNeeded = targetRevenue - currentRevenue;
+    const dailyNeeded = daysRemaining > 0 ? revenueNeeded / daysRemaining : 0;
+    const progress = targetRevenue > 0 ? Math.round((currentRevenue / targetRevenue) * 100) : 0;
+    const growthRate = lastMonthRevenue > 0 ? Math.round(((currentRevenue - lastMonthRevenue) / lastMonthRevenue) * 100) : 0;
+    
+    return {
+        currentMonth,
+        currentYear,
+        dayOfMonth,
+        daysInMonth,
+        daysRemaining,
+        currentRevenue,
+        lastMonthRevenue,
+        targetRevenue,
+        avgDaily,
+        projectedRevenue,
+        revenueNeeded,
+        dailyNeeded,
+        progress,
+        growthRate,
+        revenueByDayOfWeek,
+        revenueByHour,
+        topProducts,
+        lowSellingProducts,
+        avgOrderValue: avgOrderValue[0],
+        orderStatus,
+        customerAnalysis
+    };
+}
+
+// API: Chiến lược tăng doanh thu chi tiết
+router.get('/revenue/strategy', requireAdmin, async (req, res) => {
+    try {
+        const data = await analyzeRevenueData();
+        
+        // Xây dựng chiến lược dựa trên phân tích
+        const strategies = [];
+        const urgentActions = [];
+        const recommendations = [];
+        
+        // 1. Phân tích tiến độ mục tiêu
+        if (data.targetRevenue > 0) {
+            if (data.progress < 50 && data.daysRemaining < 15) {
+                urgentActions.push({
+                    priority: 'critical',
+                    icon: '🚨',
+                    title: 'Cần tăng tốc gấp!',
+                    detail: `Còn ${data.daysRemaining} ngày, cần đạt thêm ${new Intl.NumberFormat('vi-VN').format(data.revenueNeeded)}đ`,
+                    action: `Mỗi ngày cần đạt ${new Intl.NumberFormat('vi-VN').format(Math.round(data.dailyNeeded))}đ`
+                });
+            } else if (data.progress < 80) {
+                strategies.push({
+                    priority: 'high',
+                    icon: '⚡',
+                    title: 'Tăng cường bán hàng',
+                    detail: `Tiến độ ${data.progress}%, cần thêm ${new Intl.NumberFormat('vi-VN').format(data.revenueNeeded)}đ`
+                });
+            }
+        }
+        
+        // 2. Phân tích ngày bán chạy
+        if (data.revenueByDayOfWeek.length > 0) {
+            const bestDay = data.revenueByDayOfWeek[0];
+            const worstDay = data.revenueByDayOfWeek[data.revenueByDayOfWeek.length - 1];
+            
+            const dayNames = {
+                1: 'Chủ nhật', 2: 'Thứ 2', 3: 'Thứ 3', 4: 'Thứ 4', 
+                5: 'Thứ 5', 6: 'Thứ 6', 7: 'Thứ 7'
+            };
+            
+            recommendations.push({
+                icon: '📅',
+                title: 'Tối ưu theo ngày',
+                detail: `${dayNames[bestDay.ngay_trong_tuan]} bán chạy nhất (${new Intl.NumberFormat('vi-VN').format(bestDay.doanh_thu)}đ)`,
+                action: `Tăng khuyến mãi vào ${dayNames[worstDay?.ngay_trong_tuan] || 'ngày ít khách'} để cân bằng`
+            });
+        }
+        
+        // 3. Phân tích khung giờ vàng
+        if (data.revenueByHour.length > 0) {
+            const peakHours = data.revenueByHour.slice(0, 3);
+            const peakHourText = peakHours.map(h => `${h.gio}h`).join(', ');
+            
+            recommendations.push({
+                icon: '⏰',
+                title: 'Khung giờ vàng',
+                detail: `Doanh thu cao nhất: ${peakHourText}`,
+                action: 'Tập trung nhân sự và quảng cáo vào khung giờ này'
+            });
+        }
+        
+        // 4. Phân tích sản phẩm
+        if (data.topProducts.length > 0) {
+            const topProduct = data.topProducts[0];
+            recommendations.push({
+                icon: '🏆',
+                title: 'Sản phẩm chủ lực',
+                detail: `"${topProduct.ten_san_pham}" - ${topProduct.so_luong_ban} lượt bán`,
+                action: 'Đẩy mạnh quảng bá, tạo combo với sản phẩm này'
+            });
+        }
+        
+        if (data.lowSellingProducts.length > 0) {
+            strategies.push({
+                priority: 'medium',
+                icon: '📦',
+                title: 'Kích cầu sản phẩm ít bán',
+                detail: `${data.lowSellingProducts.length} sản phẩm bán dưới 3 lượt/tháng`,
+                action: 'Giảm giá, tạo combo, hoặc xem xét ngừng kinh doanh'
+            });
+        }
+        
+        // 5. Phân tích giá trị đơn hàng
+        if (data.avgOrderValue.trung_binh > 0) {
+            const avgValue = Math.round(data.avgOrderValue.trung_binh);
+            if (avgValue < 100000) {
+                strategies.push({
+                    priority: 'high',
+                    icon: '💰',
+                    title: 'Tăng giá trị đơn hàng',
+                    detail: `Trung bình chỉ ${new Intl.NumberFormat('vi-VN').format(avgValue)}đ/đơn`,
+                    action: 'Tạo combo, upsell, miễn phí ship đơn từ 150k'
+                });
+            }
+            
+            recommendations.push({
+                icon: '📊',
+                title: 'Giá trị đơn hàng',
+                detail: `TB: ${new Intl.NumberFormat('vi-VN').format(avgValue)}đ | Cao nhất: ${new Intl.NumberFormat('vi-VN').format(data.avgOrderValue.cao_nhat)}đ`,
+                action: 'Đặt mục tiêu tăng 20% giá trị đơn TB'
+            });
+        }
+        
+        // 6. Phân tích khách hàng
+        const newCustomers = data.customerAnalysis.find(c => c.loai_khach === 'Khách mới');
+        const returningCustomers = data.customerAnalysis.find(c => c.loai_khach === 'Khách quay lại');
+        
+        if (newCustomers && returningCustomers) {
+            const returnRate = Math.round((returningCustomers.so_khach / (newCustomers.so_khach + returningCustomers.so_khach)) * 100);
+            
+            if (returnRate < 30) {
+                strategies.push({
+                    priority: 'high',
+                    icon: '👥',
+                    title: 'Tăng tỷ lệ khách quay lại',
+                    detail: `Chỉ ${returnRate}% khách quay lại mua`,
+                    action: 'Tạo chương trình tích điểm, voucher cho lần mua sau'
+                });
+            }
+        }
+        
+        // 7. Phân tích đơn hủy
+        const cancelledOrders = data.orderStatus.find(o => o.trang_thai === 'cancelled');
+        if (cancelledOrders && cancelledOrders.so_luong > 0) {
+            const totalOrders = data.orderStatus.reduce((sum, o) => sum + o.so_luong, 0);
+            const cancelRate = Math.round((cancelledOrders.so_luong / totalOrders) * 100);
+            
+            if (cancelRate > 10) {
+                urgentActions.push({
+                    priority: 'high',
+                    icon: '❌',
+                    title: 'Giảm tỷ lệ hủy đơn',
+                    detail: `${cancelRate}% đơn bị hủy (${cancelledOrders.so_luong} đơn)`,
+                    action: 'Kiểm tra quy trình, liên hệ khách để tìm nguyên nhân'
+                });
+            }
+        }
+        
+        // 8. Dự báo cuối tháng
+        const forecast = {
+            projected: Math.round(data.projectedRevenue),
+            target: data.targetRevenue,
+            gap: Math.round(data.targetRevenue - data.projectedRevenue),
+            willAchieve: data.projectedRevenue >= data.targetRevenue
+        };
+        
+        res.json({
+            success: true,
+            data: {
+                overview: {
+                    currentRevenue: data.currentRevenue,
+                    targetRevenue: data.targetRevenue,
+                    lastMonthRevenue: data.lastMonthRevenue,
+                    progress: data.progress,
+                    growthRate: data.growthRate,
+                    avgDaily: Math.round(data.avgDaily),
+                    daysRemaining: data.daysRemaining,
+                    revenueNeeded: data.revenueNeeded,
+                    dailyNeeded: Math.round(data.dailyNeeded)
+                },
+                forecast,
+                urgentActions,
+                strategies,
+                recommendations,
+                details: {
+                    topProducts: data.topProducts.slice(0, 5),
+                    lowSellingProducts: data.lowSellingProducts.slice(0, 5),
+                    peakHours: data.revenueByHour.slice(0, 3),
+                    bestDays: data.revenueByDayOfWeek.slice(0, 3),
+                    avgOrderValue: data.avgOrderValue,
+                    customerAnalysis: data.customerAnalysis
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error getting revenue strategy:', error);
+        res.status(500).json({ success: false, message: 'Lỗi phân tích doanh thu: ' + error.message });
+    }
+});
+
+// API: AI đề xuất chiến lược doanh thu thông minh
+router.post('/revenue/ai-strategy', requireAdmin, async (req, res) => {
+    try {
+        const data = await analyzeRevenueData();
+        
+        // Tạo context chi tiết cho AI
+        const revenueContext = `
+📊 PHÂN TÍCH DOANH THU THÁNG ${data.currentMonth}/${data.currentYear}
+
+💰 TỔNG QUAN:
+- Doanh thu hiện tại: ${new Intl.NumberFormat('vi-VN').format(data.currentRevenue)}đ
+- Mục tiêu: ${new Intl.NumberFormat('vi-VN').format(data.targetRevenue)}đ
+- Tiến độ: ${data.progress}%
+- Còn thiếu: ${new Intl.NumberFormat('vi-VN').format(data.revenueNeeded)}đ
+- Tháng trước: ${new Intl.NumberFormat('vi-VN').format(data.lastMonthRevenue)}đ (${data.growthRate > 0 ? '+' : ''}${data.growthRate}%)
+
+📅 THỜI GIAN:
+- Ngày hiện tại: ${data.dayOfMonth}/${data.daysInMonth}
+- Còn lại: ${data.daysRemaining} ngày
+- Trung bình/ngày: ${new Intl.NumberFormat('vi-VN').format(Math.round(data.avgDaily))}đ
+- Cần đạt/ngày: ${new Intl.NumberFormat('vi-VN').format(Math.round(data.dailyNeeded))}đ
+
+🏆 TOP SẢN PHẨM:
+${data.topProducts.slice(0, 5).map((p, i) => `${i+1}. ${p.ten_san_pham}: ${p.so_luong_ban} lượt - ${new Intl.NumberFormat('vi-VN').format(p.doanh_thu_sp)}đ`).join('\n')}
+
+📦 SẢN PHẨM ÍT BÁN:
+${data.lowSellingProducts.slice(0, 5).map(p => `- ${p.ten_san_pham}: ${p.so_luong_ban} lượt`).join('\n')}
+
+⏰ KHUNG GIỜ VÀNG:
+${data.revenueByHour.slice(0, 3).map(h => `- ${h.gio}h: ${h.so_don} đơn - ${new Intl.NumberFormat('vi-VN').format(h.doanh_thu)}đ`).join('\n')}
+
+📊 GIÁ TRỊ ĐƠN HÀNG:
+- Trung bình: ${new Intl.NumberFormat('vi-VN').format(Math.round(data.avgOrderValue.trung_binh))}đ
+- Cao nhất: ${new Intl.NumberFormat('vi-VN').format(data.avgOrderValue.cao_nhat)}đ
+- Tổng đơn: ${data.avgOrderValue.tong_don}
+
+👥 KHÁCH HÀNG:
+${data.customerAnalysis.map(c => `- ${c.loai_khach}: ${c.so_khach} người - ${new Intl.NumberFormat('vi-VN').format(c.tong_chi_tieu)}đ`).join('\n')}
+
+📈 DỰ BÁO:
+- Dự kiến cuối tháng: ${new Intl.NumberFormat('vi-VN').format(Math.round(data.projectedRevenue))}đ
+- ${data.projectedRevenue >= data.targetRevenue ? '✅ Có thể đạt mục tiêu' : '⚠️ Khó đạt mục tiêu nếu không tăng tốc'}
+`;
+
+        // Gọi Groq AI
+        const completion = await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Bạn là "Phương Nam" - trợ lý AI của nhà hàng "Ẩm Thực Phương Nam".
+Chủ nhà hàng là chị Linh. Xưng "em", gọi "chị Linh".
+
+NHIỆM VỤ: Phân tích dữ liệu và đưa ra CHIẾN LƯỢC TĂNG DOANH THU cụ thể cho chị Linh.
+
+QUY TẮC:
+1. Trả lời bằng tiếng Việt, thân thiện
+2. Xưng "em", gọi "chị Linh"
+3. Đưa ra 5-7 hành động CỤ THỂ, có thể thực hiện NGAY
+4. Mỗi đề xuất phải có: Hành động + Lý do + Kết quả dự kiến
+5. Ưu tiên các giải pháp nhanh, chi phí thấp
+6. Dựa trên dữ liệu thực tế được cung cấp
+7. Sử dụng emoji để dễ đọc
+
+FORMAT:
+🎯 Chị Linh ơi, [Tóm tắt tình hình]
+
+📋 EM ĐỀ XUẤT:
+1. [Hành động] - [Lý do] → [Kết quả dự kiến]
+2. ...
+
+⚡ VIỆC CẦN LÀM NGAY:
+- [Việc cần làm hôm nay]
+
+💡 GỢI Ý THÊM:
+- [Ý tưởng dài hạn]`
+                },
+                {
+                    role: 'user',
+                    content: `Dựa trên dữ liệu sau, hãy đề xuất chiến lược TĂNG DOANH THU cụ thể:\n\n${revenueContext}`
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 1500
+        });
+
+        const aiStrategy = completion.choices[0]?.message?.content || 'Không thể tạo chiến lược. Vui lòng thử lại.';
+        
+        res.json({
+            success: true,
+            data: {
+                type: 'revenue_strategy',
+                message: aiStrategy,
+                overview: {
+                    currentRevenue: data.currentRevenue,
+                    targetRevenue: data.targetRevenue,
+                    progress: data.progress,
+                    daysRemaining: data.daysRemaining,
+                    dailyNeeded: Math.round(data.dailyNeeded)
+                },
+                suggestions: ['Xem chi tiết phân tích', 'Báo cáo doanh thu', 'Top sản phẩm']
+            }
+        });
+    } catch (error) {
+        console.error('Error generating revenue AI strategy:', error);
+        res.status(500).json({ success: false, message: 'Lỗi tạo chiến lược: ' + error.message });
     }
 });
 

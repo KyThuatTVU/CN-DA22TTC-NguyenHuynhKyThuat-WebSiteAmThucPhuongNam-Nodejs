@@ -1430,13 +1430,23 @@
         }
         
         function formatGoalValue(value, type) {
+            // Làm tròn số, bỏ phần thập phân
+            const roundedValue = Math.round(parseFloat(value) || 0);
+            
             if (type === 'doanh_thu') {
-                if (value >= 1000000) {
-                    return (value / 1000000).toFixed(1) + 'tr';
+                if (roundedValue >= 1000000000) {
+                    return (roundedValue / 1000000000).toFixed(1) + ' tỷ';
                 }
-                return new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+                if (roundedValue >= 1000000) {
+                    return (roundedValue / 1000000).toFixed(1).replace('.0', '') + ' triệu';
+                }
+                if (roundedValue >= 1000) {
+                    return new Intl.NumberFormat('vi-VN').format(roundedValue) + 'đ';
+                }
+                return roundedValue + 'đ';
             }
-            return value;
+            // Các loại khác: số nguyên
+            return roundedValue.toLocaleString('vi-VN');
         }
         
         async function generateGoals() {
@@ -1551,8 +1561,23 @@
             appendAdminMessage(message, 'user');
             input.value = '';
             
-            // Hiển thị loading
-            const loadingId = appendAdminMessage('<i class="fas fa-spinner fa-spin"></i> Đang phân tích...', 'bot', true);
+            // Hiển thị loading với ID cố định
+            const loadingId = 'chat-loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'flex justify-start mb-3';
+            loadingDiv.innerHTML = `
+                <div class="flex items-start space-x-2 max-w-[90%]">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-100 px-4 py-2 rounded-2xl rounded-tl-sm text-sm text-gray-800">
+                        <i class="fas fa-spinner fa-spin mr-1"></i> Đang phân tích...
+                    </div>
+                </div>`;
+            const chatContainer = document.getElementById('admin-chat-messages');
+            chatContainer.appendChild(loadingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
             
             try {
                 const response = await fetch(`${API_BASE}/admin-chatbot/chat`, {
@@ -1564,8 +1589,11 @@
                 
                 const result = await response.json();
                 
-                // Xóa loading
-                document.getElementById(loadingId)?.remove();
+                // Xóa loading - đảm bảo xóa được
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
                 
                 if (result.success) {
                     appendAdminMessage(result.data.message, 'bot');
@@ -1588,7 +1616,11 @@
                     appendAdminMessage('❌ ' + (result.message || 'Có lỗi xảy ra'), 'bot');
                 }
             } catch (error) {
-                document.getElementById(loadingId)?.remove();
+                // Xóa loading khi lỗi
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
                 appendAdminMessage('❌ Không thể kết nối server', 'bot');
             }
         }
@@ -1756,8 +1788,8 @@
                         <i class="fas fa-robot text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold">AI Business Assistant</h3>
-                        <p class="text-xs text-purple-200">Trợ lý phân tích kinh doanh</p>
+                        <h3 class="font-bold">Phương Nam</h3>
+                        <p class="text-xs text-purple-200">Trợ lý AI của chị Linh 💜</p>
                     </div>
                 </div>
                 <button onclick="toggleAdminChat()" class="text-white/80 hover:text-white">
@@ -1775,11 +1807,13 @@
                         <i class="fas fa-robot text-white text-xs"></i>
                     </div>
                     <div class="bg-gray-100 px-4 py-2 rounded-2xl rounded-tl-sm text-sm text-gray-800">
-                        👋 Xin chào! Tôi là trợ lý AI của bạn.<br><br>
-                        Tôi có thể giúp bạn:<br>
+                        👋 <strong>Chào chị Linh!</strong><br><br>
+                        Em là <strong>Phương Nam</strong> - trợ lý AI của chị.<br><br>
+                        Em có thể giúp chị:<br>
                         📊 Xem báo cáo kinh doanh<br>
                         🎯 Đặt và theo dõi mục tiêu<br>
-                        📈 Đề xuất chiến lược tăng doanh thu
+                        📈 Đề xuất chiến lược tăng doanh thu<br><br>
+                        <em>Chị cần em hỗ trợ gì ạ?</em> 😊
                     </div>
                 </div>
             </div>
