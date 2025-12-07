@@ -6,18 +6,52 @@ const OpenAI = require('openai');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
 
-// Khởi tạo AI client (hỗ trợ cả OpenAI và Groq)
-const useGroq = process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key_here';
-const openai = new OpenAI({
-    apiKey: useGroq ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY,
-    baseURL: useGroq ? 'https://api.groq.com/openai/v1' : undefined
+// Khởi tạo Groq AI client
+const groq = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: 'https://api.groq.com/openai/v1'
 });
 
-console.log(`🤖 Chatbot using: ${useGroq ? 'Groq (Free)' : 'OpenAI'}`);
+console.log('🤖 Chatbot using: Groq (Free)');
+console.log('🔑 Groq API Key:', process.env.GROQ_API_KEY ? '✅ Configured (***' + process.env.GROQ_API_KEY.slice(-8) + ')' : '❌ NOT SET');
 
 // Cache thông tin nhà hàng
 let restaurantCache = { data: '', lastUpdate: 0 };
 let settingsCache = { data: null, lastUpdate: 0 };
+
+// API test - kiểm tra dữ liệu chatbot đọc được
+router.get('/test-data', async (req, res) => {
+    try {
+        // Test settings
+        const [settings] = await db.query('SELECT * FROM cai_dat');
+        const settingsObj = {};
+        settings.forEach(item => {
+            settingsObj[item.setting_key] = item.setting_value;
+        });
+        
+        // Test menu
+        const [categories] = await db.query('SELECT * FROM danh_muc WHERE trang_thai = 1');
+        const [dishes] = await db.query('SELECT ma_mon, ten_mon, gia_tien, ma_danh_muc FROM mon_an WHERE trang_thai = 1 LIMIT 10');
+        
+        res.json({
+            success: true,
+            data: {
+                groq_api_key: process.env.GROQ_API_KEY ? '✅ Configured' : '❌ NOT SET',
+                settings_count: settings.length,
+                settings: settingsObj,
+                categories_count: categories.length,
+                categories: categories.map(c => c.ten_danh_muc),
+                dishes_count: dishes.length,
+                dishes_sample: dishes.slice(0, 5).map(d => ({ ten: d.ten_mon, gia: d.gia_tien }))
+            }
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 // Hàm lấy thông tin user từ token (nếu có)
 function getUserFromToken(req) {
@@ -43,6 +77,80 @@ async function saveChatHistory(ma_nguoi_dung, session_id, nguoi_gui, noi_dung) {
         );
     } catch (error) {
         console.error('Error saving chat history:', error.message);
+    }
+}
+
+// Lấy thống kê kinh doanh từ database
+async function getBusinessStats() {
+    try {
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentYear = currentDate.getFullYear();
+        
+        // Doanh thu tháng này
+        const [revenueThisMonth] = await db.query(`
+            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+        `, [currentMonth, currentYear]);
+
+        // Số đơn hàng tháng này
+        const [ordersThisMonth] = await db.query(`
+            SELECT COUNT(*) as total FROM don_hang 
+            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+        `, [currentMonth, currentYear]);
+
+        // Khách hàng mới tháng này
+        const [customersThisMonth] = await db.query(`
+            SELECT COUNT(*) as total FROM nguoi_dung 
+            WHERE MONTH(ngay_tao) = ? AND YEAR(ngay_tao) = ?
+        `, [currentMonth, currentYear]);
+
+        // Đặt bàn tháng này
+        const [reservationsThisMonth] = await db.query(`
+            SELECT COUNT(*) as total FROM dat_ban 
+            WHERE MONTH(ngay_dat) = ? AND YEAR(ngay_dat) = ?
+        `, [currentMonth, currentYear]);
+
+        // Top 5 món bán chạy
+        const [topProducts] = await db.query(`
+            SELECT m.ten_mon, SUM(ct.so_luong) as so_luong_ban
+            FROM chi_tiet_don_hang ct
+            JOIN mon_an m ON ct.ma_mon = m.ma_mon
+            JOIN don_hang dh ON ct.ma_don_hang = dh.ma_don_hang
+            WHERE dh.trang_thai = 'delivered'
+            GROUP BY m.ma_mon, m.ten_mon
+            ORDER BY so_luong_ban DESC
+            LIMIT 5
+        `);
+
+        // Đánh giá trung bình
+        const [avgRating] = await db.query(`
+            SELECT AVG(so_sao) as avg_rating, COUNT(*) as total_reviews 
+            FROM danh_gia_san_pham WHERE trang_thai = 'approved'
+        `);
+
+        // Tổng số món ăn
+        const [totalDishes] = await db.query(`SELECT COUNT(*) as total FROM mon_an WHERE trang_thai = 1`);
+        
+        // Tổng số danh mục
+        const [totalCategories] = await db.query(`SELECT COUNT(*) as total FROM danh_muc WHERE trang_thai = 1`);
+
+        return {
+            currentMonth,
+            currentYear,
+            revenue: revenueThisMonth[0]?.total || 0,
+            orders: ordersThisMonth[0]?.total || 0,
+            newCustomers: customersThisMonth[0]?.total || 0,
+            reservations: reservationsThisMonth[0]?.total || 0,
+            topProducts: topProducts || [],
+            avgRating: avgRating[0]?.avg_rating || 0,
+            totalReviews: avgRating[0]?.total_reviews || 0,
+            totalDishes: totalDishes[0]?.total || 0,
+            totalCategories: totalCategories[0]?.total || 0
+        };
+    } catch (error) {
+        console.error('Error getting business stats:', error.message);
+        return null;
     }
 }
 
@@ -74,12 +182,16 @@ async function getRestaurantSettings() {
 async function getRestaurantInfo() {
     const now = Date.now();
     if (restaurantCache.data && (now - restaurantCache.lastUpdate) < 300000) {
+        console.log('🍽️ Using cached menu');
         return restaurantCache.data;
     }
     
     try {
+        console.log('🍽️ Loading menu from database...');
+        
         // Lấy tất cả danh mục
         const [categories] = await db.query(`SELECT * FROM danh_muc WHERE trang_thai = 1 ORDER BY ma_danh_muc`);
+        console.log(`📂 Found ${categories.length} categories`);
         
         // Lấy tất cả món ăn
         const [dishes] = await db.query(`
@@ -89,6 +201,7 @@ async function getRestaurantInfo() {
             WHERE m.trang_thai = 1
             ORDER BY d.ma_danh_muc, m.ten_mon
         `);
+        console.log(`🍜 Found ${dishes.length} dishes`);
         
         // Tạo thông tin menu theo danh mục
         let menuInfo = '\n\n=== THỰC ĐƠN ĐẦY ĐỦ ===\n';
@@ -104,10 +217,11 @@ async function getRestaurantInfo() {
             }
         });
         
+        console.log('🍽️ Menu loaded successfully, length:', menuInfo.length);
         restaurantCache = { data: menuInfo, lastUpdate: now };
         return menuInfo;
     } catch (error) {
-        console.error('Error getting restaurant info:', error.message);
+        console.error('❌ Error getting restaurant info:', error.message);
         return '';
     }
 }
@@ -121,8 +235,9 @@ router.post('/chat', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Vui lòng nhập tin nhắn' });
         }
 
-        if (!process.env.OPENAI_API_KEY) {
-            return res.json({ success: false, message: 'Chưa cấu hình OpenAI API key' });
+        // Kiểm tra Groq API key
+        if (!process.env.GROQ_API_KEY) {
+            return res.json({ success: false, message: 'Chưa cấu hình GROQ_API_KEY trong file .env' });
         }
 
         // Lấy thông tin user từ token (nếu đăng nhập)
@@ -135,6 +250,7 @@ router.post('/chat', async (req, res) => {
         // Lấy thông tin nhà hàng từ database
         const menuInfo = await getRestaurantInfo();
         const settings = await getRestaurantSettings();
+        const stats = await getBusinessStats();
         
         // Lấy thông tin từ settings hoặc dùng giá trị mặc định
         const tenNhaHang = settings.ten_nha_hang || 'Nhà hàng Ẩm thực Phương Nam';
@@ -147,7 +263,30 @@ router.post('/chat', async (req, res) => {
         const phiGiaoHang = settings.phi_giao_hang || '20000';
         const mienPhiGiaoHangTu = settings.mien_phi_giao_hang_tu || '200000';
         
-        console.log('🤖 Chatbot using settings:', { tenNhaHang, diaChi, soDienThoai, email });
+        console.log('🤖 Chatbot processing message:', message);
+        console.log('📋 Settings loaded:', Object.keys(settings).length > 0 ? 'YES' : 'NO (using defaults)');
+        console.log('🍽️ Menu loaded:', menuInfo.length > 50 ? `YES (${menuInfo.length} chars)` : 'NO or EMPTY');
+        console.log('📊 Stats loaded:', stats ? 'YES' : 'NO');
+        console.log('📍 Restaurant info:', { tenNhaHang, diaChi, soDienThoai });
+        
+        // Tạo thông tin thống kê
+        const formatMoney = (amount) => new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+        let statsInfo = '';
+        if (stats) {
+            statsInfo = `
+
+=== THỐNG KÊ KINH DOANH THÁNG ${stats.currentMonth}/${stats.currentYear} ===
+📊 Doanh thu tháng này: ${formatMoney(stats.revenue)}
+📦 Số đơn hàng: ${stats.orders} đơn
+👥 Khách hàng mới: ${stats.newCustomers} người
+🍽️ Lượt đặt bàn: ${stats.reservations} lượt
+⭐ Đánh giá trung bình: ${parseFloat(stats.avgRating || 0).toFixed(1)}/5 (${stats.totalReviews} đánh giá)
+📋 Tổng số món ăn: ${stats.totalDishes} món trong ${stats.totalCategories} danh mục
+
+🏆 TOP MÓN BÁN CHẠY:
+${stats.topProducts.length > 0 ? stats.topProducts.map((p, i) => `${i + 1}. ${p.ten_mon} (${p.so_luong_ban} phần)`).join('\n') : 'Chưa có dữ liệu'}
+`;
+        }
         
         const systemPrompt = `BẠN LÀ TRÀ MY - trợ lý ảo thông minh của ${tenNhaHang}.
 
@@ -243,12 +382,13 @@ ${menuInfo}
 ⚠️ PHẢI TRẢ LỜI ĐÚNG GIÁ TIỀN (đọc từ thực đơn)
 ⚠️ PHẢI TRẢ LỜI ĐÚNG TÊN NGƯỜI trong đội ngũ
 ⚠️ KHÔNG ĐƯỢC bịa đặt thông tin không có trong hệ thống
-⚠️ Khi khách hỏi về người cụ thể (Linh, Trường, Kỹ Thuật, Vy) → Trả lời CHÍNH XÁC theo thông tin đội ngũ`;
+⚠️ Khi khách hỏi về người cụ thể (Linh, Trường, Kỹ Thuật, Vy) → Trả lời CHÍNH XÁC theo thông tin đội ngũ
+⚠️ Khi khách hỏi về tình hình kinh doanh, doanh thu, đơn hàng → Trả lời dựa trên THỐNG KÊ KINH DOANH bên dưới
+${statsInfo}`;
 
-        // Gọi AI API (OpenAI hoặc Groq)
-        const model = useGroq ? 'llama-3.3-70b-versatile' : 'gpt-3.5-turbo';
-        const completion = await openai.chat.completions.create({
-            model: model,
+        // Gọi Groq AI API
+        const completion = await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
             messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: message }
@@ -265,36 +405,36 @@ ${menuInfo}
             
             return res.json({
                 success: true,
-                data: { response: botResponse, source: 'ai' }
+                data: { response: botResponse, source: 'groq' }
             });
         }
 
         return res.json({
             success: false,
-            message: 'Không nhận được phản hồi từ OpenAI'
+            message: 'Không nhận được phản hồi từ Groq AI'
         });
 
     } catch (error) {
         console.error('Chatbot error:', error.message);
         
-        // Xử lý lỗi cụ thể từ OpenAI
+        // Xử lý lỗi cụ thể từ Groq API
         if (error.status === 401) {
             return res.json({
                 success: false,
-                message: 'API key không hợp lệ. Vui lòng kiểm tra cấu hình!'
+                message: 'GROQ_API_KEY không hợp lệ. Vui lòng kiểm tra lại trong file .env!'
             });
         }
         
         if (error.status === 429) {
             return res.json({
                 success: false,
-                message: 'Đã vượt quá giới hạn API. Vui lòng thử lại sau!'
+                message: 'Đã vượt quá giới hạn Groq API. Vui lòng thử lại sau!'
             });
         }
         
         return res.json({
             success: false,
-            message: 'Không thể kết nối đến OpenAI. Vui lòng thử lại!'
+            message: 'Không thể kết nối đến Groq AI. Vui lòng thử lại!'
         });
     }
 });

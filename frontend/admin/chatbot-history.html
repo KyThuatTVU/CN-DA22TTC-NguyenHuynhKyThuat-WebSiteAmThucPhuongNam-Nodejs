@@ -143,7 +143,7 @@
     <!-- Detail Modal -->
     <div id="detail-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-green-500 to-blue-600">
+            <div class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-orange-500 to-amber-600">
                 <h3 class="text-xl font-bold text-white"><i class="fas fa-comments mr-2"></i>Chi tiết cuộc trò chuyện</h3>
                 <button onclick="closeModal()" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button>
             </div>
@@ -374,8 +374,17 @@
                         } else {
                             html += `
                                 <div class="flex gap-2">
-                                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-robot text-white text-sm"></i>
+                                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border border-orange-200">
+                                        <svg viewBox="0 0 64 64" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <ellipse cx="32" cy="18" rx="22" ry="8" fill="#fff5e6" stroke="#fbbf24" stroke-width="1.5"/>
+                                            <path d="M10 18 L32 4 L54 18" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.5" stroke-linejoin="round"/>
+                                            <circle cx="32" cy="36" r="14" fill="#fef3c7"/>
+                                            <path d="M18 32 Q18 24 26 22 Q32 20 38 22 Q46 24 46 32 Q46 28 44 26 Q40 22 32 22 Q24 22 20 26 Q18 28 18 32" fill="#1c1917"/>
+                                            <ellipse cx="27" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                                            <ellipse cx="37" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                                            <path d="M28 42 Q32 46 36 42" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                                            <path d="M22 50 Q32 48 42 50 L44 60 L20 60 Z" fill="#ea580c"/>
+                                        </svg>
                                     </div>
                                     <div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[80%] shadow-sm">
                                         <p class="text-sm text-gray-700">${msg.noi_dung}</p>

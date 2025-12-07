@@ -597,21 +597,30 @@ function showChatbotGreeting() {
         greeting = 'Chào quý khách ạ! 🌸 Em là Trà My, trợ lý ảo của Nhà hàng Ẩm thực Phương Nam đây ạ. Em có thể giúp anh/chị tìm hiểu về thực đơn, đặt bàn hoặc giải đáp mọi thắc mắc. Anh/chị cần em hỗ trợ gì ạ? 💕';
     }
     
-    // Thêm quick suggestions
+    // Thêm quick suggestions với màu cam
     const quickSuggestions = `
         <div class="flex flex-wrap gap-2 mt-3">
-            <button onclick="chatbotSendQuick('Xem thực đơn')" class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-200 transition">🍽️ Thực đơn</button>
-            <button onclick="chatbotSendQuick('Đặt bàn')" class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-200 transition">📅 Đặt bàn</button>
-            <button onclick="chatbotSendQuick('Giờ mở cửa')" class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-200 transition">🕐 Giờ mở cửa</button>
+            <button onclick="chatbotSendQuick('Xem thực đơn')" class="bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-orange-200 transition">🍽️ Thực đơn</button>
+            <button onclick="chatbotSendQuick('Đặt bàn')" class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-amber-200 transition">📅 Đặt bàn</button>
+            <button onclick="chatbotSendQuick('Giờ mở cửa')" class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-200 transition">🕐 Giờ mở cửa</button>
         </div>
     `;
     
-    // Thêm tin nhắn chào mừng
+    // Thêm tin nhắn chào mừng với logo Trà My
     const botMsg = document.createElement('div');
     botMsg.className = 'flex gap-2';
     botMsg.innerHTML = `
-        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-robot text-white text-sm"></i>
+        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border border-orange-100">
+            <svg viewBox="0 0 64 64" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="32" cy="18" rx="22" ry="8" fill="#fff5e6" stroke="#fbbf24" stroke-width="1.5"/>
+                <path d="M10 18 L32 4 L54 18" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.5" stroke-linejoin="round"/>
+                <circle cx="32" cy="36" r="14" fill="#fef3c7"/>
+                <path d="M18 32 Q18 24 26 22 Q32 20 38 22 Q46 24 46 32 Q46 28 44 26 Q40 22 32 22 Q24 22 20 26 Q18 28 18 32" fill="#1c1917"/>
+                <ellipse cx="27" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                <ellipse cx="37" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                <path d="M28 42 Q32 46 36 42" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <path d="M22 50 Q32 48 42 50 L44 60 L20 60 Z" fill="#ea580c"/>
+            </svg>
         </div>
         <div class="chat-bubble-bot px-3 py-2 max-w-[85%] bg-white rounded-2xl rounded-tl-none shadow-sm">
             <p class="text-gray-700 text-sm leading-relaxed">${greeting}</p>
@@ -709,7 +718,7 @@ function renderHistoryList() {
         return `
             <div class="history-item ${isActive ? 'active' : ''} px-3 py-2 cursor-pointer border-b border-gray-50" onclick="loadChatSession('${session.session_id}')">
                 <div class="flex items-start gap-2">
-                    <i class="fas fa-comment-dots text-green-500 mt-0.5"></i>
+                    <i class="fas fa-comment-dots text-orange-500 mt-0.5"></i>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm text-gray-700 truncate">${escapeHtmlChat(preview)}</p>
                         <p class="text-xs text-gray-400">${timeStr}</p>
@@ -788,7 +797,7 @@ function addUserMessageToUI(messages, text) {
     const userMsg = document.createElement('div');
     userMsg.className = 'flex justify-end';
     userMsg.innerHTML = `
-        <div class="bg-gradient-to-br from-green-400 to-blue-500 p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">
+        <div class="bg-gradient-to-br from-orange-400 to-amber-500 p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">
             <p class="text-white text-sm">${escapeHtmlChat(text)}</p>
         </div>
     `;
@@ -859,19 +868,28 @@ window.chatbotSendMessage = async function() {
     input.value = '';
     messages.scrollTop = messages.scrollHeight;
     
-    // Hiển thị typing indicator
+    // Hiển thị typing indicator với logo Trà My
     const typingDiv = document.createElement('div');
     typingDiv.id = 'chatbot-typing';
     typingDiv.className = 'flex gap-2';
     typingDiv.innerHTML = `
-        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-robot text-white text-sm"></i>
+        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border border-orange-100">
+            <svg viewBox="0 0 64 64" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="32" cy="18" rx="22" ry="8" fill="#fff5e6" stroke="#fbbf24" stroke-width="1.5"/>
+                <path d="M10 18 L32 4 L54 18" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.5" stroke-linejoin="round"/>
+                <circle cx="32" cy="36" r="14" fill="#fef3c7"/>
+                <path d="M18 32 Q18 24 26 22 Q32 20 38 22 Q46 24 46 32 Q46 28 44 26 Q40 22 32 22 Q24 22 20 26 Q18 28 18 32" fill="#1c1917"/>
+                <ellipse cx="27" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                <ellipse cx="37" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                <path d="M28 42 Q32 46 36 42" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <path d="M22 50 Q32 48 42 50 L44 60 L20 60 Z" fill="#ea580c"/>
+            </svg>
         </div>
         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm">
             <div class="flex gap-1">
-                <span class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
-                <span class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-                <span class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                <span class="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
             </div>
         </div>
     `;
@@ -911,13 +929,22 @@ window.chatbotSendMessage = async function() {
     }
 };
 
-// Thêm tin nhắn bot
+// Thêm tin nhắn bot với logo Trà My
 function addBotMessage(messages, response) {
     const botMsg = document.createElement('div');
     botMsg.className = 'flex gap-2';
     botMsg.innerHTML = `
-        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-robot text-white text-sm"></i>
+        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border border-orange-100">
+            <svg viewBox="0 0 64 64" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="32" cy="18" rx="22" ry="8" fill="#fff5e6" stroke="#fbbf24" stroke-width="1.5"/>
+                <path d="M10 18 L32 4 L54 18" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.5" stroke-linejoin="round"/>
+                <circle cx="32" cy="36" r="14" fill="#fef3c7"/>
+                <path d="M18 32 Q18 24 26 22 Q32 20 38 22 Q46 24 46 32 Q46 28 44 26 Q40 22 32 22 Q24 22 20 26 Q18 28 18 32" fill="#1c1917"/>
+                <ellipse cx="27" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                <ellipse cx="37" cy="35" rx="2" ry="2.5" fill="#1c1917"/>
+                <path d="M28 42 Q32 46 36 42" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <path d="M22 50 Q32 48 42 50 L44 60 L20 60 Z" fill="#ea580c"/>
+            </svg>
         </div>
         <div class="chat-bubble-bot px-3 py-2 max-w-[85%] bg-white rounded-2xl rounded-tl-none shadow-sm">
             <p class="text-gray-700 text-sm leading-relaxed">${response}</p>
