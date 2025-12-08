@@ -109,6 +109,21 @@ async function loadAllComponents() {
     promises.push(loadComponent('footer-container', 'components/footer.html'));
     promises.push(loadComponent('chatbot-container', 'components/chatbot.html'));
     
+    // Load recommendation widget container
+    let recommendationContainer = document.getElementById('recommendation-container');
+    if (!recommendationContainer) {
+        recommendationContainer = document.createElement('div');
+        recommendationContainer.id = 'recommendation-container';
+        // Insert before footer if exists
+        const footerContainer = document.getElementById('footer-container');
+        if (footerContainer) {
+            footerContainer.parentNode.insertBefore(recommendationContainer, footerContainer);
+        } else {
+            document.body.appendChild(recommendationContainer);
+        }
+    }
+    promises.push(loadComponent('recommendation-container', 'components/recommendation-widget.html'));
+    
     // Load floating contact buttons (bao gồm cả nút scroll to top)
     let floatingContactContainer = document.getElementById('floating-contact-container');
     if (!floatingContactContainer) {
@@ -902,7 +917,21 @@ window.chatbotSendMessage = async function() {
             ? result.data.response 
             : (result.message || '❌ Không thể kết nối. Vui lòng thử lại!');
         
-        addBotMessage(messages, botResponse);
+        // Lấy gợi ý món ăn dựa trên tin nhắn (ML Recommendation)
+        let recommendations = [];
+        if (typeof RecommendationSystem !== 'undefined') {
+            try {
+                const recResult = await RecommendationSystem.getChatRecommendations(text);
+                if (recResult.success && recResult.meta?.has_food_intent) {
+                    recommendations = recResult.data || [];
+                    console.log('🍽️ Chat recommendations:', recommendations.length, 'items');
+                }
+            } catch (recError) {
+                console.log('⚠️ Could not get recommendations:', recError.message);
+            }
+        }
+        
+        addBotMessage(messages, botResponse, recommendations);
         
     } catch (error) {
         console.error('Chatbot API error:', error);
@@ -912,15 +941,23 @@ window.chatbotSendMessage = async function() {
 };
 
 // Thêm tin nhắn bot
-function addBotMessage(messages, response) {
+function addBotMessage(messages, response, recommendations = null) {
     const botMsg = document.createElement('div');
     botMsg.className = 'flex gap-2';
+    
+    // Render recommendations nếu có
+    let recommendationHtml = '';
+    if (recommendations && recommendations.length > 0 && typeof RecommendationSystem !== 'undefined') {
+        recommendationHtml = RecommendationSystem.renderChatRecommendations(recommendations);
+    }
+    
     botMsg.innerHTML = `
         <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
             <i class="fas fa-robot text-white text-sm"></i>
         </div>
         <div class="chat-bubble-bot px-3 py-2 max-w-[85%] bg-white rounded-2xl rounded-tl-none shadow-sm">
             <p class="text-gray-700 text-sm leading-relaxed">${response}</p>
+            ${recommendationHtml}
         </div>
     `;
     messages.appendChild(botMsg);

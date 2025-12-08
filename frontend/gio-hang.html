@@ -384,12 +384,43 @@
         </div>
     </section>
 
-    <!-- Recommended Products -->
+    <!-- ML Pairing Recommendations - Gợi ý kết hợp món -->
+    <section id="pairing-section" class="py-8 bg-gradient-to-r from-orange-50 to-amber-50 hidden">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span class="text-2xl">🍽️</span> Kết hợp hoàn hảo
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Gợi ý món ăn phù hợp với giỏ hàng của bạn</p>
+                </div>
+                <button onclick="loadPairingRecommendations()" class="text-orange-600 hover:text-orange-700 text-sm">
+                    <i class="fas fa-sync-alt mr-1"></i> Làm mới
+                </button>
+            </div>
+            <div id="pairing-recommendations" class="flex gap-4 overflow-x-auto pb-4">
+                <!-- Loading skeleton -->
+                <div class="flex-shrink-0 w-44 animate-pulse">
+                    <div class="bg-white rounded-xl overflow-hidden shadow">
+                        <div class="bg-gray-200 h-28"></div>
+                        <div class="p-3">
+                            <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommended Products - ML Based -->
     <section class="py-12 bg-gradient-to-b from-white to-orange-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-8">
-                <h2 class="font-dancing text-3xl sm:text-4xl font-bold text-gray-800 mb-2">Có thể bạn cũng thích</h2>
-                <p class="text-gray-500">Khám phá thêm các món ăn ngon khác</p>
+                <h2 class="font-dancing text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+                    <span class="text-3xl mr-2">✨</span>Gợi ý dành cho bạn
+                </h2>
+                <p class="text-gray-500">Dựa trên sở thích và lịch sử của bạn</p>
             </div>
             <div id="recommended-products" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Loading skeleton -->
@@ -432,6 +463,112 @@
             </div>
         </div>
     </section>
+    
+    <script>
+    // Load ML-based pairing recommendations
+    async function loadPairingRecommendations() {
+        const section = document.getElementById('pairing-section');
+        const container = document.getElementById('pairing-recommendations');
+        
+        if (!section || !container) return;
+        
+        // Lấy danh sách món trong giỏ hàng
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const dishIds = cart.map(item => item.id).filter(Boolean);
+        
+        if (dishIds.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+        
+        try {
+            if (typeof RecommendationSystem === 'undefined') {
+                console.warn('RecommendationSystem not loaded');
+                return;
+            }
+            
+            const recommendations = await RecommendationSystem.getPairingRecommendations(dishIds);
+            
+            if (recommendations.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            
+            container.innerHTML = recommendations.map(dish => {
+                let imagePath = dish.anh_mon || 'default-food.jpg';
+                if (!imagePath.startsWith('http') && !imagePath.startsWith('/images/')) {
+                    imagePath = '/images/' + imagePath.replace(/^\/+/, '');
+                }
+                const imageUrl = imagePath.startsWith('http') ? imagePath : `http://localhost:3000${imagePath}`;
+                const price = new Intl.NumberFormat('vi-VN').format(dish.gia_tien);
+                
+                return `
+                    <div class="flex-shrink-0 w-44">
+                        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1">
+                            <a href="chitietmonan.html?id=${dish.ma_mon}" class="block">
+                                <div class="relative">
+                                    <img src="${imageUrl}" alt="${dish.ten_mon}" 
+                                         class="w-full h-28 object-cover"
+                                         onerror="this.src='images/default-food.jpg'">
+                                    <span class="absolute top-2 left-2 bg-orange-500 text-white px-2 py-0.5 rounded-full text-xs">
+                                        🍽️ Kết hợp
+                                    </span>
+                                </div>
+                            </a>
+                            <div class="p-3">
+                                <h4 class="font-medium text-sm text-gray-800 line-clamp-1 mb-1">${dish.ten_mon}</h4>
+                                <p class="text-xs text-gray-500 line-clamp-1 mb-2">${dish.reason || ''}</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-orange-600 font-bold text-sm">${price}đ</span>
+                                    <button onclick="addToCartFromRecommendation(${dish.ma_mon}, '${dish.ten_mon.replace(/'/g, "\\'")}', ${dish.gia_tien}, '${imageUrl}')"
+                                            class="bg-orange-500 text-white w-7 h-7 rounded-full hover:bg-orange-600 transition text-xs">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+        } catch (error) {
+            console.error('Error loading pairing recommendations:', error);
+            section.classList.add('hidden');
+        }
+    }
+    
+    // Load ML-based general recommendations
+    async function loadMLRecommendations() {
+        const container = document.getElementById('recommended-products');
+        if (!container) return;
+        
+        try {
+            if (typeof RecommendationSystem === 'undefined') {
+                console.warn('RecommendationSystem not loaded, waiting...');
+                setTimeout(loadMLRecommendations, 500);
+                return;
+            }
+            
+            const recommendations = await RecommendationSystem.getRecommendations(8);
+            
+            if (recommendations.length > 0) {
+                RecommendationSystem.renderList(recommendations, 'recommended-products');
+            }
+        } catch (error) {
+            console.error('Error loading ML recommendations:', error);
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            loadPairingRecommendations();
+            loadMLRecommendations();
+        }, 800);
+    });
+    </script>
 
     <!-- Footer Container -->
     <div id="footer-container"></div>
@@ -442,6 +579,7 @@
     <script src="js/loading.js"></script>
     <script src="js/main.js"></script>
     <script src="js/cart.js"></script>
+    <script src="js/recommendation.js"></script>
     <script src="js/load-components.js"></script>
 
     <!-- Cart Page Initialization -->
