@@ -170,8 +170,8 @@
                         <div class="grid grid-cols-4 gap-5 mb-6">
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-gradient-to-br from-blue-500 to-blue-600">
-                                        <i class="fas fa-dollar-sign text-white text-xl"></i>
+                                    <div class="kpi-icon bg-slate-100">
+                                        <i class="fas fa-coins text-slate-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Tổng doanh thu</p>
@@ -182,8 +182,8 @@
                             </div>
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-gradient-to-br from-emerald-500 to-emerald-600">
-                                        <i class="fas fa-shopping-cart text-white text-xl"></i>
+                                    <div class="kpi-icon bg-slate-100">
+                                        <i class="fas fa-receipt text-slate-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Số đơn hàng</p>
@@ -194,8 +194,8 @@
                             </div>
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-gradient-to-br from-amber-500 to-amber-600">
-                                        <i class="fas fa-users text-white text-xl"></i>
+                                    <div class="kpi-icon bg-slate-100">
+                                        <i class="fas fa-user text-slate-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Khách hàng</p>
@@ -206,8 +206,8 @@
                             </div>
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-gradient-to-br from-purple-500 to-purple-600">
-                                        <i class="fas fa-calendar-check text-white text-xl"></i>
+                                    <div class="kpi-icon bg-slate-100">
+                                        <i class="fas fa-calendar text-slate-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Đặt bàn</p>
@@ -221,16 +221,16 @@
                         <!-- Row 2: 5 Mục tiêu tháng -->
                         <div class="chart-card mb-6">
                             <div class="flex items-center justify-between mb-4">
-                                <p class="chart-title mb-0"><i class="fas fa-bullseye text-purple-500 mr-2"></i>5 Mục tiêu tháng <span id="goals-month-year"></span></p>
+                                <p class="chart-title mb-0"><i class="fas fa-target text-slate-600 mr-2"></i>5 Mục tiêu tháng <span id="goals-month-year"></span></p>
                                 <div class="flex items-center gap-2">
-                                    <span id="total-progress-badge" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">0%</span>
-                                    <button onclick="generateGoals()" id="btn-generate-goals" class="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-xs hover:opacity-90 transition">
-                                        <i class="fas fa-magic mr-1"></i>AI Tạo mục tiêu
+                                    <span id="total-progress-badge" class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-bold">0%</span>
+                                    <button onclick="generateGoals()" id="btn-generate-goals" class="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-xs hover:bg-slate-800 transition">
+                                        <i class="fas fa-plus mr-1"></i>AI Tạo mục tiêu
                                     </button>
-                                    <button onclick="resetGoals()" id="btn-reset-goals" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs hover:bg-red-200 transition hidden" title="Xóa mục tiêu để tạo lại">
+                                    <button onclick="resetGoals()" id="btn-reset-goals" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs hover:bg-slate-200 transition hidden" title="Xóa mục tiêu để tạo lại">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button onclick="refreshGoals()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs hover:bg-gray-200 transition">
+                                    <button onclick="refreshGoals()" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs hover:bg-slate-200 transition">
                                         <i class="fas fa-sync-alt"></i>
                                     </button>
                                 </div>
@@ -247,20 +247,20 @@
                         <!-- Row 3: Gauge + Revenue Chart -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-bullseye text-blue-500 mr-2"></i>Tỷ lệ hoàn thành tổng</p>
+                                <p class="chart-title"><i class="fas fa-chart-pie text-slate-600 mr-2"></i>Tỷ lệ hoàn thành tổng</p>
                                 <div style="height: 160px; position: relative;">
                                     <canvas id="gaugeChart"></canvas>
                                     <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); text-align: center;">
-                                        <p class="text-3xl font-bold text-blue-600" id="gauge-value">0%</p>
+                                        <p class="text-3xl font-bold text-slate-700" id="gauge-value">0%</p>
                                         <p class="text-xs text-gray-500">Hoàn thành mục tiêu</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="chart-card col-span-2">
-                                <p class="chart-title"><i class="fas fa-chart-bar text-emerald-500 mr-2"></i>Doanh thu 12 tháng gần nhất</p>
+                                <p class="chart-title"><i class="fas fa-chart-line text-slate-600 mr-2"></i>Doanh thu 12 tháng gần nhất</p>
                                 <div style="height: 200px;"><canvas id="revenueChart"></canvas></div>
                                 <div class="flex justify-center gap-8 mt-3">
-                                    <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)"></div> Doanh thu (triệu đồng)</div>
+                                    <div class="legend-item"><div class="legend-dot bg-slate-600"></div> Doanh thu (triệu đồng)</div>
                                 </div>
                             </div>
                         </div>
@@ -268,15 +268,15 @@
                         <!-- Row 3: Orders + Top Products + Customers -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-pie-chart text-purple-500 mr-2"></i>Đơn hàng theo trạng thái</p>
+                                <p class="chart-title"><i class="fas fa-chart-pie text-slate-600 mr-2"></i>Đơn hàng theo trạng thái</p>
                                 <div style="height: 200px;"><canvas id="ordersChart"></canvas></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-fire text-orange-500 mr-2"></i>Top 10 món ăn bán chạy</p>
+                                <p class="chart-title"><i class="fas fa-star text-slate-600 mr-2"></i>Top 10 món ăn bán chạy</p>
                                 <div id="top-products" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-user-plus text-cyan-500 mr-2"></i>Khách hàng mới theo tháng</p>
+                                <p class="chart-title"><i class="fas fa-users text-slate-600 mr-2"></i>Khách hàng mới theo tháng</p>
                                 <div style="height: 200px;"><canvas id="customerChart"></canvas></div>
                             </div>
                         </div>
@@ -284,15 +284,15 @@
                         <!-- Row 4: Reservations + Payment Methods + Recent Orders -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-clock text-amber-500 mr-2"></i>Đặt bàn theo khung giờ</p>
+                                <p class="chart-title"><i class="fas fa-clock text-slate-600 mr-2"></i>Đặt bàn theo khung giờ</p>
                                 <div style="height: 200px;"><canvas id="reservationChart"></canvas></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-credit-card text-teal-500 mr-2"></i>Phương thức thanh toán</p>
+                                <p class="chart-title"><i class="fas fa-wallet text-slate-600 mr-2"></i>Phương thức thanh toán</p>
                                 <div style="height: 200px;"><canvas id="paymentMethodsChart"></canvas></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-list-alt text-indigo-500 mr-2"></i>Đơn hàng gần đây</p>
+                                <p class="chart-title"><i class="fas fa-list text-slate-600 mr-2"></i>Đơn hàng gần đây</p>
                                 <div id="recent-orders" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
                             </div>
                         </div>
@@ -300,21 +300,21 @@
                         <!-- Row 5: Reviews Stats -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-star text-yellow-500 mr-2"></i>Phân bố đánh giá sao</p>
+                                <p class="chart-title"><i class="fas fa-star text-slate-600 mr-2"></i>Phân bố đánh giá sao</p>
                                 <div style="height: 180px;"><canvas id="reviewStarChart"></canvas></div>
                                 <div class="text-center mt-2">
                                     <p class="text-sm text-slate-500">Điểm trung bình</p>
-                                    <p class="text-2xl font-bold text-yellow-500" id="avg-rating">0.0 <i class="fas fa-star text-lg"></i></p>
+                                    <p class="text-2xl font-bold text-slate-700" id="avg-rating">0.0 <i class="fas fa-star text-lg"></i></p>
                                 </div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-chart-pie text-emerald-500 mr-2"></i>Trạng thái đánh giá</p>
+                                <p class="chart-title"><i class="fas fa-chart-pie text-slate-600 mr-2"></i>Trạng thái đánh giá</p>
                                 <div style="height: 200px;"><canvas id="reviewStatusChart"></canvas></div>
                             </div>
                             <div class="chart-card">
                                 <div class="flex items-center justify-between mb-4">
-                                    <p class="chart-title mb-0"><i class="fas fa-trophy text-orange-500 mr-2"></i>Top món được đánh giá</p>
-                                    <a href="reviews.html" class="text-xs text-blue-500 hover:text-blue-700">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+                                    <p class="chart-title mb-0"><i class="fas fa-award text-slate-600 mr-2"></i>Top món được đánh giá</p>
+                                    <a href="reviews.html" class="text-xs text-slate-600 hover:text-slate-800">Xem tất cả <i class="fas fa-arrow-right"></i></a>
                                 </div>
                                 <div id="top-reviewed-products" class="space-y-2" style="max-height: 200px; overflow-y: auto;"></div>
                             </div>
@@ -323,15 +323,15 @@
                         <!-- Row 6: News Stats -->
                         <div class="grid grid-cols-3 gap-5">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-newspaper text-pink-500 mr-2"></i>Lượt xem bài viết theo tháng</p>
+                                <p class="chart-title"><i class="fas fa-newspaper text-slate-600 mr-2"></i>Lượt xem bài viết theo tháng</p>
                                 <div style="height: 200px;"><canvas id="newsViewsChart"></canvas></div>
                             </div>
                             <div class="chart-card col-span-2">
                                 <div class="flex items-center justify-between mb-4">
-                                    <p class="chart-title mb-0"><i class="fas fa-eye text-rose-500 mr-2"></i>Top bài viết được xem nhiều nhất</p>
+                                    <p class="chart-title mb-0"><i class="fas fa-eye text-slate-600 mr-2"></i>Top bài viết được xem nhiều nhất</p>
                                     <div class="flex items-center space-x-4 text-sm">
                                         <span class="text-slate-500">Tổng: <span id="total-news" class="font-bold text-slate-700">0</span> bài</span>
-                                        <span class="text-slate-500">Lượt xem: <span id="total-views" class="font-bold text-pink-600">0</span></span>
+                                        <span class="text-slate-500">Lượt xem: <span id="total-views" class="font-bold text-slate-700">0</span></span>
                                     </div>
                                 </div>
                                 <div id="top-news" class="space-y-2" style="max-height: 200px; overflow-y: auto;"></div>
@@ -421,7 +421,7 @@
             // Gauge Chart
             gaugeChart = new Chart(document.getElementById('gaugeChart').getContext('2d'), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [0, 100], backgroundColor: ['#3b82f6', '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
+                data: { datasets: [{ data: [0, 100], backgroundColor: ['#475569', '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
             });
 
@@ -431,7 +431,7 @@
                 data: {
                     labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
                     datasets: [
-                        { label: 'Doanh thu', data: new Array(12).fill(0), backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 }
+                        { label: 'Doanh thu', data: new Array(12).fill(0), backgroundColor: '#475569', borderRadius: 6, barPercentage: 0.6 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + 'tr' } } } }
@@ -440,21 +440,21 @@
             // Orders Chart
             ordersChart = new Chart(document.getElementById('ordersChart').getContext('2d'), {
                 type: 'doughnut',
-                data: { labels: ['Hoàn thành', 'Đang xử lý', 'Chờ xác nhận', 'Đã hủy'], datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'], borderWidth: 3, borderColor: '#fff' }] },
+                data: { labels: ['Hoàn thành', 'Đang xử lý', 'Chờ xác nhận', 'Đã hủy'], datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#334155', '#475569', '#64748b', '#94a3b8'], borderWidth: 3, borderColor: '#fff' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } } } }
             });
 
             // Customer Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
             customerChart = new Chart(document.getElementById('customerChart').getContext('2d'), {
                 type: 'line',
-                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: new Array(12).fill(0), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
+                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: new Array(12).fill(0), borderColor: '#475569', backgroundColor: 'rgba(71, 85, 105, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#475569', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
             // Reservation Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
             reservationChart = new Chart(document.getElementById('reservationChart').getContext('2d'), {
                 type: 'bar',
-                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: new Array(6).fill(0), backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'], borderRadius: 8 }] },
+                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: new Array(6).fill(0), backgroundColor: '#64748b', borderRadius: 8 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
@@ -466,13 +466,13 @@
                     datasets: [{ 
                         label: 'Lượt xem', 
                         data: new Array(12).fill(0), 
-                        borderColor: '#ec4899', 
-                        backgroundColor: 'rgba(236, 72, 153, 0.1)', 
+                        borderColor: '#64748b', 
+                        backgroundColor: 'rgba(100, 116, 139, 0.1)', 
                         borderWidth: 3, 
                         fill: true, 
                         tension: 0.4, 
                         pointRadius: 5, 
-                        pointBackgroundColor: '#ec4899', 
+                        pointBackgroundColor: '#64748b', 
                         pointBorderColor: '#fff', 
                         pointBorderWidth: 2 
                     }] 
@@ -488,7 +488,7 @@
                     datasets: [{
                         label: 'Số lượng',
                         data: [0, 0, 0, 0, 0],
-                        backgroundColor: ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'],
+                        backgroundColor: ['#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1'],
                         borderRadius: 6,
                         barPercentage: 0.7
                     }]
@@ -512,7 +512,7 @@
                     labels: ['Đã duyệt', 'Chờ duyệt', 'Đã khóa'],
                     datasets: [{
                         data: [0, 0, 0],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        backgroundColor: ['#475569', '#94a3b8', '#cbd5e1'],
                         borderWidth: 3,
                         borderColor: '#fff'
                     }]
@@ -534,7 +534,7 @@
                     labels: ['Tiền mặt', 'MoMo', 'Chuyển khoản'],
                     datasets: [{
                         data: [0, 0, 0],
-                        backgroundColor: ['#10b981', '#a855f7', '#3b82f6'],
+                        backgroundColor: ['#475569', '#64748b', '#94a3b8'],
                         borderWidth: 3,
                         borderColor: '#fff'
                     }]
@@ -808,14 +808,14 @@
             const maxViews = Math.max(...newsData.map(n => n.luot_xem || 0));
             container.innerHTML = newsData.map((news, i) => `
                 <div class="product-row">
-                    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
+                    <span class="w-7 h-7 rounded-full bg-slate-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-800 truncate" title="${news.tieu_de}">${news.tieu_de}</p>
                         <div class="w-full bg-slate-100 rounded-full h-2 mt-1">
-                            <div class="bg-gradient-to-r from-pink-500 to-rose-600 h-2 rounded-full transition-all" style="width: ${maxViews > 0 ? (news.luot_xem/maxViews)*100 : 0}%"></div>
+                            <div class="bg-slate-600 h-2 rounded-full transition-all" style="width: ${maxViews > 0 ? (news.luot_xem/maxViews)*100 : 0}%"></div>
                         </div>
                     </div>
-                    <span class="text-sm font-semibold text-pink-600 ml-3">${formatNumber(news.luot_xem || 0)}</span>
+                    <span class="text-sm font-semibold text-slate-700 ml-3">${formatNumber(news.luot_xem || 0)}</span>
                 </div>
             `).join('');
         }
@@ -854,14 +854,14 @@
                         const maxSold = Math.max(...products.map(p => p.da_ban || 0));
                         container.innerHTML = products.map((p, i) => `
                             <div class="product-row">
-                                <span class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
+                                <span class="w-7 h-7 rounded-full bg-slate-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
                                 <div class="flex-1">
                                     <p class="text-sm font-medium text-gray-800 truncate">${p.ten_mon}</p>
                                     <div class="w-full bg-slate-100 rounded-full h-2 mt-1">
-                                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all" style="width: ${maxSold > 0 ? (p.da_ban/maxSold)*100 : 0}%"></div>
+                                        <div class="bg-slate-600 h-2 rounded-full transition-all" style="width: ${maxSold > 0 ? (p.da_ban/maxSold)*100 : 0}%"></div>
                                     </div>
                                 </div>
-                                <span class="text-sm font-semibold text-blue-600 ml-3">${p.da_ban || 0}</span>
+                                <span class="text-sm font-semibold text-slate-700 ml-3">${p.da_ban || 0}</span>
                             </div>
                         `).join('');
                         return;
@@ -1230,14 +1230,14 @@
             const maxSold = Math.max(...products.map(p => p.da_ban || 0));
             container.innerHTML = products.map((p, i) => `
                 <div class="product-row">
-                    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
+                    <span class="w-7 h-7 rounded-full bg-slate-600 text-white text-xs font-bold flex items-center justify-center mr-3">${i + 1}</span>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-800 truncate">${p.ten_mon}</p>
                         <div class="w-full bg-slate-100 rounded-full h-2 mt-1">
-                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all" style="width: ${maxSold > 0 ? (p.da_ban/maxSold)*100 : 0}%"></div>
+                            <div class="bg-slate-600 h-2 rounded-full transition-all" style="width: ${maxSold > 0 ? (p.da_ban/maxSold)*100 : 0}%"></div>
                         </div>
                     </div>
-                    <span class="text-sm font-semibold text-blue-600 ml-3">${p.da_ban || 0}</span>
+                    <span class="text-sm font-semibold text-slate-700 ml-3">${p.da_ban || 0}</span>
                 </div>
             `).join('');
         }
