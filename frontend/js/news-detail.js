@@ -904,24 +904,32 @@ async function setupCommentForm() {
 
 // Load reactions for news
 async function loadReactions(newsId) {
+    console.log('🎭 Loading reactions for news:', newsId);
     try {
         const response = await fetch(`${API_URL}/${newsId}/reactions`);
         const result = await response.json();
+        console.log('🎭 Reactions API response:', result);
 
         if (result.success) {
             displayReactions(result.data);
+        } else {
+            console.error('❌ Failed to load reactions:', result);
         }
     } catch (error) {
-        console.error('Lỗi tải cảm xúc:', error);
+        console.error('❌ Error loading reactions:', error);
     }
 }
 
-// Display reactions
+// Display reactions - Facebook style
 function displayReactions(data) {
     const reactionsContainer = document.querySelector('.reactions-container');
-    if (!reactionsContainer) return;
+    if (!reactionsContainer) {
+        console.warn('Reactions container not found');
+        return;
+    }
 
     const { reactions, total, userReaction } = data;
+    console.log('📊 Displaying reactions:', { reactions, total, userReaction });
 
     const reactionIcons = {
         like: '👍',
@@ -941,36 +949,147 @@ function displayReactions(data) {
         angry: 'Phẫn nộ'
     };
 
+    const reactionColors = {
+        like: 'text-blue-600',
+        love: 'text-red-600',
+        haha: 'text-yellow-600',
+        wow: 'text-yellow-600',
+        sad: 'text-yellow-600',
+        angry: 'text-orange-600'
+    };
+
+    // Get user's reaction label and icon
+    const userReactionLabel = userReaction ? reactionLabels[userReaction] : 'Thích';
+    const userReactionIcon = userReaction ? reactionIcons[userReaction] : '👍';
+    const userReactionColor = userReaction ? reactionColors[userReaction] : 'text-gray-600';
+
     reactionsContainer.innerHTML = `
-        <div class="flex items-center gap-2 mb-4">
-            <span class="text-gray-600 font-medium">Cảm xúc:</span>
-            <div class="flex gap-2">
-                ${Object.keys(reactionIcons).map(type => `
-                    <button 
-                        onclick="toggleReaction('${type}')"
-                        class="reaction-btn ${userReaction === type ? 'active' : ''}"
-                        data-reaction="${type}"
-                        title="${reactionLabels[type]}">
-                        <span class="text-2xl">${reactionIcons[type]}</span>
-                        <span class="count">${reactions[type] || 0}</span>
-                    </button>
-                `).join('')}
+        <div class="flex items-center justify-between py-3">
+            <!-- Main reaction button with hover popup -->
+            <div class="relative reaction-wrapper" onmouseenter="showReactionPicker()" onmouseleave="hideReactionPicker()">
+                <button 
+                    onclick="window.toggleReaction('like')"
+                    class="reaction-main-btn flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition ${userReaction ? userReactionColor + ' font-semibold' : 'text-gray-600'}"
+                    id="main-reaction-btn">
+                    <span class="text-xl">${userReactionIcon}</span>
+                    <span class="text-sm">${userReactionLabel}</span>
+                </button>
+                
+                <!-- Reaction picker popup (Facebook style) -->
+                <div id="reaction-picker" 
+                     class="reaction-picker-popup absolute bottom-full left-0 mb-2 bg-white rounded-full px-2 py-2 shadow-xl border border-gray-200 hidden"
+                     style="z-index: 1000;">
+                    <div class="flex gap-1">
+                        ${Object.keys(reactionIcons).map(type => `
+                            <button 
+                                onclick="window.selectReaction('${type}', event)"
+                                class="reaction-option w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 transition transform hover:scale-125"
+                                title="${reactionLabels[type]}"
+                                data-reaction-type="${type}">
+                                <span class="text-3xl pointer-events-none">${reactionIcons[type]}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
-            <span class="text-gray-500 text-sm ml-2">${total} cảm xúc</span>
+
+            <!-- Reaction counts summary -->
+            ${total > 0 ? `
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <div class="flex -space-x-1">
+                        ${Object.entries(reactions)
+                            .filter(([_, count]) => count > 0)
+                            .slice(0, 3)
+                            .map(([type, _]) => `<span class="text-lg">${reactionIcons[type]}</span>`)
+                            .join('')}
+                    </div>
+                    <span class="font-medium">${total}</span>
+                </div>
+            ` : ''}
         </div>
     `;
 }
 
+// Show reaction picker on hover
+function showReactionPicker() {
+    console.log('👆 Showing reaction picker');
+    const picker = document.getElementById('reaction-picker');
+    if (picker) {
+        picker.classList.remove('hidden');
+        picker.classList.add('visible');
+    }
+}
+
+// Hide reaction picker
+function hideReactionPicker() {
+    console.log('👇 Hiding reaction picker');
+    setTimeout(() => {
+        const picker = document.getElementById('reaction-picker');
+        if (picker) {
+            picker.classList.add('hidden');
+            picker.classList.remove('visible');
+        }
+    }, 300);
+}
+
+// Select reaction from picker
+function selectReaction(reactionType, event) {
+    console.log('🎯 selectReaction called with:', reactionType, 'event:', event);
+    
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    // Validate reaction type trước khi gọi
+    const validReactions = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+    if (!reactionType || !validReactions.includes(reactionType)) {
+        console.error('❌ Invalid reaction type in selectReaction:', reactionType);
+        alert('Lỗi: Loại cảm xúc không hợp lệ - ' + reactionType);
+        return;
+    }
+    
+    console.log('✅ Calling toggleReaction with:', reactionType);
+    hideReactionPicker();
+    toggleReaction(reactionType);
+}
+
+// Make functions global
+window.showReactionPicker = showReactionPicker;
+window.hideReactionPicker = hideReactionPicker;
+window.selectReaction = selectReaction;
+
+console.log('✅ Reaction functions registered globally');
+console.log('✅ selectReaction:', typeof window.selectReaction);
+console.log('✅ toggleReaction:', typeof window.toggleReaction);
+
 // Toggle reaction
 async function toggleReaction(reactionType) {
+    console.log('🎭 toggleReaction called with:', reactionType, 'type:', typeof reactionType);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const newsId = urlParams.get('id');
 
-    if (!newsId) return;
+    if (!newsId) {
+        console.error('❌ No newsId found');
+        return;
+    }
+
+    // Validate reaction type
+    const validReactions = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+    if (!reactionType || typeof reactionType !== 'string' || !validReactions.includes(reactionType)) {
+        console.error('❌ Invalid reaction type:', reactionType, 'type:', typeof reactionType);
+        alert('Loại cảm xúc không hợp lệ: ' + reactionType);
+        return;
+    }
+
+    console.log('🎭 Toggling reaction:', reactionType, 'for news:', newsId);
 
     try {
         // Lấy token từ localStorage
         const token = localStorage.getItem('token');
+        console.log('🔑 Token:', token ? 'exists' : 'not found');
+        
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -978,24 +1097,48 @@ async function toggleReaction(reactionType) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
+        const requestBody = { loai_cam_xuc: reactionType };
+        console.log('📤 Sending request:', JSON.stringify(requestBody));
+        console.log('📤 Headers:', JSON.stringify(headers));
+        console.log('📤 URL:', `${API_URL}/${newsId}/reactions`);
+
         const response = await fetch(`${API_URL}/${newsId}/reactions`, {
             method: 'POST',
             headers: headers,
             credentials: 'include', // Gửi cookie session
-            body: JSON.stringify({ loai_cam_xuc: reactionType })
+            body: JSON.stringify(requestBody)
         });
 
         const result = await response.json();
 
         if (result.success) {
+            console.log('✅ Reaction success:', result.action);
             // Reload reactions
             loadReactions(newsId);
+            
+            // Show notification
+            const messages = {
+                'added': 'Đã thả cảm xúc!',
+                'removed': 'Đã bỏ cảm xúc',
+                'updated': 'Đã thay đổi cảm xúc'
+            };
+            if (typeof showNotification === 'function') {
+                showNotification(messages[result.action] || 'Thành công', 'success');
+            }
         } else {
             if (response.status === 401) {
-                alert('Vui lòng đăng nhập để thả cảm xúc');
-                window.location.href = 'dang-nhap.html?redirect=' + encodeURIComponent(window.location.href);
+                if (typeof showNotification === 'function') {
+                    showNotification('Vui lòng đăng nhập để thả cảm xúc', 'warning');
+                }
+                setTimeout(() => {
+                    window.location.href = 'dang-nhap.html?redirect=' + encodeURIComponent(window.location.href);
+                }, 1500);
             } else {
-                alert(result.message || 'Không thể thả cảm xúc');
+                if (typeof showNotification === 'function') {
+                    showNotification(result.message || 'Không thể thả cảm xúc', 'error');
+                } else {
+                    alert(result.message || 'Không thể thả cảm xúc');
+                }
             }
         }
     } catch (error) {

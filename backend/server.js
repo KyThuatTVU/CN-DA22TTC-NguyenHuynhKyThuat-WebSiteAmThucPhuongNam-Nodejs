@@ -89,6 +89,63 @@ async function initSettingsTable() {
 
 initSettingsTable();
 
+// Tự động tạo bảng thong_bao nếu chưa tồn tại
+async function initNotificationsTable() {
+    try {
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS thong_bao (
+                ma_thong_bao int NOT NULL AUTO_INCREMENT,
+                ma_nguoi_dung int NOT NULL COMMENT 'Người nhận thông báo',
+                loai enum('news','promo','comment_reply','comment_like','order_status','system') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'system' COMMENT 'Loại thông báo',
+                tieu_de varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Tiêu đề thông báo',
+                noi_dung text COLLATE utf8mb4_unicode_ci COMMENT 'Nội dung chi tiết',
+                duong_dan varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Link liên quan',
+                ma_lien_quan int DEFAULT NULL COMMENT 'ID của đối tượng liên quan',
+                da_doc tinyint(1) NOT NULL DEFAULT '0' COMMENT '0: chưa đọc, 1: đã đọc',
+                ngay_tao datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (ma_thong_bao),
+                KEY idx_nguoi_dung (ma_nguoi_dung),
+                KEY idx_da_doc (da_doc),
+                KEY idx_loai (loai),
+                KEY idx_ngay_tao (ngay_tao),
+                CONSTRAINT thong_bao_ibfk_1 FOREIGN KEY (ma_nguoi_dung) REFERENCES nguoi_dung (ma_nguoi_dung) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bảng lưu thông báo cho người dùng'
+        `);
+        console.log('✅ Bảng thong_bao đã sẵn sàng');
+    } catch (error) {
+        console.error('❌ Lỗi khởi tạo bảng thong_bao:', error.message);
+    }
+}
+
+initNotificationsTable();
+
+// Khởi tạo bảng thông báo admin
+async function initAdminNotificationsTable() {
+    try {
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS thong_bao_admin (
+                ma_thong_bao INT NOT NULL AUTO_INCREMENT,
+                loai ENUM('new_order', 'new_reservation', 'new_comment', 'new_review', 'new_user', 'contact_message', 'comment_like', 'system') NOT NULL DEFAULT 'system',
+                tieu_de VARCHAR(255) NOT NULL,
+                noi_dung TEXT,
+                duong_dan VARCHAR(500),
+                ma_lien_quan INT,
+                da_doc BOOLEAN DEFAULT FALSE,
+                ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (ma_thong_bao),
+                INDEX idx_da_doc (da_doc),
+                INDEX idx_ngay_tao (ngay_tao),
+                INDEX idx_loai (loai)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        `);
+        console.log('✅ Bảng thong_bao_admin đã sẵn sàng');
+    } catch (error) {
+        console.error('❌ Lỗi khởi tạo bảng thong_bao_admin:', error.message);
+    }
+}
+
+initAdminNotificationsTable();
+
 // ==================== BASIC ROUTES ====================
 
 app.get('/', (req, res) => {
@@ -138,6 +195,7 @@ const chatbotRoutes = require('./routes/chatbot');
 const settingsRoutes = require('./routes/settings');
 const adminChatbotRoutes = require('./routes/admin-chatbot');
 const recommendationRoutes = require('./routes/recommendation');
+const notificationRoutes = require('./routes/notifications');
 
 // Register routes
 app.use('/api/menu', menuRoutes);
@@ -158,6 +216,11 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin-chatbot', adminChatbotRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/notifications', notificationRoutes);
+
+// Admin notifications routes
+const adminNotificationRoutes = require('./routes/admin-notifications');
+app.use('/api/admin/notifications', adminNotificationRoutes);
 
 // ==================== ERROR HANDLING ====================
 

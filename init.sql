@@ -1160,6 +1160,42 @@ LOCK TABLES `xac_thuc_email` WRITE;
 /*!40000 ALTER TABLE `xac_thuc_email` DISABLE KEYS */;
 /*!40000 ALTER TABLE `xac_thuc_email` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `thong_bao`
+--
+
+DROP TABLE IF EXISTS `thong_bao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `thong_bao` (
+  `ma_thong_bao` int NOT NULL AUTO_INCREMENT,
+  `ma_nguoi_dung` int NOT NULL COMMENT 'Người nhận thông báo',
+  `loai` enum('news','promo','comment_reply','comment_like','order_status','system') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'system' COMMENT 'Loại thông báo',
+  `tieu_de` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Tiêu đề thông báo',
+  `noi_dung` text COLLATE utf8mb4_unicode_ci COMMENT 'Nội dung chi tiết',
+  `duong_dan` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Link liên quan',
+  `ma_lien_quan` int DEFAULT NULL COMMENT 'ID của đối tượng liên quan',
+  `da_doc` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0: chưa đọc, 1: đã đọc',
+  `ngay_tao` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ma_thong_bao`),
+  KEY `idx_nguoi_dung` (`ma_nguoi_dung`),
+  KEY `idx_da_doc` (`da_doc`),
+  KEY `idx_loai` (`loai`),
+  KEY `idx_ngay_tao` (`ngay_tao`),
+  CONSTRAINT `thong_bao_ibfk_1` FOREIGN KEY (`ma_nguoi_dung`) REFERENCES `nguoi_dung` (`ma_nguoi_dung`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bảng lưu thông báo cho người dùng';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `thong_bao`
+--
+
+LOCK TABLES `thong_bao` WRITE;
+/*!40000 ALTER TABLE `thong_bao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `thong_bao` ENABLE KEYS */;
+UNLOCK TABLES;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

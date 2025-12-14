@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { createAdminNotification } = require('./admin-notifications');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -254,6 +255,20 @@ router.post('/', authenticateToken, (req, res) => {
         INSERT INTO danh_gia_san_pham (ma_mon, ma_nguoi_dung, so_sao, binh_luan, hinh_anh, trang_thai)
         VALUES (?, ?, ?, ?, ?, 'approved')
       `, [ma_mon, userId, so_sao, binh_luan || null, imagesJson]);
+
+      // Tạo thông báo cho admin
+      const [user] = await db.query('SELECT ten_nguoi_dung FROM nguoi_dung WHERE ma_nguoi_dung = ?', [userId]);
+      const [dish] = await db.query('SELECT ten_mon FROM mon_an WHERE ma_mon = ?', [ma_mon]);
+      const userName = user[0]?.ten_nguoi_dung || 'Khách hàng';
+      const dishName = dish[0]?.ten_mon || 'món ăn';
+      
+      await createAdminNotification(
+        'new_review',
+        `Đánh giá mới ${so_sao}⭐`,
+        `${userName} đã đánh giá "${dishName}"`,
+        `../chitietmonan.html?id=${ma_mon}`,
+        result.insertId
+      );
 
       res.json({ 
         success: true, 
@@ -620,9 +635,9 @@ router.post('/:reviewId/reply', async (req, res) => {
             });
         }
 
-        // Kiểm tra đánh giá có tồn tại không
+        // Kiểm tra đánh giá có tồn tại không và lấy thông tin user
         const [review] = await db.query(
-            'SELECT ma_danh_gia FROM danh_gia_san_pham WHERE ma_danh_gia = ?',
+            'SELECT dg.ma_danh_gia, dg.ma_nguoi_dung, dg.ma_mon, ma.ten_mon FROM danh_gia_san_pham dg JOIN mon_an ma ON dg.ma_mon = ma.ma_mon WHERE dg.ma_danh_gia = ?',
             [reviewId]
         );
 
@@ -639,6 +654,25 @@ router.post('/:reviewId/reply', async (req, res) => {
             VALUES (?, ?, ?)`,
             [reviewId, noi_dung, adminName]
         );
+
+        // Gửi thông báo cho người viết đánh giá
+        if (review[0].ma_nguoi_dung) {
+            try {
+                await db.query(`
+                    INSERT INTO thong_bao (ma_nguoi_dung, loai, tieu_de, noi_dung, duong_dan, ma_lien_quan)
+                    VALUES (?, 'comment_reply', ?, ?, ?, ?)
+                `, [
+                    review[0].ma_nguoi_dung,
+                    `Admin đã trả lời đánh giá của bạn về "${review[0].ten_mon}"`,
+                    noi_dung.substring(0, 100) + (noi_dung.length > 100 ? '...' : ''),
+                    `chitietmonan.html?id=${review[0].ma_mon}`,
+                    reviewId
+                ]);
+                console.log(`📢 Đã gửi thông báo trả lời đánh giá cho user ${review[0].ma_nguoi_dung}`);
+            } catch (notifError) {
+                console.error('Lỗi gửi thông báo:', notifError.message);
+            }
+        }
 
         res.json({
             success: true,

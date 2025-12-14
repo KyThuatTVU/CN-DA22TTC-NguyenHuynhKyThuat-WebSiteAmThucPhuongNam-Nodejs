@@ -4,6 +4,7 @@ const db = require('../config/database');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { createAdminNotification } = require('./admin-notifications');
 
 // Cấu hình multer cho upload hình ảnh
 const storage = multer.diskStorage({
@@ -113,6 +114,15 @@ router.post('/', upload.array('hinh_anh', 5), async (req, res) => {
             `INSERT INTO lien_he (ho_ten, email, so_dien_thoai, tieu_de, noi_dung, hinh_anh, ngay_gui, trang_thai) 
              VALUES (?, ?, ?, ?, ?, ?, NOW(), 'new')`,
             [ho_ten, email, so_dien_thoai || null, tieu_de || 'Câu hỏi chung', noi_dung, hinh_anh]
+        );
+        
+        // Tạo thông báo cho admin
+        await createAdminNotification(
+            'contact_message',
+            `Tin nhắn liên hệ mới từ ${ho_ten}`,
+            `${tieu_de || 'Câu hỏi chung'} - ${noi_dung.substring(0, 100)}${noi_dung.length > 100 ? '...' : ''}`,
+            `quan-ly-lien-he.html?id=${result.insertId}`,
+            result.insertId
         );
         
         res.status(201).json({

@@ -168,6 +168,16 @@ function initializeComponents() {
     // Initialize Chatbot
     initializeChatbot();
     
+    // Initialize Notification Manager - wait longer to ensure navbar is fully loaded
+    setTimeout(() => {
+        if (typeof NotificationManager !== 'undefined') {
+            console.log('🔔 Initializing Notification Manager...');
+            NotificationManager.init();
+        } else {
+            console.warn('⚠️ NotificationManager not found');
+        }
+    }, 500);
+    
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -975,3 +985,29 @@ function escapeHtmlChat(text) {
 window.updateUserMenu = updateUserMenu;
 window.getAvatarUrl = getAvatarUrl;
 window.initializeChatbot = initializeChatbot;
+
+// ==================== NOTIFICATION SYSTEM ====================
+
+// Load notifications script dynamically
+function loadNotificationScript() {
+    // Check if already loaded
+    if (window.NotificationManager) {
+        window.NotificationManager.init();
+        return;
+    }
+    
+    const script = document.createElement('script');
+    script.src = 'js/notifications.js';
+    script.onload = function() {
+        console.log('✅ Notifications script loaded');
+    };
+    script.onerror = function() {
+        console.warn('⚠️ Could not load notifications.js');
+    };
+    document.head.appendChild(script);
+}
+
+// Initialize notifications after components are loaded
+setTimeout(() => {
+    loadNotificationScript();
+}, 600);

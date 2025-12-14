@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const { createAdminNotification } = require('./admin-notifications');
 
 // Middleware kiểm tra admin session
 const requireAdmin = (req, res, next) => {
@@ -305,6 +306,19 @@ router.post('/create', authenticateToken, async (req, res) => {
         // GIỮ NGUYÊN cart = "active" để nếu thanh toán thất bại, user vẫn còn món
 
         await connection.commit();
+
+        // Tạo thông báo cho admin
+        const customerName = ma_nguoi_dung ? 
+            (await db.query('SELECT ten_nguoi_dung FROM nguoi_dung WHERE ma_nguoi_dung = ?', [ma_nguoi_dung]))[0][0]?.ten_nguoi_dung || 'Khách hàng' 
+            : ten_khach_vang_lai || 'Khách vãng lai';
+        
+        await createAdminNotification(
+            'new_order',
+            `Đơn hàng mới #${ma_don_hang}`,
+            `${customerName} đã đặt ${cartItems.length} món - Tổng: ${new Intl.NumberFormat('vi-VN').format(tong_tien)}đ`,
+            `quan-ly-don-hang.html?id=${ma_don_hang}`,
+            ma_don_hang
+        );
 
         res.json({
             success: true,
@@ -819,10 +833,43 @@ router.put('/:orderId/status', requireAdmin, async (req, res) => {
 
         const dbStatus = statusMap[trang_thai_don_hang] || trang_thai_don_hang;
 
+        // Lấy thông tin đơn hàng để gửi thông báo
+        const [orderInfo] = await db.query(
+            'SELECT ma_nguoi_dung FROM don_hang WHERE ma_don_hang = ?',
+            [orderId]
+        );
+
         await db.query(
             'UPDATE don_hang SET trang_thai = ? WHERE ma_don_hang = ?',
             [dbStatus, orderId]
         );
+
+        // Gửi thông báo cho khách hàng về trạng thái đơn hàng
+        if (orderInfo.length > 0 && orderInfo[0].ma_nguoi_dung) {
+            const statusMessages = {
+                'pending': 'Đơn hàng đang chờ xác nhận',
+                'confirmed': 'Đơn hàng đã được xác nhận',
+                'preparing': 'Đơn hàng đang được chuẩn bị',
+                'delivered': 'Đơn hàng đã giao thành công',
+                'cancelled': 'Đơn hàng đã bị hủy'
+            };
+            
+            try {
+                await db.query(`
+                    INSERT INTO thong_bao (ma_nguoi_dung, loai, tieu_de, noi_dung, duong_dan, ma_lien_quan)
+                    VALUES (?, 'order_status', ?, ?, ?, ?)
+                `, [
+                    orderInfo[0].ma_nguoi_dung,
+                    `Cập nhật đơn hàng #${orderId}`,
+                    statusMessages[dbStatus] || `Trạng thái: ${dbStatus}`,
+                    `don-hang-cua-toi.html`,
+                    orderId
+                ]);
+                console.log(`📢 Đã gửi thông báo cập nhật đơn hàng #${orderId} cho user ${orderInfo[0].ma_nguoi_dung}`);
+            } catch (notifError) {
+                console.error('Lỗi gửi thông báo:', notifError.message);
+            }
+        }
 
         res.json({
             success: true,

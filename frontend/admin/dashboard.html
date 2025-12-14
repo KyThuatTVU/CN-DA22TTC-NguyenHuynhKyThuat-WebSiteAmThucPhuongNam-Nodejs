@@ -144,10 +144,27 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button class="relative text-white hover:text-blue-200 transition">
-                        <i class="fas fa-bell text-lg"></i>
-                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">3</span>
-                    </button>
+                    <!-- Admin Notification Bell -->
+                    <div id="admin-notification-container" class="relative">
+                        <button id="admin-notification-btn" class="relative text-white hover:text-blue-200 transition cursor-pointer">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span id="admin-notification-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                        </button>
+                        <!-- Notification Dropdown -->
+                        <div id="admin-notification-dropdown" class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-100 hidden" style="z-index: 9999;">
+                            <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                                <h3 class="font-semibold text-gray-800">Thông báo quản trị</h3>
+                                <button id="admin-mark-all-read-btn" class="text-xs text-orange-600 hover:text-orange-700 cursor-pointer">Đánh dấu đã đọc</button>
+                            </div>
+                            <div id="admin-notification-list" class="max-h-96 overflow-y-auto">
+                                <div class="text-center py-8 text-gray-400">
+                                    <i class="fas fa-bell-slash text-3xl mb-2"></i>
+                                    <p class="text-sm">Chưa có thông báo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <a href="../index.html" target="_blank" class="text-white hover:text-blue-200 transition" title="Xem website">
                         <i class="fas fa-external-link-alt text-lg"></i>
                     </a>
@@ -1837,5 +1854,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Admin Notification Script -->
+    <script src="js/admin-notifications.js"></script>
+    <script>
+        // Initialize admin notifications after page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof AdminNotificationManager !== 'undefined') {
+                    AdminNotificationManager.init();
+                    console.log('✅ Admin Notification Manager initialized');
+                }
+            }, 500);
+        });
+    </script>
 </body>
 </html>

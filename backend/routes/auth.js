@@ -8,6 +8,7 @@ const fs = require('fs');
 const passport = require('passport');
 const db = require('../config/database');
 const { sendVerificationEmail, sendWelcomeEmail } = require('../config/email');
+const { createAdminNotification } = require('./admin-notifications');
 
 // Secret key cho JWT (nên đặt trong .env)
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
@@ -295,6 +296,15 @@ router.post('/verify-email', async (req, res) => {
 
         // Gửi email chào mừng
         await sendWelcomeEmail(email, verification.ten_nguoi_dung);
+
+        // Tạo thông báo cho admin
+        await createAdminNotification(
+            'new_user',
+            `Người dùng mới: ${verification.ten_nguoi_dung}`,
+            `${verification.email} vừa đăng ký tài khoản`,
+            `quan-ly-khach-hang.html?id=${result.insertId}`,
+            result.insertId
+        );
 
         // Tạo JWT token
         const token = jwt.sign(
