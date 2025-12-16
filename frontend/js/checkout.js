@@ -1,6 +1,9 @@
 // API Configuration
 const API_URL = window.API_URL || 'http://localhost:3000/api';
 
+// Biến lưu mã khuyến mãi đã áp dụng
+let appliedPromo = null;
+
 // Get authentication token
 function getToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -97,13 +100,15 @@ function updateCheckoutSummary() {
 
     const subtotal = cart.tong_tien || 0;
     const shipping = subtotal >= 150000 ? 0 : (subtotal > 0 ? 30000 : 0); // Free ship từ 150k
-    const discount = 0; // Will be calculated with promo code
-    const total = subtotal + shipping - discount;
+    // Sử dụng giá trị giảm giá từ appliedPromo nếu có
+    const discount = (typeof appliedPromo !== 'undefined' && appliedPromo) ? appliedPromo.tien_giam : 0;
+    const total = Math.max(0, subtotal + shipping - discount);
 
     const subtotalEl = document.getElementById('checkout-subtotal');
     const shippingEl = document.getElementById('checkout-shipping');
     const discountEl = document.getElementById('checkout-discount');
     const totalEl = document.getElementById('checkout-total');
+    const discountRow = document.getElementById('discount-row');
 
     if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
     if (shippingEl) {
@@ -114,6 +119,10 @@ function updateCheckoutSummary() {
         }
     }
     if (discountEl) discountEl.textContent = `-${formatCurrency(discount)}`;
+    // Hiển thị/ẩn dòng giảm giá
+    if (discountRow) {
+        discountRow.style.display = discount > 0 ? 'flex' : 'none';
+    }
     if (totalEl) totalEl.textContent = formatCurrency(total);
 }
 
@@ -291,7 +300,10 @@ async function submitOrder(event) {
         phuong_xa: formData.phuong_xa,
         ghi_chu: formData.ghi_chu,
         phuong_thuc_thanh_toan: paymentMethod,
-        ma_khuyen_mai: null // Add promo code support later
+        // Gửi cả ma_khuyen_mai (ID) và ma_code (mã text) để backend xử lý
+        ma_khuyen_mai: appliedPromo ? appliedPromo.ma_khuyen_mai : null,
+        ma_code: appliedPromo ? appliedPromo.ma_code : null,
+        tien_giam: appliedPromo ? appliedPromo.tien_giam : 0
     };
 
     // Validate required fields
@@ -765,3 +777,202 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
+
+// ==================== PROMO CODE FUNCTIONS ====================
+
+// Load available promo codes
+async function loadAvailablePromos() {
+    try {
+        const response = await fetch(`${API_URL}/promotions/active`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            const promoList = document.getElementById('promo-list');
+            const availablePromos = document.getElementById('available-promos');
+            
+            if (promoList && availablePromos) {
+                availablePromos.classList.remove('hidden');
+                promoList.innerHTML = result.data.map(promo => {
+                    const discountText = promo.loai_giam_gia === 'percentage' 
+                        ? `Giảm ${promo.gia_tri}%` 
+                        : `Giảm ${formatCurrency(promo.gia_tri)}`;
+                    const minOrder = promo.don_hang_toi_thieu > 0 
+                        ? ` (Đơn tối thiểu ${formatCurrency(promo.don_hang_toi_thieu)})` 
+                        : '';
+                    
+                    return `
+                        <div class="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-2 cursor-pointer hover:bg-orange-100 transition"
+                             onclick="selectPromoCode('${promo.ma_code}')">
+                            <div>
+                                <span class="font-mono font-bold text-orange-600">${promo.ma_code}</span>
+                                <p class="text-xs text-gray-600">${discountText}${minOrder}</p>
+                            </div>
+                            <button class="text-orange-500 hover:text-orange-700 text-sm">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading promos:', error);
+    }
+}
+
+// Select promo code from list
+function selectPromoCode(code) {
+    const input = document.getElementById('promo-code-input');
+    if (input) {
+        input.value = code;
+        applyPromoCode();
+    }
+}
+
+// Apply promo code
+async function applyPromoCode() {
+    const input = document.getElementById('promo-code-input');
+    const messageEl = document.getElementById('promo-message');
+    const appliedEl = document.getElementById('applied-promo');
+    
+    if (!input || !input.value.trim()) {
+        showPromoMessage('Vui lòng nhập mã khuyến mãi', 'error');
+        return;
+    }
+    
+    const code = input.value.trim().toUpperCase();
+    
+    // Get current cart total
+    let cart = { tong_tien: 0 };
+    if (typeof cartManager !== 'undefined') {
+        cart = cartManager.getCart();
+    }
+    
+    const tongTien = cart.tong_tien || 0;
+    console.log('🎫 Applying promo code:', code, 'with total:', tongTien);
+    
+    if (tongTien <= 0) {
+        showPromoMessage('Giỏ hàng trống, không thể áp dụng mã', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/promotions/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ma_code: code, tong_tien: tongTien })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            appliedPromo = result.data;
+            
+            // Show applied promo
+            if (appliedEl) {
+                appliedEl.classList.remove('hidden');
+                document.getElementById('applied-promo-code').textContent = appliedPromo.ma_code;
+                document.getElementById('applied-promo-desc').textContent = 
+                    `Giảm ${formatCurrency(appliedPromo.tien_giam)}`;
+            }
+            
+            // Hide input area
+            input.value = '';
+            showPromoMessage('Áp dụng mã thành công!', 'success');
+            
+            // Update checkout summary with discount
+            updateCheckoutWithDiscount();
+        } else {
+            showPromoMessage(result.message || 'Mã không hợp lệ', 'error');
+        }
+    } catch (error) {
+        console.error('Error applying promo:', error);
+        showPromoMessage('Có lỗi xảy ra', 'error');
+    }
+}
+
+// Remove applied promo code
+function removePromoCode() {
+    appliedPromo = null;
+    
+    const appliedEl = document.getElementById('applied-promo');
+    if (appliedEl) {
+        appliedEl.classList.add('hidden');
+    }
+    
+    showPromoMessage('Đã xóa mã khuyến mãi', 'info');
+    updateCheckoutWithDiscount();
+}
+
+// Show promo message
+function showPromoMessage(message, type) {
+    const messageEl = document.getElementById('promo-message');
+    if (!messageEl) return;
+    
+    messageEl.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-blue-600');
+    
+    if (type === 'success') {
+        messageEl.classList.add('text-green-600');
+    } else if (type === 'error') {
+        messageEl.classList.add('text-red-600');
+    } else {
+        messageEl.classList.add('text-blue-600');
+    }
+    
+    messageEl.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle mr-1"></i>${message}`;
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+        messageEl.classList.add('hidden');
+    }, 3000);
+}
+
+// Update checkout summary with discount
+function updateCheckoutWithDiscount() {
+    let cart = { tong_tien: 0 };
+    if (typeof cartManager !== 'undefined') {
+        cart = cartManager.getCart();
+    }
+    
+    const subtotal = cart.tong_tien || 0;
+    const shipping = subtotal >= 150000 ? 0 : (subtotal > 0 ? 30000 : 0);
+    const discount = appliedPromo ? appliedPromo.tien_giam : 0;
+    const total = Math.max(0, subtotal + shipping - discount);
+    
+    const subtotalEl = document.getElementById('checkout-subtotal');
+    const shippingEl = document.getElementById('checkout-shipping');
+    const discountEl = document.getElementById('checkout-discount');
+    const totalEl = document.getElementById('checkout-total');
+    const discountRow = document.getElementById('discount-row');
+    
+    if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+    if (shippingEl) {
+        if (shipping === 0 && subtotal >= 150000) {
+            shippingEl.innerHTML = '<span class="text-green-600">Miễn phí</span>';
+        } else {
+            shippingEl.textContent = formatCurrency(shipping);
+        }
+    }
+    if (discountEl) discountEl.textContent = `-${formatCurrency(discount)}`;
+    if (discountRow) {
+        discountRow.style.display = discount > 0 ? 'flex' : 'none';
+    }
+    if (totalEl) totalEl.textContent = formatCurrency(total);
+}
+
+// Get applied promo for order submission
+function getAppliedPromo() {
+    return appliedPromo;
+}
+
+// Initialize promo code functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Load available promos after a short delay
+    setTimeout(loadAvailablePromos, 1000);
+});
+
+// Make functions globally available
+window.applyPromoCode = applyPromoCode;
+window.removePromoCode = removePromoCode;
+window.selectPromoCode = selectPromoCode;
+window.getAppliedPromo = getAppliedPromo;

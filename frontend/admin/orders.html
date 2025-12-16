@@ -269,7 +269,38 @@
             });
             renderOrders(filtered);
         }
-        loadOrders();
+        
+        // Kiểm tra nếu có order ID trong URL thì mở modal chi tiết
+        function checkUrlForOrderId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+            console.log('🔍 Checking URL for order ID:', orderId);
+            if (orderId) {
+                const orderIdNum = parseInt(orderId);
+                // Tìm đơn hàng trong danh sách đã load
+                const order = orders.find(o => o.ma_don_hang === orderIdNum);
+                if (order) {
+                    console.log('✅ Found order:', order);
+                    viewOrder(orderIdNum);
+                } else {
+                    console.log('⚠️ Order not found in list, trying to fetch directly...');
+                    // Nếu không tìm thấy, có thể đơn hàng mới - thử load lại
+                    loadOrders().then(() => {
+                        const retryOrder = orders.find(o => o.ma_don_hang === orderIdNum);
+                        if (retryOrder) {
+                            viewOrder(orderIdNum);
+                        } else {
+                            alert('Không tìm thấy đơn hàng #' + orderId);
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Load orders trước, sau đó check URL
+        loadOrders().then(() => {
+            checkUrlForOrderId();
+        });
     </script>
 </body>
 </html>

@@ -62,7 +62,9 @@ const AdminNotificationManager = {
     // Load thông báo
     async loadNotifications() {
         try {
-            const response = await fetch(`${this.API_URL}?limit=10`);
+            const response = await fetch(`${this.API_URL}?limit=10`, {
+                credentials: 'include'
+            });
             const result = await response.json();
             
             if (result.success) {
@@ -171,9 +173,11 @@ const AdminNotificationManager = {
     
     // Đánh dấu đã đọc
     async markAsRead(id, link) {
+        console.log('🔔 markAsRead called with id:', id, 'link:', link);
         try {
             await fetch(`${this.API_URL}/${id}/read`, {
-                method: 'PUT'
+                method: 'PUT',
+                credentials: 'include'
             });
             
             // Reload notifications
@@ -181,16 +185,20 @@ const AdminNotificationManager = {
             
             // Navigate to link if exists
             if (link) {
+                console.log('🔗 Navigating to:', link);
                 // Check if link starts with ../ (relative to parent directory)
                 if (link.startsWith('../')) {
                     // Remove ../ and navigate from root
                     const cleanLink = link.replace('../', '/');
+                    console.log('🔗 Clean link (from ../): ', cleanLink);
                     window.location.href = cleanLink;
                 } else if (link.startsWith('http')) {
                     // Absolute URL
+                    console.log('🔗 Absolute URL');
                     window.location.href = link;
                 } else {
                     // Relative link within admin folder
+                    console.log('🔗 Relative link within admin folder');
                     window.location.href = link;
                 }
             }
@@ -203,7 +211,8 @@ const AdminNotificationManager = {
     async markAllAsRead() {
         try {
             await fetch(`${this.API_URL}/read-all`, {
-                method: 'PUT'
+                method: 'PUT',
+                credentials: 'include'
             });
             
             this.loadNotifications();
@@ -230,7 +239,9 @@ const AdminNotificationManager = {
     // Kiểm tra thông báo mới
     async checkNewNotifications() {
         try {
-            const response = await fetch(`${this.API_URL}/unread-count`);
+            const response = await fetch(`${this.API_URL}/unread-count`, {
+                credentials: 'include'
+            });
             const result = await response.json();
             
             if (result.success) {

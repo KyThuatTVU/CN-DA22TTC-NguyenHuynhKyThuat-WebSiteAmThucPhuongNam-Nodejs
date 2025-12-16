@@ -196,6 +196,7 @@ const settingsRoutes = require('./routes/settings');
 const adminChatbotRoutes = require('./routes/admin-chatbot');
 const recommendationRoutes = require('./routes/recommendation');
 const notificationRoutes = require('./routes/notifications');
+const promotionRoutes = require('./routes/promotions');
 
 // Register routes
 app.use('/api/menu', menuRoutes);
@@ -217,6 +218,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/admin-chatbot', adminChatbotRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/promotions', promotionRoutes);
 
 // Admin notifications routes
 const adminNotificationRoutes = require('./routes/admin-notifications');

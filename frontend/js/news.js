@@ -68,6 +68,14 @@ async function loadPopularNews(limit = 5) {
     }
 }
 
+// Get image URL with server prefix
+function getImageUrl(imagePath) {
+    if (!imagePath) return 'images/default-news.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    if (imagePath.startsWith('/')) return `http://localhost:3000${imagePath}`;
+    return `http://localhost:3000/${imagePath}`;
+}
+
 // Display featured news
 function displayFeaturedNews(news) {
     const container = document.getElementById('featured-news');
@@ -76,9 +84,10 @@ function displayFeaturedNews(news) {
     container.innerHTML = `
         <article class="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
             <a href="tin-tuc-chi-tiet.html?id=${news.ma_tin_tuc}">
-                <img src="${news.anh_dai_dien || 'images/default-news.jpg'}" 
+                <img src="${getImageUrl(news.anh_dai_dien)}" 
                      alt="${news.tieu_de}" 
-                     class="w-full h-48 sm:h-56 md:h-64 object-cover">
+                     class="w-full h-48 sm:h-56 md:h-64 object-cover"
+                     onerror="this.src='images/default-news.jpg'">
             </a>
             <div class="p-4 sm:p-6">
                 <div class="flex items-center text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 space-x-3 sm:space-x-4">
@@ -129,9 +138,10 @@ function displayNews(newsList) {
     container.innerHTML = newsList.map(news => `
         <article class="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
             <a href="tin-tuc-chi-tiet.html?id=${news.ma_tin_tuc}">
-                <img src="${news.anh_dai_dien || 'images/default-news.jpg'}" 
+                <img src="${getImageUrl(news.anh_dai_dien)}" 
                      alt="${news.tieu_de}" 
-                     class="w-full h-40 sm:h-48 object-cover">
+                     class="w-full h-40 sm:h-48 object-cover"
+                     onerror="this.src='images/default-news.jpg'">
             </a>
             <div class="p-4 sm:p-5">
                 <div class="flex items-center text-xs text-gray-600 mb-2 space-x-2 sm:space-x-3">
@@ -168,9 +178,10 @@ function displayPopularNews(newsList) {
     container.innerHTML = newsList.map((news, index) => `
         <article class="flex gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-orange-50 rounded-lg transition">
             <div class="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20">
-                <img src="${news.anh_dai_dien || 'images/default-news.jpg'}" 
+                <img src="${getImageUrl(news.anh_dai_dien)}" 
                      alt="${news.tieu_de}" 
-                     class="w-full h-full object-cover rounded-lg">
+                     class="w-full h-full object-cover rounded-lg"
+                     onerror="this.src='images/default-news.jpg'">
             </div>
             <div class="flex-1 min-w-0">
                 <h4 class="font-semibold text-xs sm:text-sm line-clamp-2 mb-1 hover:text-orange-600">

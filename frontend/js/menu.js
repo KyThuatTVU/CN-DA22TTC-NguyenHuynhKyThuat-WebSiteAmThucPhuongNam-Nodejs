@@ -80,7 +80,8 @@ function applyFiltersAndSort() {
     // Filter by price range
     if (selectedPriceRange) {
         filtered = filtered.filter(product => {
-            const price = parseFloat(product.gia_tien);
+            const price = parseFloat(product.gia_tien) || 0;
+            if (isNaN(price)) return false;
             switch(selectedPriceRange) {
                 case 'under-100k':
                     return price < 100000;
@@ -102,10 +103,10 @@ function applyFiltersAndSort() {
             filtered.sort((a, b) => b.ma_mon - a.ma_mon);
             break;
         case 'price-asc':
-            filtered.sort((a, b) => parseFloat(a.gia_tien) - parseFloat(b.gia_tien));
+            filtered.sort((a, b) => (parseFloat(a.gia_tien) || 0) - (parseFloat(b.gia_tien) || 0));
             break;
         case 'price-desc':
-            filtered.sort((a, b) => parseFloat(b.gia_tien) - parseFloat(a.gia_tien));
+            filtered.sort((a, b) => (parseFloat(b.gia_tien) || 0) - (parseFloat(a.gia_tien) || 0));
             break;
         case 'popular':
             // Sort by stock quantity (assuming popular items have lower stock)
@@ -561,9 +562,11 @@ function generateStars(rating) {
     return stars;
 }
 
-// Format price
+// Format price - xử lý an toàn tránh NaN
 function formatPrice(price) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    const numPrice = parseFloat(price);
+    if (isNaN(numPrice)) return 'Liên hệ';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numPrice);
 }
 
 // Setup search functionality

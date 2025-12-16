@@ -141,8 +141,14 @@ const RecommendationSystem = {
             imagePath = '/images/' + imagePath.replace(/^\/+/, '');
         }
         const imageUrl = imagePath.startsWith('http') ? imagePath : `http://localhost:3000${imagePath}`;
-        const price = new Intl.NumberFormat('vi-VN').format(dish.gia_tien);
-        const rating = parseFloat(dish.avg_rating || 0).toFixed(1);
+        
+        // Xử lý giá an toàn - tránh NaN
+        const priceValue = dish.gia_tien ? parseFloat(dish.gia_tien) : 0;
+        const price = !isNaN(priceValue) ? new Intl.NumberFormat('vi-VN').format(priceValue) : 'Liên hệ';
+        
+        // Xử lý rating an toàn
+        const ratingValue = dish.avg_rating ? parseFloat(dish.avg_rating) : 0;
+        const rating = !isNaN(ratingValue) ? ratingValue.toFixed(1) : '0';
         
         // Badge theo loại recommendation
         let badge = '';
@@ -185,7 +191,7 @@ const RecommendationSystem = {
                     ${dish.reason ? `<p class="text-xs text-gray-500 mb-2 line-clamp-1">${dish.reason}</p>` : ''}
                     <div class="flex items-center justify-between">
                         <span class="text-orange-600 font-bold text-sm">${price}đ</span>
-                        <button onclick="event.preventDefault(); event.stopPropagation(); addToCartFromRecommendation(${dish.ma_mon}, '${dish.ten_mon.replace(/'/g, "\\'")}', ${dish.gia_tien}, '${imageUrl}')"
+                        <button onclick="event.preventDefault(); event.stopPropagation(); addToCartFromRecommendation(${dish.ma_mon}, '${dish.ten_mon.replace(/'/g, "\\'")}', ${priceValue}, '${imageUrl}')"
                             class="bg-orange-500 text-white w-7 h-7 rounded-full hover:bg-orange-600 transition text-xs">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -226,7 +232,10 @@ const RecommendationSystem = {
                 imagePath = '/images/' + imagePath.replace(/^\/+/, '');
             }
             const imageUrl = imagePath.startsWith('http') ? imagePath : `http://localhost:3000${imagePath}`;
-            const price = new Intl.NumberFormat('vi-VN').format(dish.gia_tien);
+            
+            // Xử lý giá an toàn
+            const priceValue = dish.gia_tien ? parseFloat(dish.gia_tien) : 0;
+            const price = !isNaN(priceValue) ? new Intl.NumberFormat('vi-VN').format(priceValue) : 'Liên hệ';
             
             html += `
                 <a href="chitietmonan.html?id=${dish.ma_mon}" 

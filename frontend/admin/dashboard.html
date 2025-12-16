@@ -84,6 +84,9 @@
                         <a href="reviews.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
                             <i class="fas fa-star w-5"></i><span class="text-sm">Đánh giá</span>
                         </a>
+                        <a href="promotions.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl">
+                            <i class="fas fa-ticket-alt w-5"></i><span class="text-sm">Khuyến mãi</span>
+                        </a>
                     </div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-3">Nội dung</p>
                     <div class="space-y-1">
@@ -187,8 +190,8 @@
                         <div class="grid grid-cols-4 gap-5 mb-6">
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-slate-100">
-                                        <i class="fas fa-coins text-slate-600 text-xl"></i>
+                                    <div class="kpi-icon bg-blue-100">
+                                        <i class="fas fa-coins text-blue-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Tổng doanh thu</p>
@@ -199,8 +202,8 @@
                             </div>
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-slate-100">
-                                        <i class="fas fa-receipt text-slate-600 text-xl"></i>
+                                    <div class="kpi-icon bg-green-100">
+                                        <i class="fas fa-receipt text-green-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Số đơn hàng</p>
@@ -211,8 +214,8 @@
                             </div>
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-slate-100">
-                                        <i class="fas fa-user text-slate-600 text-xl"></i>
+                                    <div class="kpi-icon bg-purple-100">
+                                        <i class="fas fa-user text-purple-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Khách hàng</p>
@@ -223,8 +226,8 @@
                             </div>
                             <div class="kpi-card">
                                 <div class="flex items-center gap-4">
-                                    <div class="kpi-icon bg-slate-100">
-                                        <i class="fas fa-calendar text-slate-600 text-xl"></i>
+                                    <div class="kpi-icon bg-orange-100">
+                                        <i class="fas fa-calendar text-orange-600 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="kpi-label">Đặt bàn</p>
@@ -238,16 +241,16 @@
                         <!-- Row 2: 5 Mục tiêu tháng -->
                         <div class="chart-card mb-6">
                             <div class="flex items-center justify-between mb-4">
-                                <p class="chart-title mb-0"><i class="fas fa-target text-slate-600 mr-2"></i>5 Mục tiêu tháng <span id="goals-month-year"></span></p>
+                                <p class="chart-title mb-0"><i class="fas fa-bullseye text-indigo-500 mr-2"></i>5 Mục tiêu tháng <span id="goals-month-year"></span></p>
                                 <div class="flex items-center gap-2">
-                                    <span id="total-progress-badge" class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-bold">0%</span>
-                                    <button onclick="generateGoals()" id="btn-generate-goals" class="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-xs hover:bg-slate-800 transition">
+                                    <span id="total-progress-badge" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">0%</span>
+                                    <button onclick="generateGoals()" id="btn-generate-goals" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs hover:bg-indigo-700 transition">
                                         <i class="fas fa-plus mr-1"></i>AI Tạo mục tiêu
                                     </button>
-                                    <button onclick="resetGoals()" id="btn-reset-goals" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs hover:bg-slate-200 transition hidden" title="Xóa mục tiêu để tạo lại">
+                                    <button onclick="resetGoals()" id="btn-reset-goals" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs hover:bg-red-200 transition hidden" title="Xóa mục tiêu để tạo lại">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button onclick="refreshGoals()" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs hover:bg-slate-200 transition">
+                                    <button onclick="refreshGoals()" class="px-3 py-1.5 bg-blue-100 text-blue-600 rounded-lg text-xs hover:bg-blue-200 transition">
                                         <i class="fas fa-sync-alt"></i>
                                     </button>
                                 </div>
@@ -264,20 +267,20 @@
                         <!-- Row 3: Gauge + Revenue Chart -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-chart-pie text-slate-600 mr-2"></i>Tỷ lệ hoàn thành tổng</p>
+                                <p class="chart-title"><i class="fas fa-chart-pie text-emerald-500 mr-2"></i>Tỷ lệ hoàn thành tổng</p>
                                 <div style="height: 160px; position: relative;">
                                     <canvas id="gaugeChart"></canvas>
                                     <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); text-align: center;">
-                                        <p class="text-3xl font-bold text-slate-700" id="gauge-value">0%</p>
+                                        <p class="text-3xl font-bold text-emerald-600" id="gauge-value">0%</p>
                                         <p class="text-xs text-gray-500">Hoàn thành mục tiêu</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="chart-card col-span-2">
-                                <p class="chart-title"><i class="fas fa-chart-line text-slate-600 mr-2"></i>Doanh thu 12 tháng gần nhất</p>
+                                <p class="chart-title"><i class="fas fa-chart-line text-blue-500 mr-2"></i>Doanh thu 12 tháng gần nhất</p>
                                 <div style="height: 200px;"><canvas id="revenueChart"></canvas></div>
                                 <div class="flex justify-center gap-8 mt-3">
-                                    <div class="legend-item"><div class="legend-dot bg-slate-600"></div> Doanh thu (triệu đồng)</div>
+                                    <div class="legend-item"><div class="legend-dot bg-blue-500"></div> Doanh thu (triệu đồng)</div>
                                 </div>
                             </div>
                         </div>
@@ -285,15 +288,15 @@
                         <!-- Row 3: Orders + Top Products + Customers -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-chart-pie text-slate-600 mr-2"></i>Đơn hàng theo trạng thái</p>
+                                <p class="chart-title"><i class="fas fa-chart-pie text-green-500 mr-2"></i>Đơn hàng theo trạng thái</p>
                                 <div style="height: 200px;"><canvas id="ordersChart"></canvas></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-star text-slate-600 mr-2"></i>Top 10 món ăn bán chạy</p>
+                                <p class="chart-title"><i class="fas fa-star text-amber-500 mr-2"></i>Top 10 món ăn bán chạy</p>
                                 <div id="top-products" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-users text-slate-600 mr-2"></i>Khách hàng mới theo tháng</p>
+                                <p class="chart-title"><i class="fas fa-users text-purple-500 mr-2"></i>Khách hàng mới theo tháng</p>
                                 <div style="height: 200px;"><canvas id="customerChart"></canvas></div>
                             </div>
                         </div>
@@ -301,15 +304,15 @@
                         <!-- Row 4: Reservations + Payment Methods + Recent Orders -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-clock text-slate-600 mr-2"></i>Đặt bàn theo khung giờ</p>
+                                <p class="chart-title"><i class="fas fa-clock text-orange-500 mr-2"></i>Đặt bàn theo khung giờ</p>
                                 <div style="height: 200px;"><canvas id="reservationChart"></canvas></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-wallet text-slate-600 mr-2"></i>Phương thức thanh toán</p>
+                                <p class="chart-title"><i class="fas fa-wallet text-teal-500 mr-2"></i>Phương thức thanh toán</p>
                                 <div style="height: 200px;"><canvas id="paymentMethodsChart"></canvas></div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-list text-slate-600 mr-2"></i>Đơn hàng gần đây</p>
+                                <p class="chart-title"><i class="fas fa-list text-indigo-500 mr-2"></i>Đơn hàng gần đây</p>
                                 <div id="recent-orders" class="space-y-2" style="max-height: 220px; overflow-y: auto;"></div>
                             </div>
                         </div>
@@ -317,21 +320,21 @@
                         <!-- Row 5: Reviews Stats -->
                         <div class="grid grid-cols-3 gap-5 mb-6">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-star text-slate-600 mr-2"></i>Phân bố đánh giá sao</p>
+                                <p class="chart-title"><i class="fas fa-star text-yellow-500 mr-2"></i>Phân bố đánh giá sao</p>
                                 <div style="height: 180px;"><canvas id="reviewStarChart"></canvas></div>
                                 <div class="text-center mt-2">
                                     <p class="text-sm text-slate-500">Điểm trung bình</p>
-                                    <p class="text-2xl font-bold text-slate-700" id="avg-rating">0.0 <i class="fas fa-star text-lg"></i></p>
+                                    <p class="text-2xl font-bold text-yellow-500" id="avg-rating">0.0 <i class="fas fa-star text-lg"></i></p>
                                 </div>
                             </div>
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-chart-pie text-slate-600 mr-2"></i>Trạng thái đánh giá</p>
+                                <p class="chart-title"><i class="fas fa-chart-pie text-cyan-500 mr-2"></i>Trạng thái đánh giá</p>
                                 <div style="height: 200px;"><canvas id="reviewStatusChart"></canvas></div>
                             </div>
                             <div class="chart-card">
                                 <div class="flex items-center justify-between mb-4">
-                                    <p class="chart-title mb-0"><i class="fas fa-award text-slate-600 mr-2"></i>Top món được đánh giá</p>
-                                    <a href="reviews.html" class="text-xs text-slate-600 hover:text-slate-800">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+                                    <p class="chart-title mb-0"><i class="fas fa-award text-amber-500 mr-2"></i>Top món được đánh giá</p>
+                                    <a href="reviews.html" class="text-xs text-blue-600 hover:text-blue-800">Xem tất cả <i class="fas fa-arrow-right"></i></a>
                                 </div>
                                 <div id="top-reviewed-products" class="space-y-2" style="max-height: 200px; overflow-y: auto;"></div>
                             </div>
@@ -340,15 +343,15 @@
                         <!-- Row 6: News Stats -->
                         <div class="grid grid-cols-3 gap-5">
                             <div class="chart-card">
-                                <p class="chart-title"><i class="fas fa-newspaper text-slate-600 mr-2"></i>Lượt xem bài viết theo tháng</p>
+                                <p class="chart-title"><i class="fas fa-newspaper text-pink-500 mr-2"></i>Lượt xem bài viết theo tháng</p>
                                 <div style="height: 200px;"><canvas id="newsViewsChart"></canvas></div>
                             </div>
                             <div class="chart-card col-span-2">
                                 <div class="flex items-center justify-between mb-4">
-                                    <p class="chart-title mb-0"><i class="fas fa-eye text-slate-600 mr-2"></i>Top bài viết được xem nhiều nhất</p>
+                                    <p class="chart-title mb-0"><i class="fas fa-eye text-rose-500 mr-2"></i>Top bài viết được xem nhiều nhất</p>
                                     <div class="flex items-center space-x-4 text-sm">
-                                        <span class="text-slate-500">Tổng: <span id="total-news" class="font-bold text-slate-700">0</span> bài</span>
-                                        <span class="text-slate-500">Lượt xem: <span id="total-views" class="font-bold text-slate-700">0</span></span>
+                                        <span class="text-slate-500">Tổng: <span id="total-news" class="font-bold text-rose-600">0</span> bài</span>
+                                        <span class="text-slate-500">Lượt xem: <span id="total-views" class="font-bold text-rose-600">0</span></span>
                                     </div>
                                 </div>
                                 <div id="top-news" class="space-y-2" style="max-height: 200px; overflow-y: auto;"></div>
@@ -435,47 +438,47 @@
         });
 
         function initAllCharts() {
-            // Gauge Chart
+            // Gauge Chart - màu xanh lá cho tiến độ
             gaugeChart = new Chart(document.getElementById('gaugeChart').getContext('2d'), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [0, 100], backgroundColor: ['#475569', '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
+                data: { datasets: [{ data: [0, 100], backgroundColor: ['#10b981', '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
             });
 
-            // Revenue Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
+            // Revenue Chart - gradient màu xanh dương
             revenueChart = new Chart(document.getElementById('revenueChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
                     datasets: [
-                        { label: 'Doanh thu', data: new Array(12).fill(0), backgroundColor: '#475569', borderRadius: 6, barPercentage: 0.6 }
+                        { label: 'Doanh thu', data: new Array(12).fill(0), backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + 'tr' } } } }
             });
 
-            // Orders Chart
+            // Orders Chart - màu sắc phân biệt rõ ràng
             ordersChart = new Chart(document.getElementById('ordersChart').getContext('2d'), {
                 type: 'doughnut',
-                data: { labels: ['Hoàn thành', 'Đang xử lý', 'Chờ xác nhận', 'Đã hủy'], datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#334155', '#475569', '#64748b', '#94a3b8'], borderWidth: 3, borderColor: '#fff' }] },
+                data: { labels: ['Hoàn thành', 'Đang xử lý', 'Chờ xác nhận', 'Đã hủy'], datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'], borderWidth: 3, borderColor: '#fff' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } } } }
             });
 
-            // Customer Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
+            // Customer Chart - màu tím
             customerChart = new Chart(document.getElementById('customerChart').getContext('2d'), {
                 type: 'line',
-                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: new Array(12).fill(0), borderColor: '#475569', backgroundColor: 'rgba(71, 85, 105, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#475569', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
+                data: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], datasets: [{ label: 'Khách mới', data: new Array(12).fill(0), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#8b5cf6', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
-            // Reservation Chart - khởi tạo với dữ liệu rỗng, sẽ load từ API
+            // Reservation Chart - màu cam
             reservationChart = new Chart(document.getElementById('reservationChart').getContext('2d'), {
                 type: 'bar',
-                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: new Array(6).fill(0), backgroundColor: '#64748b', borderRadius: 8 }] },
+                data: { labels: ['10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h'], datasets: [{ label: 'Số lượt đặt', data: new Array(6).fill(0), backgroundColor: '#f59e0b', borderRadius: 8 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
-            // News Views Chart
+            // News Views Chart - màu hồng
             newsViewsChart = new Chart(document.getElementById('newsViewsChart').getContext('2d'), {
                 type: 'line',
                 data: { 
@@ -483,13 +486,13 @@
                     datasets: [{ 
                         label: 'Lượt xem', 
                         data: new Array(12).fill(0), 
-                        borderColor: '#64748b', 
-                        backgroundColor: 'rgba(100, 116, 139, 0.1)', 
+                        borderColor: '#ec4899', 
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)', 
                         borderWidth: 3, 
                         fill: true, 
                         tension: 0.4, 
                         pointRadius: 5, 
-                        pointBackgroundColor: '#64748b', 
+                        pointBackgroundColor: '#ec4899', 
                         pointBorderColor: '#fff', 
                         pointBorderWidth: 2 
                     }] 
@@ -497,7 +500,7 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } } }
             });
 
-            // Review Star Distribution Chart
+            // Review Star Distribution Chart - gradient vàng đến đỏ
             reviewStarChart = new Chart(document.getElementById('reviewStarChart').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -505,7 +508,7 @@
                     datasets: [{
                         label: 'Số lượng',
                         data: [0, 0, 0, 0, 0],
-                        backgroundColor: ['#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1'],
+                        backgroundColor: ['#fbbf24', '#f59e0b', '#fb923c', '#f97316', '#ef4444'],
                         borderRadius: 6,
                         barPercentage: 0.7
                     }]
@@ -522,14 +525,14 @@
                 }
             });
 
-            // Review Status Chart
+            // Review Status Chart - xanh lá, vàng, đỏ
             reviewStatusChart = new Chart(document.getElementById('reviewStatusChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Đã duyệt', 'Chờ duyệt', 'Đã khóa'],
                     datasets: [{
                         data: [0, 0, 0],
-                        backgroundColor: ['#475569', '#94a3b8', '#cbd5e1'],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
                         borderWidth: 3,
                         borderColor: '#fff'
                     }]
@@ -544,14 +547,14 @@
                 }
             });
 
-            // Payment Methods Chart
+            // Payment Methods Chart - xanh lá, hồng MoMo, xanh dương
             paymentMethodsChart = new Chart(document.getElementById('paymentMethodsChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Tiền mặt', 'MoMo', 'Chuyển khoản'],
                     datasets: [{
                         data: [0, 0, 0],
-                        backgroundColor: ['#475569', '#64748b', '#94a3b8'],
+                        backgroundColor: ['#10b981', '#d63384', '#3b82f6'],
                         borderWidth: 3,
                         borderColor: '#fff'
                     }]

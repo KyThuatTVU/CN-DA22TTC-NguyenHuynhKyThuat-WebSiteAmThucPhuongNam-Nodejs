@@ -10,9 +10,11 @@ const productId = urlParams.get('id');
 let currentProduct = null;
 let relatedProducts = [];
 
-// Format price
+// Format price - xử lý an toàn tránh NaN
 function formatPrice(price) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    const numPrice = parseFloat(price);
+    if (isNaN(numPrice)) return 'Liên hệ';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numPrice);
 }
 
 // Fetch product detail
@@ -188,10 +190,11 @@ function renderProductDetail() {
         productName.textContent = currentProduct.ten_mon;
     }
     
-    // Price
+    // Price - xử lý an toàn tránh NaN
     const productPrice = document.getElementById('product-price');
     if (productPrice) {
-        productPrice.textContent = formatPrice(parseFloat(currentProduct.gia_tien));
+        const price = currentProduct.gia_tien ? parseFloat(currentProduct.gia_tien) : 0;
+        productPrice.textContent = !isNaN(price) ? formatPrice(price) : 'Liên hệ';
     }
     
     // Stock - Ẩn với người dùng, chỉ dùng nội bộ để kiểm tra
@@ -316,6 +319,14 @@ function renderRelatedProducts() {
             ? '<span class="absolute top-2 right-2 bg-gray-800 bg-opacity-90 text-white px-2 py-1 rounded-full text-xs font-medium">Hết hàng</span>'
             : '';
         
+        // Xử lý giá an toàn - tránh NaN
+        const price = product.gia_tien ? parseFloat(product.gia_tien) : 0;
+        const formattedPrice = !isNaN(price) ? formatPrice(price) : 'Liên hệ';
+        
+        // Xử lý rating an toàn
+        const rating = product.avg_rating ? parseFloat(product.avg_rating) : 0;
+        const formattedRating = !isNaN(rating) ? rating.toFixed(1) : '0';
+        
         return `
             <a href="chitietmonan.html?id=${product.ma_mon}" class="related-card block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                 <div class="relative bg-gray-50">
@@ -330,10 +341,10 @@ function renderRelatedProducts() {
                 <div class="p-3 md:p-4">
                     <h3 class="font-semibold text-sm md:text-base mb-2 text-gray-800 line-clamp-2 hover:text-orange-600 transition">${product.ten_mon}</h3>
                     <div class="flex items-center justify-between">
-                        <span class="text-orange-600 font-bold text-base md:text-lg">${formatPrice(parseFloat(product.gia_tien))}</span>
+                        <span class="text-orange-600 font-bold text-base md:text-lg">${formattedPrice}</span>
                         <span class="text-yellow-400 text-sm flex items-center gap-1">
                             <i class="fas fa-star"></i>
-                            <span class="text-gray-600 font-medium">${product.avg_rating ? parseFloat(product.avg_rating).toFixed(1) : '0'}</span>
+                            <span class="text-gray-600 font-medium">${formattedRating}</span>
                         </span>
                     </div>
                 </div>
@@ -521,18 +532,21 @@ function renderReviews(data) {
     if (productStars) productStars.innerHTML = renderStars(stats.averageRating);
     if (productRating) productRating.textContent = `(${avgRating}/5)`;
     
-    // Update rating distribution
+    // Update rating distribution with new design
     const distContainer = document.getElementById('rating-distribution');
     distContainer.innerHTML = [5, 4, 3, 2, 1].map(star => {
         const count = stats.distribution[star] || 0;
         const percent = stats.totalReviews > 0 ? (count / stats.totalReviews * 100) : 0;
         return `
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-sm w-12">${star} sao</span>
-                <div class="flex-1 bg-gray-200 rounded-full h-2">
-                    <div class="bg-yellow-400 h-2 rounded-full" style="width: ${percent}%"></div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 w-20">
+                    <span class="text-sm font-medium text-gray-700">${star}</span>
+                    <i class="fas fa-star text-yellow-400 text-sm"></i>
                 </div>
-                <span class="text-sm text-gray-500 w-8">${count}</span>
+                <div class="flex-1 rating-bar">
+                    <div class="rating-bar-fill" style="width: ${percent}%"></div>
+                </div>
+                <span class="text-sm text-gray-500 w-12 text-right font-medium">${count}</span>
             </div>
         `;
     }).join('');
@@ -543,49 +557,50 @@ function renderReviews(data) {
         reviewCountEl.textContent = `${stats.totalReviews} đánh giá`;
     }
     
-    // Render reviews list
+    // Render reviews list with new design
     const listContainer = document.getElementById('reviews-list');
     if (reviews.length === 0) {
-        listContainer.innerHTML = '<p class="text-center text-gray-500 py-8">Chưa có đánh giá nào cho món ăn này</p>';
+        listContainer.innerHTML = `
+            <div class="text-center py-12 bg-white rounded-2xl">
+                <i class="far fa-comment-dots text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Chưa có đánh giá nào cho món ăn này</p>
+                <p class="text-gray-400 text-sm mt-2">Hãy là người đầu tiên đánh giá!</p>
+            </div>
+        `;
         return;
     }
     
     listContainer.innerHTML = reviews.map(review => {
-        // Xử lý avatar
+        // Xử lý avatar với design mới
         let avatarHtml = '';
         if (review.anh_dai_dien) {
             const avatarUrl = review.anh_dai_dien.startsWith('http') 
                 ? review.anh_dai_dien 
                 : `http://localhost:3000${review.anh_dai_dien.startsWith('/') ? '' : '/'}${review.anh_dai_dien}`;
-            avatarHtml = `<img src="${avatarUrl}" alt="${review.ten_nguoi_dung}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center\\'><i class=\\'fas fa-user text-orange-600\\'></i></div>';">`;
+            avatarHtml = `<img src="${avatarUrl}" alt="${review.ten_nguoi_dung}" class="review-avatar" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'review-avatar bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center text-white font-bold text-lg\\'>${review.ten_nguoi_dung.charAt(0).toUpperCase()}</div>';">`;
         } else {
-            avatarHtml = `<div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center"><i class="fas fa-user text-orange-600"></i></div>`;
+            avatarHtml = `<div class="review-avatar bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center text-white font-bold text-lg">${review.ten_nguoi_dung.charAt(0).toUpperCase()}</div>`;
         }
         
-        // Render admin replies
+        // Render admin replies với design mới
         let repliesHtml = '';
         if (review.replies && review.replies.length > 0) {
             repliesHtml = `
-                <div class="mt-3 ml-4 border-l-4 border-green-500 bg-green-50 rounded-r-lg p-4">
+                <div class="admin-reply mt-4">
                     <div class="flex items-center gap-2 mb-3">
-                        <i class="fas fa-store text-green-600"></i>
-                        <span class="font-semibold text-green-700 text-sm">Phản hồi từ Nhà hàng Phương Nam</span>
+                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-store text-white text-sm"></i>
+                        </div>
+                        <span class="font-semibold text-green-700">Phản hồi từ Nhà hàng</span>
                     </div>
                     <div class="space-y-3">
                         ${review.replies.map(reply => `
-                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <div class="bg-white rounded-xl p-4 shadow-sm">
                                 <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <img src="https://ui-avatars.com/api/?name=Admin&size=32&background=22c55e&color=fff" 
-                                             class="w-8 h-8 rounded-full">
-                                        <span class="font-semibold text-green-700 text-sm">Admin</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-400 italic">Tác giả: ${reply.ten_admin}</span>
-                                        <span class="text-xs text-gray-500">${formatDate(reply.ngay_tra_loi)}</span>
-                                    </div>
+                                    <span class="font-medium text-green-700">Admin</span>
+                                    <span class="text-xs text-gray-400">${formatDate(reply.ngay_tra_loi)}</span>
                                 </div>
-                                <p class="text-gray-700 text-sm">${reply.noi_dung}</p>
+                                <p class="text-gray-700">${reply.noi_dung}</p>
                             </div>
                         `).join('')}
                     </div>
@@ -594,41 +609,45 @@ function renderReviews(data) {
         }
         
         return `
-        <div class="border-b pb-4 mb-4 last:border-0" id="review-${review.ma_danh_gia}">
-            <div class="flex items-start gap-3">
+        <div class="review-card" id="review-${review.ma_danh_gia}">
+            <div class="flex items-start gap-4">
                 ${avatarHtml}
-                <div class="flex-1">
-                    <div class="flex items-center justify-between mb-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium">${review.ten_nguoi_dung}</span>
-                            <span class="text-yellow-400 text-sm">${renderStars(review.so_sao)}</span>
-                        </div>
-                        ${review.is_owner ? `
-                            <div class="flex gap-2">
-                                <button onclick="editReview(${review.ma_danh_gia}, ${review.so_sao}, '${(review.binh_luan || '').replace(/'/g, "\\'").replace(/\n/g, '\\n')}')" 
-                                        class="text-blue-500 hover:text-blue-700 text-sm" title="Sửa đánh giá">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteReview(${review.ma_danh_gia})" 
-                                        class="text-red-500 hover:text-red-700 text-sm" title="Xóa đánh giá">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="font-semibold text-gray-800">${review.ten_nguoi_dung}</span>
+                            <div class="flex items-center bg-yellow-50 px-2 py-1 rounded-full">
+                                <span class="text-yellow-500 text-sm">${renderStars(review.so_sao)}</span>
                             </div>
-                        ` : ''}
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-400 text-sm"><i class="far fa-clock mr-1"></i>${formatDate(review.ngay_danh_gia)}</span>
+                            ${review.is_owner ? `
+                                <div class="flex gap-2">
+                                    <button onclick="editReview(${review.ma_danh_gia}, ${review.so_sao}, '${(review.binh_luan || '').replace(/'/g, "\\'").replace(/\n/g, '\\n')}')" 
+                                            class="text-blue-500 hover:text-blue-700 p-1.5 hover:bg-blue-50 rounded-lg transition" title="Sửa đánh giá">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteReview(${review.ma_danh_gia})" 
+                                            class="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition" title="Xóa đánh giá">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
-                    <p class="text-gray-600 text-sm mb-2">${review.binh_luan || ''}</p>
+                    ${review.binh_luan ? `<p class="text-gray-600 leading-relaxed mb-3">${review.binh_luan}</p>` : ''}
                     ${review.images && review.images.length > 0 ? `
-                        <div class="flex flex-wrap gap-2 mb-2">
+                        <div class="review-images flex flex-wrap gap-2 mb-3">
                             ${review.images.map((img, idx) => `
                                 <img src="http://localhost:3000${img}" 
                                      alt="Ảnh đánh giá ${idx + 1}" 
-                                     class="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
+                                     class="w-24 h-24 object-cover rounded-xl cursor-pointer hover:opacity-90 shadow-sm border border-gray-100"
                                      onclick="openImageModal('http://localhost:3000${img}')"
                                      onerror="this.style.display='none'">
                             `).join('')}
                         </div>
                     ` : ''}
-                    <span class="text-gray-400 text-xs">${formatDate(review.ngay_danh_gia)}</span>
                     ${repliesHtml}
                 </div>
             </div>

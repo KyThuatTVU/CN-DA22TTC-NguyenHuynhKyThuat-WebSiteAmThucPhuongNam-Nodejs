@@ -88,8 +88,11 @@ router.post('/create', authenticateToken, async (req, res) => {
             phuong_xa,
             ghi_chu,
             phuong_thuc_thanh_toan,
-            ma_khuyen_mai
+            ma_khuyen_mai,
+            ma_code
         } = req.body;
+
+        console.log('📦 Order request - ma_khuyen_mai:', ma_khuyen_mai, 'ma_code:', ma_code);
 
         // Validate input
         if (!ten_nguoi_nhan || !so_dien_thoai || !dia_chi || !tinh_thanh || !quan_huyen || !phuong_xa) {
@@ -167,7 +170,7 @@ router.post('/create', authenticateToken, async (req, res) => {
         if (ma_khuyen_mai) {
             const [promoRows] = await connection.query(
                 `SELECT * FROM khuyen_mai 
-                 WHERE ma_code = ? 
+                 WHERE ma_khuyen_mai = ? 
                  AND trang_thai = 1 
                  AND ngay_bat_dau <= NOW() 
                  AND ngay_ket_thuc >= NOW()
@@ -177,21 +180,35 @@ router.post('/create', authenticateToken, async (req, res) => {
 
             if (promoRows.length > 0) {
                 const promo = promoRows[0];
+                console.log('🎫 Found promo:', promo);
 
-                // Kiểm tra đơn hàng tối thiểu
-                if (tong_tien_hang >= parseFloat(promo.don_hang_toi_thieu)) {
+                // Kiểm tra đơn hàng tối thiểu (nếu không có hoặc = 0 thì bỏ qua)
+                const minOrder = parseFloat(promo.don_hang_toi_thieu) || 0;
+                if (tong_tien_hang >= minOrder) {
                     if (promo.loai_giam_gia === 'percentage') {
                         tien_giam_gia = (tong_tien_hang * parseFloat(promo.gia_tri)) / 100;
-                    } else if (promo.loai_giam_gia === 'fixed_amount') {
+                        // Áp dụng giới hạn giảm tối đa nếu có
+                        if (promo.giam_toi_da && tien_giam_gia > parseFloat(promo.giam_toi_da)) {
+                            tien_giam_gia = parseFloat(promo.giam_toi_da);
+                        }
+                    } else {
+                        // fixed_amount hoặc các loại khác
                         tien_giam_gia = parseFloat(promo.gia_tri);
                     }
+                    
+                    console.log('💰 Discount applied:', tien_giam_gia);
 
                     // Cập nhật số lượng đã dùng
                     await connection.query(
                         'UPDATE khuyen_mai SET so_luong_da_dung = so_luong_da_dung + 1 WHERE ma_khuyen_mai = ?',
                         [promo.ma_khuyen_mai]
                     );
+                    console.log('✅ Promo usage count updated');
+                } else {
+                    console.log('⚠️ Order total', tong_tien_hang, 'is less than minimum', minOrder);
                 }
+            } else {
+                console.log('⚠️ No valid promo found for ID:', ma_khuyen_mai);
             }
         }
 
@@ -199,6 +216,19 @@ router.post('/create', authenticateToken, async (req, res) => {
 
         // Tạo địa chỉ giao hàng đầy đủ
         const dia_chi_day_du = `${dia_chi}, ${phuong_xa}, ${quan_huyen}, ${tinh_thanh}`;
+
+        // Lấy ma_code từ promo nếu có (để lưu vào đơn hàng)
+        let promoCodeToSave = ma_code || null;
+        if (!promoCodeToSave && ma_khuyen_mai && tien_giam_gia > 0) {
+            // Nếu không có ma_code nhưng có ma_khuyen_mai và đã tính giảm giá, lấy ma_code từ DB
+            const [promoInfo] = await connection.query(
+                'SELECT ma_code FROM khuyen_mai WHERE ma_khuyen_mai = ?',
+                [ma_khuyen_mai]
+            );
+            if (promoInfo.length > 0) {
+                promoCodeToSave = promoInfo[0].ma_code;
+            }
+        }
 
         // Tạo đơn hàng
         const [orderResult] = await connection.query(
@@ -220,7 +250,7 @@ router.post('/create', authenticateToken, async (req, res) => {
                 dia_chi_day_du,
                 tong_tien,
                 ghi_chu || null,
-                ma_khuyen_mai || null,
+                promoCodeToSave,
                 tien_giam_gia
             ]
         );
@@ -316,7 +346,7 @@ router.post('/create', authenticateToken, async (req, res) => {
             'new_order',
             `Đơn hàng mới #${ma_don_hang}`,
             `${customerName} đã đặt ${cartItems.length} món - Tổng: ${new Intl.NumberFormat('vi-VN').format(tong_tien)}đ`,
-            `quan-ly-don-hang.html?id=${ma_don_hang}`,
+            `orders.html?id=${ma_don_hang}`,
             ma_don_hang
         );
 
