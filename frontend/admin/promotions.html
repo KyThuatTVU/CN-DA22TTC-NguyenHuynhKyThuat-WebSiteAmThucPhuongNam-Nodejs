@@ -54,9 +54,9 @@
             <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
             
             <header class="header-bar flex items-center justify-between">
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3 sm:space-x-4">
                     <button onclick="toggleSidebar()" class="mobile-menu-btn lg:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
-                    <div><h2 class="text-xl font-bold">Quản lý Khuyến mãi</h2><p class="text-sm text-blue-200">Tạo và quản lý mã giảm giá</p></div>
+                    <div><h2 class="text-base sm:text-xl font-bold">Quản lý Khuyến mãi</h2><p class="text-xs sm:text-sm text-blue-200 hidden sm:block">Tạo và quản lý mã giảm giá</p></div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <!-- Notification Bell -->
@@ -84,13 +84,13 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6">
                 <!-- Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Tổng mã</p><p id="stat-total" class="text-2xl font-bold text-slate-800">0</p></div><div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fas fa-ticket-alt text-slate-600 text-xl"></i></div></div></div>
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Đang hoạt động</p><p id="stat-active" class="text-2xl font-bold text-green-600">0</p></div><div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-check-circle text-green-600 text-xl"></i></div></div></div>
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Đã hết hạn</p><p id="stat-expired" class="text-2xl font-bold text-red-600">0</p></div><div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center"><i class="fas fa-times-circle text-red-600 text-xl"></i></div></div></div>
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Lượt sử dụng</p><p id="stat-used" class="text-2xl font-bold text-blue-600">0</p></div><div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-chart-line text-blue-600 text-xl"></i></div></div></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 mb-4 sm:mb-6">
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Tổng mã</p><p id="stat-total" class="text-xl sm:text-2xl font-bold text-slate-800">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fas fa-ticket-alt text-slate-600 text-base sm:text-xl"></i></div></div></div>
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Đang hoạt động</p><p id="stat-active" class="text-xl sm:text-2xl font-bold text-green-600">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-check-circle text-green-600 text-base sm:text-xl"></i></div></div></div>
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Đã hết hạn</p><p id="stat-expired" class="text-xl sm:text-2xl font-bold text-red-600">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center"><i class="fas fa-times-circle text-red-600 text-base sm:text-xl"></i></div></div></div>
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Lượt sử dụng</p><p id="stat-used" class="text-xl sm:text-2xl font-bold text-blue-600">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-chart-line text-blue-600 text-base sm:text-xl"></i></div></div></div>
                 </div>
 
                 <!-- Table -->

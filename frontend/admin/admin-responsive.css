@@ -605,3 +605,198 @@ main {
         border: 1px solid #e5e7eb;
     }
 }
+
+
+/* ============================================
+   ADDITIONAL MOBILE IMPROVEMENTS
+   ============================================ */
+
+/* Better mobile table handling */
+@media (max-width: 767px) {
+    /* Make tables scrollable horizontally */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Compact table cells on mobile */
+    table th,
+    table td {
+        padding: 8px 6px !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap;
+    }
+    
+    /* Hide less important columns on mobile */
+    .hide-on-mobile {
+        display: none !important;
+    }
+    
+    /* Stack action buttons vertically */
+    .action-btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .action-btn-group button,
+    .action-btn-group a {
+        width: 100%;
+        justify-content: center;
+        padding: 6px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Mobile-friendly cards */
+@media (max-width: 639px) {
+    .content-card,
+    .stat-card,
+    .kpi-card,
+    .chart-card {
+        padding: 12px !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Smaller icons on mobile */
+    .stat-card .w-12,
+    .kpi-card .kpi-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .stat-card i,
+    .kpi-card i {
+        font-size: 1rem !important;
+    }
+    
+    /* Compact filter inputs */
+    .filter-section input,
+    .filter-section select {
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* Mobile modal improvements */
+@media (max-width: 639px) {
+    .modal-overlay {
+        padding: 16px;
+    }
+    
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 16px !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 16px !important;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+    
+    .modal-body {
+        padding: 16px !important;
+    }
+    
+    .modal-footer {
+        padding: 16px !important;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    /* Stack modal buttons on mobile */
+    .modal-footer .flex {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+    
+    .modal-footer button {
+        width: 100%;
+    }
+}
+
+/* Better touch targets */
+@media (max-width: 1023px) {
+    button,
+    a.btn,
+    .sidebar-item,
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-height: 44px;
+    }
+    
+    /* Larger checkboxes on touch devices */
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* Mobile-friendly pagination */
+@media (max-width: 639px) {
+    .pagination-container {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+    }
+    
+    .pagination-container button {
+        min-width: 36px;
+        height: 36px;
+        padding: 0;
+        font-size: 0.75rem;
+    }
+    
+    .pagination-info {
+        width: 100%;
+        text-align: center;
+        margin-top: 8px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Mobile notification improvements */
+@media (max-width: 639px) {
+    .notification-dropdown {
+        position: fixed !important;
+        top: 60px !important;
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        max-height: 70vh;
+    }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    .modal-content {
+        max-height: 95vh;
+    }
+    
+    .sidebar {
+        overflow-y: auto;
+    }
+}
+
+/* Safe area for notched devices */
+@supports (padding: max(0px)) {
+    .header-bar {
+        padding-top: max(12px, env(safe-area-inset-top));
+    }
+    
+    main {
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+}

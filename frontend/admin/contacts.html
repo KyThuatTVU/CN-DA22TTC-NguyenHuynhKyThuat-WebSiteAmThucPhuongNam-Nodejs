@@ -72,18 +72,18 @@
                 <a href="../index.html" target="_blank" class="text-white hover:text-blue-200"><i class="fas fa-external-link-alt"></i></a>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6">
                 <!-- Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Tổng liên hệ</p><p id="total-contacts" class="text-2xl font-bold text-slate-800">0</p></div><div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fas fa-envelope text-slate-600 text-xl"></i></div></div></div>
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Chưa đọc</p><p id="new-contacts" class="text-2xl font-bold text-orange-600">0</p></div><div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center"><i class="fas fa-envelope-open text-orange-600 text-xl"></i></div></div></div>
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Đã đọc</p><p id="read-contacts" class="text-2xl font-bold text-blue-600">0</p></div><div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-eye text-blue-600 text-xl"></i></div></div></div>
-                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-sm">Đã phản hồi</p><p id="replied-contacts" class="text-2xl font-bold text-emerald-600">0</p></div><div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fas fa-reply text-emerald-600 text-xl"></i></div></div></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Tổng liên hệ</p><p id="total-contacts" class="text-xl sm:text-2xl font-bold text-slate-800">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fas fa-envelope text-slate-600 text-base sm:text-xl"></i></div></div></div>
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Chưa đọc</p><p id="new-contacts" class="text-xl sm:text-2xl font-bold text-orange-600">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center"><i class="fas fa-envelope-open text-orange-600 text-base sm:text-xl"></i></div></div></div>
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Đã đọc</p><p id="read-contacts" class="text-xl sm:text-2xl font-bold text-blue-600">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-eye text-blue-600 text-base sm:text-xl"></i></div></div></div>
+                    <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-slate-500 text-xs sm:text-sm">Đã phản hồi</p><p id="replied-contacts" class="text-xl sm:text-2xl font-bold text-emerald-600">0</p></div><div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fas fa-reply text-emerald-600 text-base sm:text-xl"></i></div></div></div>
                 </div>
 
                 <!-- Filters -->
-                <div class="content-card mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="content-card mb-4 sm:mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                         <input type="text" id="search" placeholder="Tìm tên, email, nội dung..." class="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
                         <select id="status-filter" class="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
                             <option value="">Tất cả trạng thái</option>

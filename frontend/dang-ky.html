@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="css/responsive.css">
   <link rel="stylesheet" href="css/loading.css">
+  <link rel="stylesheet" href="css/christmas-theme.css">
   <style>
     #avatar-preview {
       position: relative !important;
@@ -63,8 +64,8 @@
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-  <div class="min-h-screen flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+<body class="christmas-bg">
+  <div class="christmas-content" style="align-items: flex-start; padding-top: 2rem; padding-bottom: 2rem;">
     <div class="max-w-md w-full">
       <div class="text-center mb-6 sm:mb-8">
         <a href="index.html" class="inline-flex items-center space-x-2 sm:space-x-3">
@@ -80,7 +81,7 @@
       </div>
 
       <!-- FIX: Thêm id="registration-card" để áp dụng CSS sửa lỗi -->
-      <div id="registration-card" class="bg-white rounded-2xl shadow-xl p-5 sm:p-8">
+      <div id="registration-card" class="christmas-card bg-white rounded-2xl shadow-xl p-5 sm:p-8">
         <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">Đăng Ký</h2>
         <p class="text-gray-600 text-center mb-6 sm:mb-8 text-sm sm:text-base">Tạo tài khoản mới</p>
 
@@ -713,7 +714,9 @@
       }
     }); // Đóng DOMContentLoaded
   </script>
-
+  
+  <!-- Christmas Snow Effect -->
+  <script src="js/snow-effect.js"></script>
 </body>
 
 </html>
