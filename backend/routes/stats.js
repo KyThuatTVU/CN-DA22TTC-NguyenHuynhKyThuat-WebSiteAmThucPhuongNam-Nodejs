@@ -392,4 +392,58 @@ router.get('/payment-methods', requireAdmin, async (req, res) => {
     }
 });
 
+// Doanh thu theo ngày (cho biểu đồ dạng thị trường)
+router.get('/revenue-daily', requireAdmin, async (req, res) => {
+    try {
+        const { range } = req.query;
+        let days = 7; // Mặc định 7 ngày
+        
+        if (range === '30') days = 30;
+        else if (range === '90') days = 90;
+        else if (range === '180') days = 180;
+        else if (range === '365') days = 365;
+        else if (range === 'all') days = 730; // 2 năm
+
+        const [revenueData] = await db.query(`
+            SELECT 
+                DATE(thoi_gian_tao) as ngay,
+                COALESCE(SUM(tong_tien), 0) as doanh_thu,
+                COUNT(*) as so_don
+            FROM don_hang
+            WHERE thoi_gian_tao >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+              AND trang_thai = 'delivered'
+            GROUP BY DATE(thoi_gian_tao)
+            ORDER BY ngay ASC
+        `, [days]);
+
+        // Điền các ngày không có doanh thu với giá trị 0
+        const filledData = [];
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - days + 1);
+
+        for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            const existingData = revenueData.find(item => {
+                const itemDate = new Date(item.ngay).toISOString().split('T')[0];
+                return itemDate === dateStr;
+            });
+            
+            filledData.push({
+                ngay: dateStr,
+                doanh_thu: existingData ? existingData.doanh_thu : 0,
+                so_don: existingData ? existingData.so_don : 0
+            });
+        }
+
+        res.json({
+            success: true,
+            data: filledData
+        });
+    } catch (error) {
+        console.error('Error fetching daily revenue:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
 module.exports = router;

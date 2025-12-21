@@ -466,40 +466,81 @@ router.get('/stats', requireAdmin, async (req, res) => {
 
         // === TÍNH SO SÁNH VỚI THÁNG TRƯỚC ===
         const currentDate = new Date();
-        const currentMonth = currentDate.getMonth() + 1;
-        const currentYear = currentDate.getFullYear();
+        let compareMonth, compareYear, prevCompareMonth, prevCompareYear;
         
-        // Tháng trước
-        let prevMonth = currentMonth - 1;
-        let prevYear = currentYear;
-        if (prevMonth === 0) {
-            prevMonth = 12;
-            prevYear = currentYear - 1;
+        // Nếu có filter tháng cụ thể, so sánh với tháng trước của tháng đó
+        if (month && parseInt(month) > 0 && year) {
+            compareMonth = parseInt(month);
+            compareYear = parseInt(year);
+            prevCompareMonth = compareMonth - 1;
+            prevCompareYear = compareYear;
+            if (prevCompareMonth === 0) {
+                prevCompareMonth = 12;
+                prevCompareYear = compareYear - 1;
+            }
+        } else if (year && (!month || parseInt(month) === 0)) {
+            // Nếu chỉ filter năm, so sánh tổng năm đó với năm trước
+            compareYear = parseInt(year);
+            prevCompareYear = compareYear - 1;
+            compareMonth = 0; // 0 = cả năm
+            prevCompareMonth = 0;
+        } else {
+            // Mặc định: so sánh tháng hiện tại với tháng trước
+            compareMonth = currentDate.getMonth() + 1;
+            compareYear = currentDate.getFullYear();
+            prevCompareMonth = compareMonth - 1;
+            prevCompareYear = compareYear;
+            if (prevCompareMonth === 0) {
+                prevCompareMonth = 12;
+                prevCompareYear = compareYear - 1;
+            }
         }
 
-        // Doanh thu tháng này
-        const [revenueThisMonth] = await db.query(`
-            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
-            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
-        `, [currentMonth, currentYear]);
+        let revenueThisMonth, revenueLastMonth, ordersThisMonth, ordersLastMonth;
 
-        // Doanh thu tháng trước
-        const [revenueLastMonth] = await db.query(`
-            SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
-            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
-        `, [prevMonth, prevYear]);
+        if (compareMonth === 0) {
+            // So sánh cả năm
+            [revenueThisMonth] = await db.query(`
+                SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+                WHERE YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+            `, [compareYear]);
 
-        // Đơn hàng tháng này
-        const [ordersThisMonth] = await db.query(`
-            SELECT COUNT(*) as total FROM don_hang 
-            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
-        `, [currentMonth, currentYear]);
+            [revenueLastMonth] = await db.query(`
+                SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+                WHERE YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+            `, [prevCompareYear]);
 
-        // Đơn hàng tháng trước
-        const [ordersLastMonth] = await db.query(`
-            SELECT COUNT(*) as total FROM don_hang 
-            WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
-        `, [prevMonth, prevYear]);
+            [ordersThisMonth] = await db.query(`
+                SELECT COUNT(*) as total FROM don_hang 
+                WHERE YEAR(thoi_gian_tao) = ?
+            `, [compareYear]);
+
+            [ordersLastMonth] = await db.query(`
+                SELECT COUNT(*) as total FROM don_hang 
+                WHERE YEAR(thoi_gian_tao) = ?
+            `, [prevCompareYear]);
+        } else {
+            // So sánh theo tháng
+            [revenueThisMonth] = await db.query(`
+                SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+                WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+            `, [compareMonth, compareYear]);
+
+            [revenueLastMonth] = await db.query(`
+                SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
+                WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
+            `, [prevCompareMonth, prevCompareYear]);
+
+            [ordersThisMonth] = await db.query(`
+                SELECT COUNT(*) as total FROM don_hang 
+                WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+            `, [compareMonth, compareYear]);
+
+            [ordersLastMonth] = await db.query(`
+                SELECT COUNT(*) as total FROM don_hang 
+                WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
+            `, [prevCompareMonth, prevCompareYear]);
+        }
 
         // Tính phần trăm thay đổi
         const revenueChange = revenueLastMonth[0].total > 0 
@@ -510,6 +551,14 @@ router.get('/stats', requireAdmin, async (req, res) => {
             ? ((ordersThisMonth[0].total - ordersLastMonth[0].total) / ordersLastMonth[0].total * 100).toFixed(1)
             : (ordersThisMonth[0].total > 0 ? 100 : 0);
 
+        // Tạo label so sánh
+        let comparisonLabel = '';
+        if (compareMonth === 0) {
+            comparisonLabel = `So với năm ${prevCompareYear}`;
+        } else {
+            comparisonLabel = `So với T${prevCompareMonth}/${prevCompareYear}`;
+        }
+
         res.json({
             success: true,
             totalOrders: totalOrders[0].total,
@@ -519,14 +568,19 @@ router.get('/stats', requireAdmin, async (req, res) => {
             todayRevenue: todayRevenue[0].total,
             byStatus: statusStats,
             filters: { year, month, status },
-            // Dữ liệu so sánh với tháng trước
+            // Dữ liệu so sánh
             comparison: {
                 revenueChange: parseFloat(revenueChange),
                 ordersChange: parseFloat(ordersChange),
                 revenueThisMonth: revenueThisMonth[0].total,
                 revenueLastMonth: revenueLastMonth[0].total,
                 ordersThisMonth: ordersThisMonth[0].total,
-                ordersLastMonth: ordersLastMonth[0].total
+                ordersLastMonth: ordersLastMonth[0].total,
+                label: comparisonLabel,
+                compareMonth,
+                compareYear,
+                prevCompareMonth,
+                prevCompareYear
             }
         });
     } catch (error) {

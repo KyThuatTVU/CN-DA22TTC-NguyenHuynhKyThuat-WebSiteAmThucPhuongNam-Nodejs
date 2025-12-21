@@ -14,24 +14,47 @@ const requireAdmin = (req, res, next) => {
 // Thống kê khách hàng cho Dashboard - PHẢI ĐẶT TRƯỚC /:id
 router.get('/stats', requireAdmin, async (req, res) => {
     try {
-        // Tổng số khách hàng
-        const [totalCustomers] = await db.query(`SELECT COUNT(*) as total FROM nguoi_dung`);
-        
-        // Khách hàng mới tháng này
-        const [newThisMonth] = await db.query(`
-            SELECT COUNT(*) as count FROM nguoi_dung 
-            WHERE MONTH(ngay_tao) = MONTH(CURDATE()) AND YEAR(ngay_tao) = YEAR(CURDATE())
-        `);
-        
-        // Khách hàng mới tháng trước
+        const { year, month } = req.query;
         const currentDate = new Date();
-        let prevMonth = currentDate.getMonth(); // 0-11, tháng hiện tại - 1
-        let prevYear = currentDate.getFullYear();
+        
+        // Xác định tháng/năm để thống kê
+        const targetMonth = month && parseInt(month) > 0 ? parseInt(month) : (currentDate.getMonth() + 1);
+        const targetYear = year ? parseInt(year) : currentDate.getFullYear();
+        
+        // Tháng trước để so sánh
+        let prevMonth = targetMonth - 1;
+        let prevYear = targetYear;
         if (prevMonth === 0) {
             prevMonth = 12;
-            prevYear = prevYear - 1;
+            prevYear = targetYear - 1;
+        }
+
+        // Tổng số khách hàng (tính đến thời điểm cuối tháng được chọn)
+        let totalCustomersQuery = `SELECT COUNT(*) as total FROM nguoi_dung WHERE 1=1`;
+        const totalParams = [];
+        
+        if (year) {
+            if (month && parseInt(month) > 0) {
+                // Đếm khách hàng đăng ký đến cuối tháng được chọn
+                totalCustomersQuery = `SELECT COUNT(*) as total FROM nguoi_dung 
+                    WHERE (YEAR(ngay_tao) < ? OR (YEAR(ngay_tao) = ? AND MONTH(ngay_tao) <= ?))`;
+                totalParams.push(targetYear, targetYear, targetMonth);
+            } else {
+                // Đếm khách hàng đăng ký trong năm được chọn
+                totalCustomersQuery = `SELECT COUNT(*) as total FROM nguoi_dung WHERE YEAR(ngay_tao) = ?`;
+                totalParams.push(targetYear);
+            }
         }
         
+        const [totalCustomers] = await db.query(totalCustomersQuery, totalParams);
+        
+        // Khách hàng mới trong tháng được chọn
+        const [newThisMonth] = await db.query(`
+            SELECT COUNT(*) as count FROM nguoi_dung 
+            WHERE MONTH(ngay_tao) = ? AND YEAR(ngay_tao) = ?
+        `, [targetMonth, targetYear]);
+        
+        // Khách hàng mới tháng trước
         const [newLastMonth] = await db.query(`
             SELECT COUNT(*) as count FROM nguoi_dung 
             WHERE MONTH(ngay_tao) = ? AND YEAR(ngay_tao) = ?
@@ -47,15 +70,20 @@ router.get('/stats', requireAdmin, async (req, res) => {
             ? ((newThisMonth[0].count - newLastMonth[0].count) / newLastMonth[0].count * 100).toFixed(1)
             : (newThisMonth[0].count > 0 ? 100 : 0);
 
+        // Tạo label so sánh
+        const comparisonLabel = `So với T${prevMonth}/${prevYear}`;
+
         res.json({
             success: true,
-            totalCustomers: totalCustomers[0].total,
+            totalCustomers: month && parseInt(month) > 0 ? newThisMonth[0].count : totalCustomers[0].total,
             newThisMonth: newThisMonth[0].count,
             newLastMonth: newLastMonth[0].count,
             activeCustomers: activeCustomers[0].count,
             comparison: {
-                customersChange: parseFloat(customersChange)
-            }
+                customersChange: parseFloat(customersChange),
+                label: comparisonLabel
+            },
+            filters: { year: targetYear, month: targetMonth }
         });
     } catch (error) {
         console.error('Error fetching customer stats:', error);

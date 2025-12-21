@@ -88,18 +88,55 @@ router.post('/create', async (req, res) => {
 // Thống kê đặt bàn - PHẢI ĐẶT TRƯỚC /:id
 router.get('/stats', requireAdmin, async (req, res) => {
     try {
-        // Tổng số đặt bàn
-        const [totalCount] = await db.query(`SELECT COUNT(*) as total FROM dat_ban`);
+        const { year, month } = req.query;
+        const currentDate = new Date();
+        
+        // Xác định tháng/năm để thống kê
+        const targetMonth = month && parseInt(month) > 0 ? parseInt(month) : (currentDate.getMonth() + 1);
+        const targetYear = year ? parseInt(year) : currentDate.getFullYear();
+        
+        // Tháng trước để so sánh
+        let prevMonth = targetMonth - 1;
+        let prevYear = targetYear;
+        if (prevMonth === 0) {
+            prevMonth = 12;
+            prevYear = targetYear - 1;
+        }
+
+        // Tổng số đặt bàn theo filter
+        let totalQuery = `SELECT COUNT(*) as total FROM dat_ban WHERE 1=1`;
+        const totalParams = [];
+        
+        if (year) {
+            totalQuery += ` AND YEAR(ngay_dat) = ?`;
+            totalParams.push(targetYear);
+        }
+        if (month && parseInt(month) > 0) {
+            totalQuery += ` AND MONTH(ngay_dat) = ?`;
+            totalParams.push(targetMonth);
+        }
+        
+        const [totalCount] = await db.query(totalQuery, totalParams);
         
         // Đặt bàn hôm nay
         const [todayCount] = await db.query(`
             SELECT COUNT(*) as count FROM dat_ban WHERE DATE(ngay_dat) = CURDATE()
         `);
 
-        // Đặt bàn theo trạng thái
-        const [statusStats] = await db.query(`
-            SELECT trang_thai, COUNT(*) as count FROM dat_ban GROUP BY trang_thai
-        `);
+        // Đặt bàn theo trạng thái (theo filter)
+        let statusQuery = `SELECT trang_thai, COUNT(*) as count FROM dat_ban WHERE 1=1`;
+        const statusParams = [];
+        if (year) {
+            statusQuery += ` AND YEAR(ngay_dat) = ?`;
+            statusParams.push(targetYear);
+        }
+        if (month && parseInt(month) > 0) {
+            statusQuery += ` AND MONTH(ngay_dat) = ?`;
+            statusParams.push(targetMonth);
+        }
+        statusQuery += ` GROUP BY trang_thai`;
+        
+        const [statusStats] = await db.query(statusQuery, statusParams);
 
         // Đặt bàn tuần này
         const [weekStats] = await db.query(`
@@ -107,21 +144,13 @@ router.get('/stats', requireAdmin, async (req, res) => {
             WHERE YEARWEEK(ngay_dat, 1) = YEARWEEK(CURDATE(), 1)
         `);
 
-        // Đặt bàn tháng này
+        // Đặt bàn trong tháng được chọn
         const [thisMonthCount] = await db.query(`
             SELECT COUNT(*) as count FROM dat_ban 
-            WHERE MONTH(ngay_dat) = MONTH(CURDATE()) AND YEAR(ngay_dat) = YEAR(CURDATE())
-        `);
+            WHERE MONTH(ngay_dat) = ? AND YEAR(ngay_dat) = ?
+        `, [targetMonth, targetYear]);
 
         // Đặt bàn tháng trước
-        const currentDate = new Date();
-        let prevMonth = currentDate.getMonth(); // 0-11
-        let prevYear = currentDate.getFullYear();
-        if (prevMonth === 0) {
-            prevMonth = 12;
-            prevYear = prevYear - 1;
-        }
-        
         const [lastMonthCount] = await db.query(`
             SELECT COUNT(*) as count FROM dat_ban 
             WHERE MONTH(ngay_dat) = ? AND YEAR(ngay_dat) = ?
@@ -132,17 +161,22 @@ router.get('/stats', requireAdmin, async (req, res) => {
             ? ((thisMonthCount[0].count - lastMonthCount[0].count) / lastMonthCount[0].count * 100).toFixed(1)
             : (thisMonthCount[0].count > 0 ? 100 : 0);
 
+        // Tạo label so sánh
+        const comparisonLabel = `So với T${prevMonth}/${prevYear}`;
+
         res.json({
             success: true,
-            totalReservations: totalCount[0].total,
+            totalReservations: month && parseInt(month) > 0 ? thisMonthCount[0].count : totalCount[0].total,
             today: todayCount[0].count,
             thisWeek: weekStats[0].count,
             thisMonth: thisMonthCount[0].count,
             lastMonth: lastMonthCount[0].count,
             byStatus: statusStats,
             comparison: {
-                reservationsChange: parseFloat(reservationsChange)
-            }
+                reservationsChange: parseFloat(reservationsChange),
+                label: comparisonLabel
+            },
+            filters: { year: targetYear, month: targetMonth }
         });
     } catch (error) {
         console.error('Error fetching reservation stats:', error);

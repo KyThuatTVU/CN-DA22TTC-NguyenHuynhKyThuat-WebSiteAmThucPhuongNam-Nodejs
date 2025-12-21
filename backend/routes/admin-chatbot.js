@@ -765,9 +765,11 @@ router.get('/gauge-data', requireAdmin, async (req, res) => {
 // API: Lấy 5 mục tiêu chi tiết với tiến độ thực tế
 router.get('/goals', requireAdmin, async (req, res) => {
     try {
+        const { month, year } = req.query;
         const currentDate = new Date();
-        const currentMonth = currentDate.getMonth() + 1;
-        const currentYear = currentDate.getFullYear();
+        // Sử dụng tháng/năm từ query hoặc mặc định là tháng/năm hiện tại
+        const targetMonth = month ? parseInt(month) : (currentDate.getMonth() + 1);
+        const targetYear = year ? parseInt(year) : currentDate.getFullYear();
         
         // Lấy mục tiêu đã lưu
         let goals = [];
@@ -776,7 +778,7 @@ router.get('/goals', requireAdmin, async (req, res) => {
                 SELECT * FROM muc_tieu_chi_tiet 
                 WHERE thang = ? AND nam = ?
                 ORDER BY thu_tu ASC
-            `, [currentMonth, currentYear]);
+            `, [targetMonth, targetYear]);
             goals = result;
         } catch (err) {
             goals = [];
@@ -786,27 +788,27 @@ router.get('/goals', requireAdmin, async (req, res) => {
         const [revenueData] = await db.query(`
             SELECT COALESCE(SUM(tong_tien), 0) as total FROM don_hang 
             WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ? AND trang_thai = 'delivered'
-        `, [currentMonth, currentYear]);
+        `, [targetMonth, targetYear]);
         
         const [ordersData] = await db.query(`
             SELECT COUNT(*) as total FROM don_hang 
             WHERE MONTH(thoi_gian_tao) = ? AND YEAR(thoi_gian_tao) = ?
-        `, [currentMonth, currentYear]);
+        `, [targetMonth, targetYear]);
         
         const [customersData] = await db.query(`
             SELECT COUNT(*) as total FROM nguoi_dung 
             WHERE MONTH(ngay_tao) = ? AND YEAR(ngay_tao) = ?
-        `, [currentMonth, currentYear]);
+        `, [targetMonth, targetYear]);
         
         const [reservationsData] = await db.query(`
             SELECT COUNT(*) as total FROM dat_ban 
             WHERE MONTH(ngay_dat) = ? AND YEAR(ngay_dat) = ?
-        `, [currentMonth, currentYear]);
+        `, [targetMonth, targetYear]);
         
         const [reviewsData] = await db.query(`
             SELECT COUNT(*) as total FROM danh_gia_san_pham 
             WHERE MONTH(ngay_danh_gia) = ? AND YEAR(ngay_danh_gia) = ? AND trang_thai = 'approved'
-        `, [currentMonth, currentYear]);
+        `, [targetMonth, targetYear]);
         
         // Map dữ liệu thực tế
         const actualData = {
@@ -825,8 +827,8 @@ router.get('/goals', requireAdmin, async (req, res) => {
                     goals: [],
                     actual: actualData,
                     totalProgress: 0,
-                    month: currentMonth,
-                    year: currentYear,
+                    month: targetMonth,
+                    year: targetYear,
                     hasGoals: false
                 }
             });
@@ -859,8 +861,8 @@ router.get('/goals', requireAdmin, async (req, res) => {
                 goals: goalsWithProgress,
                 actual: actualData,
                 totalProgress,
-                month: currentMonth,
-                year: currentYear,
+                month: targetMonth,
+                year: targetYear,
                 hasGoals: true
             }
         });
