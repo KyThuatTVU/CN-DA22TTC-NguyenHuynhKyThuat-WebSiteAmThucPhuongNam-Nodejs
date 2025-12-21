@@ -34,8 +34,12 @@ passport.deserializeUser(async (data, done) => {
     }
 });
 
-// Google OAuth Strategy cho Admin
-passport.use('google-admin', new GoogleStrategy({
+// Chỉ cấu hình Google OAuth nếu có clientID
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    console.log('✅ Google OAuth đã được cấu hình');
+    
+    // Google OAuth Strategy cho Admin
+    passport.use('google-admin', new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK_URL
@@ -230,5 +234,8 @@ passport.use('google-user', new GoogleStrategy({
             return done(error, null);
         }
     }));
+} else {
+    console.log('⚠️ Google OAuth chưa được cấu hình (thiếu GOOGLE_CLIENT_ID hoặc GOOGLE_CLIENT_SECRET)');
+}
 
 module.exports = passport;

@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: amthuc_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root123}
+      MYSQL_DATABASE: ${DB_NAME:-amthuc_phuongnam}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amthuc_network
+
+  # Backend Node.js
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amthuc_backend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - FRONTEND_URL=http://localhost:3000
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=${DB_PASSWORD:-root123}
+      - DB_NAME=${DB_NAME:-amthuc_phuongnam}
+      - DB_PORT=3306
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
+      - SESSION_SECRET=${SESSION_SECRET:-your_session_secret_here}
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL:-http://localhost:3000/api/admin-auth/google/callback}
+      - GOOGLE_USER_CALLBACK_URL=${GOOGLE_USER_CALLBACK_URL:-http://localhost:3000/api/auth/google/callback}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - amthuc_network
+
+volumes:
+  mysql_data:
+
+networks:
+  amthuc_network:
+    driver: bridge

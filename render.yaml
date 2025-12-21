@@ -1,0 +1,41 @@
+# Render Blueprint
+services:
+  - type: web
+    name: amthuc-phuongnam
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase:
+          name: amthuc-db
+          property: host
+      - key: DB_USER
+        fromDatabase:
+          name: amthuc-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: amthuc-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: amthuc-db
+          property: database
+      - key: DB_PORT
+        fromDatabase:
+          name: amthuc-db
+          property: port
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+
+databases:
+  - name: amthuc-db
+    databaseName: amthuc_phuongnam
+    user: amthuc_user
+    plan: free
