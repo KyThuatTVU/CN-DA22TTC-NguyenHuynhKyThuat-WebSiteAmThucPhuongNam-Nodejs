@@ -1,4 +1,5 @@
 // Snow Effect JavaScript - Hiệu ứng tuyết rơi cho tất cả các trang
+// Có thể bật/tắt từ Admin Settings
 (function() {
     'use strict';
 
@@ -13,6 +14,10 @@
         minDelay: 0,
         maxDelay: 5
     };
+
+    // Biến lưu trạng thái - mặc định TẮT, chỉ bật khi admin cài đặt
+    let isSnowEnabled = false;
+    let isInitialized = false;
 
     // Inject CSS styles for snow effect
     function injectStyles() {
@@ -176,6 +181,8 @@
 
     // Create a single snowflake
     function createSnowflake(container) {
+        if (!isSnowEnabled) return;
+        
         const snowflake = document.createElement('div');
         snowflake.className = 'snowflake';
         
@@ -204,7 +211,7 @@
         // Remove and recreate snowflake after animation
         const totalTime = (duration + delay) * 1000;
         setTimeout(() => {
-            if (snowflake.parentNode) {
+            if (snowflake.parentNode && isSnowEnabled) {
                 snowflake.remove();
                 createSnowflake(container);
             }
@@ -213,6 +220,8 @@
 
     // Initialize snow effect
     function initSnow() {
+        if (!isSnowEnabled) return;
+        
         injectStyles();
         const container = createSnowContainer();
         
@@ -222,13 +231,17 @@
         // Create initial snowflakes with staggered timing
         for (let i = 0; i < config.snowflakeCount; i++) {
             setTimeout(() => {
-                createSnowflake(container);
+                if (isSnowEnabled) {
+                    createSnowflake(container);
+                }
             }, i * 50);
         }
     }
 
     // Add decorative elements (corner snowflakes)
     function addDecorations() {
+        if (!isSnowEnabled) return;
+        
         // Check if decorations already exist
         if (document.querySelector('.snowflake-decoration')) return;
         
@@ -244,16 +257,56 @@
 
     // Stop snow effect
     function stopSnow() {
+        isSnowEnabled = false;
         const container = document.querySelector('.snow-container');
         if (container) container.remove();
         
         document.querySelectorAll('.snowflake-decoration').forEach(el => el.remove());
     }
 
-    // Start when DOM is ready - Auto-run on all pages
-    function init() {
+    // Start snow effect
+    function startSnow() {
+        isSnowEnabled = true;
         initSnow();
         addDecorations();
+    }
+
+    // Check settings from API and initialize
+    async function checkSettingsAndInit() {
+        // Mặc định tắt cho đến khi load được settings
+        isSnowEnabled = false;
+        
+        try {
+            // Lấy API URL từ window hoặc mặc định
+            const apiUrl = window.API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${apiUrl}/settings`);
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                // Kiểm tra setting hiệu ứng tuyết - CHỈ bật khi setting = '1'
+                const snowSetting = result.data.hieu_ung_tuyet;
+                isSnowEnabled = snowSetting === '1';
+                
+                console.log('❄️ Snow effect setting:', isSnowEnabled ? 'ON' : 'OFF');
+            } else {
+                console.log('❄️ No settings found, snow effect OFF');
+                isSnowEnabled = false;
+            }
+        } catch (error) {
+            console.log('❄️ Could not load settings, snow effect OFF');
+            isSnowEnabled = false;
+        }
+        
+        // Khởi tạo nếu được bật từ admin
+        if (isSnowEnabled && !isInitialized) {
+            isInitialized = true;
+            startSnow();
+        }
+    }
+
+    // Start when DOM is ready
+    function init() {
+        checkSettingsAndInit();
     }
 
     if (document.readyState === 'loading') {
@@ -264,8 +317,19 @@
 
     // Expose to global for manual control
     window.SnowEffect = {
-        start: init,
+        start: startSnow,
         stop: stopSnow,
+        toggle: function() {
+            if (isSnowEnabled) {
+                stopSnow();
+            } else {
+                startSnow();
+            }
+            return isSnowEnabled;
+        },
+        isEnabled: function() {
+            return isSnowEnabled;
+        },
         config: config
     };
 })();

@@ -1,6 +1,7 @@
 /**
- * Christmas Intro Animation - Santa Sleigh with Music
- * Shows a beautiful intro animation when user first visits the website
+ * Christmas Intro Animation - Santa Sleigh
+ * Shows a beautiful intro animation when enabled from admin settings
+ * Controlled via admin settings - only shows when hieu_ung_intro_giang_sinh = '1'
  */
 
 (function() {
@@ -9,7 +10,7 @@
     // Variables
     let trailInterval = null;
     let introShown = false;
-    
+    let isEnabled = false;
 
     // Create intro overlay
     function createIntroOverlay() {
@@ -193,8 +194,8 @@
     
     // Initialize intro
     function initIntro() {
-        // Skip if already shown during this page load
-        if (introShown) {
+        // Skip if already shown or not enabled
+        if (introShown || !isEnabled) {
             return;
         }
         
@@ -210,25 +211,68 @@
         // Create trail particles periodically
         trailInterval = setInterval(createTrailParticles, 150);
         
-        // Remove intro after animation (8 seconds for slower animation)
+        // Remove intro after animation (8 seconds)
         setTimeout(() => {
             skipIntro();
         }, 8000);
     }
     
-    // Start intro when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initIntro);
-    } else {
-        initIntro();
+    // Check settings from API
+    async function checkSettingsAndInit() {
+        // Mặc định tắt
+        isEnabled = false;
+        
+        try {
+            const apiUrl = window.API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${apiUrl}/settings`);
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                // Chỉ bật khi setting = '1'
+                const christmasIntroSetting = result.data.hieu_ung_intro_giang_sinh;
+                isEnabled = christmasIntroSetting === '1';
+                
+                console.log('🎄 Christmas intro setting:', isEnabled ? 'ON' : 'OFF');
+            } else {
+                console.log('🎄 No settings found, Christmas intro OFF');
+            }
+        } catch (error) {
+            console.log('🎄 Could not load settings, Christmas intro OFF');
+            isEnabled = false;
+        }
+        
+        // Khởi tạo nếu được bật
+        if (isEnabled) {
+            initIntro();
+        }
     }
     
-    // Expose functions for testing
-    window.showChristmasIntro = function() {
-        introShown = false;
-        initIntro();
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkSettingsAndInit);
+    } else {
+        checkSettingsAndInit();
+    }
+    
+    // Expose functions for manual control and testing
+    window.ChristmasIntro = {
+        show: function() {
+            introShown = false;
+            isEnabled = true;
+            initIntro();
+        },
+        hide: skipIntro,
+        isEnabled: function() {
+            return isEnabled;
+        }
     };
     
+    // Keep old function for backward compatibility
+    window.showChristmasIntro = function() {
+        introShown = false;
+        isEnabled = true;
+        initIntro();
+    };
 
     // Reset intro flag when page is about to unload
     window.addEventListener('beforeunload', function() {

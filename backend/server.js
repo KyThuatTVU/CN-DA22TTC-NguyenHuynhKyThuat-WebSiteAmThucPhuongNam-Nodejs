@@ -69,7 +69,11 @@ async function initSettingsTable() {
                 ['gio_mo_cua_t2_t6', '08:00-22:00', 'Giờ mở cửa thứ 2 đến thứ 6'],
                 ['gio_mo_cua_t7_cn', '07:00-23:00', 'Giờ mở cửa thứ 7 và chủ nhật'],
                 ['phi_giao_hang', '20000', 'Phí giao hàng (VNĐ)'],
-                ['mien_phi_giao_hang_tu', '200000', 'Miễn phí giao hàng cho đơn từ (VNĐ)']
+                ['mien_phi_giao_hang_tu', '200000', 'Miễn phí giao hàng cho đơn từ (VNĐ)'],
+                ['hieu_ung_tuyet', '0', 'Bật/tắt hiệu ứng tuyết rơi (1=bật, 0=tắt)'],
+                ['hieu_ung_hoa_mai', '0', 'Bật/tắt hiệu ứng hoa mai (1=bật, 0=tắt)'],
+                ['hieu_ung_intro_tet', '0', 'Bật/tắt intro chào mừng Tết (1=bật, 0=tắt)'],
+                ['hieu_ung_intro_giang_sinh', '0', 'Bật/tắt intro Giáng sinh (1=bật, 0=tắt)']
             ];
 
             for (const [key, value, desc] of defaultSettings) {
@@ -81,6 +85,21 @@ async function initSettingsTable() {
             console.log('✅ Đã tạo bảng cai_dat và thêm dữ liệu mặc định');
         } else {
             console.log('✅ Bảng cai_dat đã tồn tại');
+            
+            // Thêm các settings mới nếu chưa có (cho database đã tồn tại)
+            const newSettings = [
+                ['hieu_ung_tuyet', '0', 'Bật/tắt hiệu ứng tuyết rơi (1=bật, 0=tắt)'],
+                ['hieu_ung_hoa_mai', '0', 'Bật/tắt hiệu ứng hoa mai (1=bật, 0=tắt)'],
+                ['hieu_ung_intro_tet', '0', 'Bật/tắt intro chào mừng Tết (1=bật, 0=tắt)'],
+                ['hieu_ung_intro_giang_sinh', '0', 'Bật/tắt intro Giáng sinh (1=bật, 0=tắt)']
+            ];
+            
+            for (const [key, value, desc] of newSettings) {
+                await db.query(
+                    'INSERT IGNORE INTO cai_dat (setting_key, setting_value, mo_ta) VALUES (?, ?, ?)',
+                    [key, value, desc]
+                );
+            }
         }
     } catch (error) {
         console.error('❌ Lỗi khởi tạo bảng cai_dat:', error.message);
