@@ -135,13 +135,13 @@ function renderCategoryFilters() {
 
     const categoryHTML = `
         <label class="flex items-center cursor-pointer">
-            <input type="checkbox" class="w-4 h-4 text-orange-600 rounded category-filter" 
+            <input type="radio" name="category" class="w-4 h-4 text-orange-600 category-filter" 
                    data-category="all" ${!selectedCategory ? 'checked' : ''}>
             <span class="ml-2 text-gray-700">Tất cả</span>
         </label>
         ${categories.map(cat => `
             <label class="flex items-center cursor-pointer">
-                <input type="checkbox" class="w-4 h-4 text-orange-600 rounded category-filter" 
+                <input type="radio" name="category" class="w-4 h-4 text-orange-600 category-filter" 
                        data-category="${cat.ma_danh_muc}" 
                        ${selectedCategory === cat.ma_danh_muc ? 'checked' : ''}>
                 <span class="ml-2 text-gray-700">${cat.ten_danh_muc}</span>
@@ -152,13 +152,8 @@ function renderCategoryFilters() {
     categoryContainer.innerHTML = categoryHTML;
 
     // Add event listeners
-    document.querySelectorAll('.category-filter').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            // Uncheck all others
-            document.querySelectorAll('.category-filter').forEach(cb => {
-                if (cb !== this) cb.checked = false;
-            });
-            
+    document.querySelectorAll('.category-filter').forEach(radio => {
+        radio.addEventListener('change', function() {
             const category = this.dataset.category;
             selectedCategory = category === 'all' ? null : parseInt(category);
             fetchMenuProducts(selectedCategory);

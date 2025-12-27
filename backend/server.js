@@ -216,6 +216,7 @@ const adminChatbotRoutes = require('./routes/admin-chatbot');
 const recommendationRoutes = require('./routes/recommendation');
 const notificationRoutes = require('./routes/notifications');
 const promotionRoutes = require('./routes/promotions');
+const reservationPaymentRoutes = require('./routes/reservation-payment');
 
 // Register routes
 app.use('/api/menu', menuRoutes);
@@ -230,6 +231,7 @@ app.use('/api/payment', momoPaymentRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/reservation-payment', reservationPaymentRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/chatbot', chatbotRoutes);

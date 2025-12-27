@@ -11,16 +11,14 @@
     let introShown = false;
     let isEnabled = false;
     
-    // Get current lunar year animal
+    // Cố định thông tin Tết Bính Ngọ 2026
     function getLunarYearInfo() {
-        const year = new Date().getFullYear();
-        const animals = ['🐀', '🐂', '🐅', '🐇', '🐉', '🐍', '🐴', '🐐', '🐵', '🐔', '🐕', '🐖'];
-        const names = ['Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
-        const index = (year - 4) % 12;
         return {
-            year: year,
-            animal: animals[index],
-            name: names[index]
+            year: 2026,
+            animal: '🐴',
+            chi: 'Ngọ',
+            can: 'Bính',
+            fullName: 'Bính Ngọ'
         };
     }
 
@@ -59,12 +57,12 @@
         }
         overlay.appendChild(fireworksContainer);
         
-        // Create dragon
+        // Create dragon or year animal
         const dragonContainer = document.createElement('div');
         dragonContainer.className = 'tet-dragon-container';
         const dragon = document.createElement('div');
         dragon.className = 'tet-dragon';
-        dragon.innerHTML = '🐉';
+        dragon.innerHTML = yearInfo.animal; // Hiển thị con giáp của năm
         dragonContainer.appendChild(dragon);
         overlay.appendChild(dragonContainer);
         
@@ -94,7 +92,7 @@
         const foodContainer = document.createElement('div');
         foodContainer.className = 'tet-food';
         const foods = ['🍊', '🧧', '🎋'];
-        foods.forEach((food, index) => {
+        foods.forEach((food) => {
             const item = document.createElement('div');
             item.className = 'tet-food-item';
             item.textContent = food;
@@ -134,7 +132,7 @@
                 Nhà hàng Ẩm thực Phương Nam kính chúc Quý khách
             </div>
             <div class="tet-year">
-                ${yearInfo.animal} Năm ${yearInfo.name} ${yearInfo.year} ${yearInfo.animal}
+                ${yearInfo.animal} Năm ${yearInfo.fullName} ${yearInfo.year} ${yearInfo.animal}
             </div>
             <div class="tet-subtitle" style="margin-top: 10px;">
                 An Khang Thịnh Vượng - Vạn Sự Như Ý! 🎊

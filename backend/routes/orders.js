@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { createAdminNotification } = require('./admin-notifications');
+const { sendOrderConfirmationEmail } = require('../config/email');
 
 // Middleware kiểm tra admin session
 const requireAdmin = (req, res, next) => {
@@ -136,6 +137,7 @@ router.post('/create', authenticateToken, async (req, res) => {
                 ct.gia_tai_thoi_diem,
                 (ct.so_luong * ct.gia_tai_thoi_diem) as thanh_tien,
                 m.ten_mon,
+                m.anh_mon,
                 m.so_luong_ton
             FROM chi_tiet_gio_hang ct
             JOIN mon_an m ON ct.ma_mon = m.ma_mon
@@ -349,6 +351,34 @@ router.post('/create', authenticateToken, async (req, res) => {
             `orders.html?id=${ma_don_hang}`,
             ma_don_hang
         );
+
+        // Gửi email xác nhận đơn hàng (nếu có email)
+        if (email) {
+            try {
+                await sendOrderConfirmationEmail(email, {
+                    ma_don_hang,
+                    ten_nguoi_nhan,
+                    so_dien_thoai,
+                    dia_chi: dia_chi_day_du,
+                    items: cartItems.map(item => ({
+                        ten_mon: item.ten_mon,
+                        so_luong: item.so_luong,
+                        gia_tai_thoi_diem: item.gia_tai_thoi_diem,
+                        anh_mon: item.anh_mon
+                    })),
+                    tong_tien_hang,
+                    phi_giao_hang,
+                    tien_giam_gia,
+                    tong_tien,
+                    phuong_thuc_thanh_toan,
+                    ngay_dat: new Date()
+                });
+                console.log(`📧 Đã gửi email xác nhận đơn hàng #${ma_don_hang} đến ${email}`);
+            } catch (emailError) {
+                console.error('⚠️ Lỗi gửi email xác nhận đơn hàng:', emailError.message);
+                // Không throw lỗi, vẫn tiếp tục vì đơn hàng đã được tạo thành công
+            }
+        }
 
         res.json({
             success: true,

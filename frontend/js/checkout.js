@@ -474,19 +474,37 @@ async function prefillUserInfo() {
     // Prefill họ tên
     const nameInput = document.querySelector('input[type="text"][placeholder*="Nguyễn Văn A"]');
     if (nameInput) {
-        nameInput.value = lastShipping?.ten_nguoi_nhan || user.ten_nguoi_dung || '';
+        const nameValue = lastShipping?.ten_nguoi_nhan || user.ten_nguoi_dung || '';
+        nameInput.value = nameValue;
+        // Khóa nếu có thông tin từ tài khoản
+        if (user.ten_nguoi_dung) {
+            nameInput.readOnly = true;
+            nameInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        }
     }
 
     // Prefill số điện thoại
     const phoneInput = document.querySelector('input[type="tel"]');
     if (phoneInput) {
-        phoneInput.value = lastShipping?.so_dien_thoai || user.so_dien_thoai || '';
+        const phoneValue = lastShipping?.so_dien_thoai || user.so_dien_thoai || '';
+        phoneInput.value = phoneValue;
+        // Khóa nếu có thông tin từ tài khoản
+        if (user.so_dien_thoai) {
+            phoneInput.readOnly = true;
+            phoneInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        }
     }
 
     // Prefill email
     const emailInput = document.querySelector('input[type="email"]');
     if (emailInput) {
-        emailInput.value = lastShipping?.email || user.email || '';
+        const emailValue = lastShipping?.email || user.email || '';
+        emailInput.value = emailValue;
+        // Khóa nếu có thông tin từ tài khoản
+        if (user.email) {
+            emailInput.readOnly = true;
+            emailInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        }
     }
 
     // Prefill địa chỉ chi tiết

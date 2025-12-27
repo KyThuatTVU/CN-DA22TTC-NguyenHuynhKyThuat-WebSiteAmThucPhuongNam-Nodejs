@@ -399,6 +399,7 @@ DROP TABLE IF EXISTS `dat_ban`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dat_ban` (
   `ma_dat_ban` int NOT NULL AUTO_INCREMENT,
+  `ma_nguoi_dung` int DEFAULT NULL COMMENT 'Liên kết với người dùng đã đăng nhập',
   `ten_nguoi_dat` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `so_dien_thoai` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `so_luong` int NOT NULL,
@@ -406,9 +407,29 @@ CREATE TABLE `dat_ban` (
   `gio_den` time NOT NULL,
   `ghi_chu` text COLLATE utf8mb4_unicode_ci,
   `trang_thai` enum('pending','confirmed','attended','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `tong_tien_du_kien` decimal(14,2) DEFAULT 0 COMMENT 'Tổng tiền dự kiến từ các món đã đặt trước',
   `thoi_gian_tao` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`ma_dat_ban`)
+  PRIMARY KEY (`ma_dat_ban`),
+  KEY `fk_dat_ban_nguoi_dung` (`ma_nguoi_dung`),
+  CONSTRAINT `fk_dat_ban_nguoi_dung` FOREIGN KEY (`ma_nguoi_dung`) REFERENCES `nguoi_dung` (`ma_nguoi_dung`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Bảng chi tiết đặt bàn (lưu các món ăn đã đặt trước)
+DROP TABLE IF EXISTS `chi_tiet_dat_ban`;
+CREATE TABLE `chi_tiet_dat_ban` (
+  `ma_chi_tiet` int NOT NULL AUTO_INCREMENT,
+  `ma_dat_ban` int NOT NULL,
+  `ma_mon` int NOT NULL,
+  `so_luong` int NOT NULL DEFAULT 1,
+  `gia_tai_thoi_diem` decimal(12,2) NOT NULL,
+  `ghi_chu` text COLLATE utf8mb4_unicode_ci,
+  `ngay_tao` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ma_chi_tiet`),
+  KEY `fk_chi_tiet_dat_ban` (`ma_dat_ban`),
+  KEY `fk_chi_tiet_mon_an` (`ma_mon`),
+  CONSTRAINT `fk_chi_tiet_dat_ban` FOREIGN KEY (`ma_dat_ban`) REFERENCES `dat_ban` (`ma_dat_ban`) ON DELETE CASCADE,
+  CONSTRAINT `fk_chi_tiet_mon_an` FOREIGN KEY (`ma_mon`) REFERENCES `mon_an` (`ma_mon`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Chi tiết món ăn đặt trước khi đặt bàn';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -417,7 +438,7 @@ CREATE TABLE `dat_ban` (
 
 LOCK TABLES `dat_ban` WRITE;
 /*!40000 ALTER TABLE `dat_ban` DISABLE KEYS */;
-INSERT INTO `dat_ban` VALUES (1,'Nguyễn Văn A','0906123456',4,'2025-10-15','12:00:00','Đặt bàn gần cửa sổ','confirmed','2025-10-30 08:31:01'),(2,'Trần Thị B','0907234567',6,'2025-10-15','18:30:00','Có trẻ em, cần ghế cao','pending','2025-10-30 08:31:01'),(3,'Lê Văn C','0908345678',2,'2025-10-16','19:00:00','Đặt bàn riêng tư','confirmed','2025-10-30 08:31:01'),(4,'Phạm Thị D','0909456789',8,'2025-10-17','12:30:00','Tiệc sinh nhật, cần trang trí','confirmed','2025-10-30 08:31:01'),(5,'Hoàng Văn E','0910567890',3,'2025-10-18','20:00:00','Không ghi chú','attended','2025-10-30 08:31:01');
+INSERT INTO `dat_ban` VALUES (1,NULL,'Nguyễn Văn A','0906123456',4,'2025-10-15','12:00:00','Đặt bàn gần cửa sổ','confirmed',0,'2025-10-30 08:31:01'),(2,NULL,'Trần Thị B','0907234567',6,'2025-10-15','18:30:00','Có trẻ em, cần ghế cao','pending',0,'2025-10-30 08:31:01'),(3,NULL,'Lê Văn C','0908345678',2,'2025-10-16','19:00:00','Đặt bàn riêng tư','confirmed',0,'2025-10-30 08:31:01'),(4,NULL,'Phạm Thị D','0909456789',8,'2025-10-17','12:30:00','Tiệc sinh nhật, cần trang trí','confirmed',0,'2025-10-30 08:31:01'),(5,NULL,'Hoàng Văn E','0910567890',3,'2025-10-18','20:00:00','Không ghi chú','attended',0,'2025-10-30 08:31:01');
 /*!40000 ALTER TABLE `dat_ban` ENABLE KEYS */;
 UNLOCK TABLES;
 
