@@ -105,7 +105,7 @@ Database `amthuc_phuongnam` có 26 bảng với dữ liệu:
 - 25 món ăn
 - 5 danh mục
 - 2 album
-- Và nhiều bảng khác...
+- Và nhiều bảng khác..
 
 
 - Server backend cũng serve frontend files
