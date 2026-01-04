@@ -617,6 +617,9 @@ function setupMobileFilter() {
     let backdrop = null;
     
     function openFilter() {
+        // Chỉ mở filter dạng popup trên mobile/tablet
+        if (window.innerWidth >= 1024) return;
+        
         // Create backdrop
         backdrop = document.createElement('div');
         backdrop.className = 'filter-backdrop';
@@ -643,7 +646,7 @@ function setupMobileFilter() {
             backdrop = null;
         }
         
-        // Hide filter on mobile
+        // Hide filter on mobile only
         if (window.innerWidth < 1024) {
             filterSidebar.classList.remove('mobile-open');
             filterSidebar.classList.add('hidden');
