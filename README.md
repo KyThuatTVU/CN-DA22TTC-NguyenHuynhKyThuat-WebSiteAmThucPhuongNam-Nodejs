@@ -79,7 +79,7 @@ Mở trình duyệt và truy cập:
 - `GET /api/categories` - Tất cả danh mục
 - `GET /api/categories/:id` - Chi tiết danh mục
 
-### Album
+
 - `GET /api/albums` - Tất cả album
 - `GET /api/albums/product/:id` - Ảnh theo món ăn
 
