@@ -501,6 +501,7 @@ router.get('/', requireAdmin, async (req, res) => {
 
         let query;
         if (hasPaymentTable) {
+            // Lấy record thanh toán mới nhất cho mỗi đặt bàn
             query = `
                 SELECT db.*, nd.ten_nguoi_dung, nd.email,
                        (SELECT COUNT(*) FROM chi_tiet_dat_ban WHERE ma_dat_ban = db.ma_dat_ban) as so_mon_da_dat,
@@ -509,7 +510,15 @@ router.get('/', requireAdmin, async (req, res) => {
                        tt.so_tien as so_tien_da_thanh_toan
                 FROM dat_ban db
                 LEFT JOIN nguoi_dung nd ON db.ma_nguoi_dung = nd.ma_nguoi_dung
-                LEFT JOIN thanh_toan_dat_ban tt ON db.ma_dat_ban = tt.ma_dat_ban
+                LEFT JOIN (
+                    SELECT t1.ma_dat_ban, t1.trang_thai, t1.so_tien
+                    FROM thanh_toan_dat_ban t1
+                    INNER JOIN (
+                        SELECT ma_dat_ban, MAX(thoi_gian_tao) as max_time
+                        FROM thanh_toan_dat_ban
+                        GROUP BY ma_dat_ban
+                    ) t2 ON t1.ma_dat_ban = t2.ma_dat_ban AND t1.thoi_gian_tao = t2.max_time
+                ) tt ON db.ma_dat_ban = tt.ma_dat_ban
                 ORDER BY db.ngay_dat DESC, db.gio_den DESC
             `;
         } else {
@@ -555,6 +564,7 @@ router.get('/:id', requireAdmin, async (req, res) => {
 
         let query;
         if (hasPaymentTable) {
+            // Lấy record thanh toán mới nhất
             query = `
                 SELECT db.*, nd.ten_nguoi_dung, nd.email as nguoi_dung_email, nd.so_dien_thoai as sdt_nguoi_dung,
                        COALESCE(tt.trang_thai, 'unpaid') as trang_thai_thanh_toan,
@@ -562,7 +572,15 @@ router.get('/:id', requireAdmin, async (req, res) => {
                        tt.thoi_gian_thanh_toan
                 FROM dat_ban db
                 LEFT JOIN nguoi_dung nd ON db.ma_nguoi_dung = nd.ma_nguoi_dung
-                LEFT JOIN thanh_toan_dat_ban tt ON db.ma_dat_ban = tt.ma_dat_ban
+                LEFT JOIN (
+                    SELECT t1.ma_dat_ban, t1.trang_thai, t1.so_tien, t1.thoi_gian_thanh_toan
+                    FROM thanh_toan_dat_ban t1
+                    INNER JOIN (
+                        SELECT ma_dat_ban, MAX(thoi_gian_tao) as max_time
+                        FROM thanh_toan_dat_ban
+                        GROUP BY ma_dat_ban
+                    ) t2 ON t1.ma_dat_ban = t2.ma_dat_ban AND t1.thoi_gian_tao = t2.max_time
+                ) tt ON db.ma_dat_ban = tt.ma_dat_ban
                 WHERE db.ma_dat_ban = ?
             `;
         } else {

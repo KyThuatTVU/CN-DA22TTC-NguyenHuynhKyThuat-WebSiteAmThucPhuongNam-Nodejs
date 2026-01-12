@@ -1167,12 +1167,9 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(paymentTimer);
-                    document.getElementById('qr-timer').textContent = '0:00';
-                    document.getElementById('qr-timer').classList.add('text-red-600');
-                    showNotification('Mã QR đã hết hạn', 'error');
-                    setTimeout(() => {
-                        cancelPayment();
-                    }, 2000);
+                    document.getElementById('qr-timer').textContent = 'Hết hạn (Demo: vẫn có thể thanh toán)';
+                    document.getElementById('qr-timer').classList.add('text-yellow-600');
+                    // Demo mode: Không tự động hủy, cho phép người dùng vẫn bấm "Đã thanh toán"
                     return;
                 }
                 

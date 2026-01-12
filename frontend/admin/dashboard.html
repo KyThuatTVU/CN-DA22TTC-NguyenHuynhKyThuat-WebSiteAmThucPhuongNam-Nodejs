@@ -427,7 +427,8 @@
                                 <div class="flex flex-wrap gap-2">
                                     <button class="filter-btn" data-year="2023">2023</button>
                                     <button class="filter-btn" data-year="2024">2024</button>
-                                    <button class="filter-btn active" data-year="2025">2025</button>
+                                    <button class="filter-btn" data-year="2025">2025</button>
+                                    <button class="filter-btn active" data-year="2026">2026</button>
                                 </div>
                             </div>
                             <div class="filter-group">
@@ -462,7 +463,7 @@
                             <!-- Filter Summary -->
                             <div id="filter-summary" class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-xs">
                                 <p class="font-semibold text-blue-800 mb-1">Đang xem:</p>
-                                <p class="text-blue-700" id="filter-summary-text">Tất cả dữ liệu năm 2025</p>
+                                <p class="text-blue-700" id="filter-summary-text">Tất cả dữ liệu năm 2026</p>
                             </div>
                         </div>
                     </div>
@@ -710,9 +711,9 @@
 
         async function loadDashboardData() {
             try {
-                // Lấy filter hiện tại (mặc định năm 2025)
+                // Lấy filter hiện tại (mặc định năm 2026)
                 const filters = getFilterValues();
-                const yearParam = `?year=${filters.year || 2025}`;
+                const yearParam = `?year=${filters.year || 2026}`;
                 
                 // Load tất cả dữ liệu song song với filter năm
                 const [ordersRes, customersRes, reservationsRes, revenueMonthlyRes, customersMonthlyRes, reservationsByTimeRes, newsViewsRes, newsViewsMonthlyRes, reviewsRes] = await Promise.all([
@@ -839,9 +840,9 @@
         function updateRevenueChart(data) {
             // Tạo mảng 12 tháng với giá trị 0
             const monthlyData = new Array(12).fill(0);
-            // Lấy năm từ filter hiện tại, mặc định 2025 (năm có dữ liệu)
+            // Lấy năm từ filter hiện tại, mặc định 2026 (năm có dữ liệu)
             const filters = getFilterValues();
-            const targetYear = parseInt(filters.year) || 2025;
+            const targetYear = parseInt(filters.year) || 2026;
             
             data.forEach(item => {
                 const itemYear = parseInt(item.nam);
@@ -857,9 +858,9 @@
 
         function updateCustomerChart(data) {
             const monthlyData = new Array(12).fill(0);
-            // Lấy năm từ filter hiện tại, mặc định 2025 (năm có dữ liệu)
+            // Lấy năm từ filter hiện tại, mặc định 2026 (năm có dữ liệu)
             const filters = getFilterValues();
-            const targetYear = parseInt(filters.year) || 2025;
+            const targetYear = parseInt(filters.year) || 2026;
             
             data.forEach(item => {
                 const itemYear = parseInt(item.nam);
@@ -886,9 +887,9 @@
 
         function updateNewsViewsChart(data) {
             const monthlyData = new Array(12).fill(0);
-            // Lấy năm từ filter hiện tại, mặc định 2025 (năm có dữ liệu)
+            // Lấy năm từ filter hiện tại, mặc định 2026 (năm có dữ liệu)
             const filters = getFilterValues();
-            const targetYear = filters.year || 2025;
+            const targetYear = filters.year || 2026;
             
             data.forEach(item => {
                 if (item.nam === targetYear && item.thang >= 1 && item.thang <= 12) {
@@ -996,7 +997,7 @@
             try {
                 // Lấy filter hiện tại
                 const filters = getFilterValues();
-                const yearParam = `?year=${filters.year || 2025}`;
+                const yearParam = `?year=${filters.year || 2026}`;
                 const response = await fetch(`${API_BASE}/stats/top-products${yearParam}`, { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();

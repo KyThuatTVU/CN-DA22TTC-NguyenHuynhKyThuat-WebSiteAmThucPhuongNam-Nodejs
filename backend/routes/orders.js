@@ -924,11 +924,16 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
 
 // Admin: Cập nhật trạng thái đơn hàng
 router.put('/:orderId/status', requireAdmin, async (req, res) => {
+    const connection = await db.getConnection();
+
     try {
+        await connection.beginTransaction();
+
         const { orderId } = req.params;
         const { trang_thai_don_hang } = req.body;
 
         if (!trang_thai_don_hang) {
+            await connection.rollback();
             return res.status(400).json({
                 success: false,
                 message: 'Thiếu trạng thái đơn hàng'
@@ -947,19 +952,46 @@ router.put('/:orderId/status', requireAdmin, async (req, res) => {
 
         const dbStatus = statusMap[trang_thai_don_hang] || trang_thai_don_hang;
 
-        // Lấy thông tin đơn hàng để gửi thông báo
-        const [orderInfo] = await db.query(
-            'SELECT ma_nguoi_dung FROM don_hang WHERE ma_don_hang = ?',
+        // Lấy thông tin đơn hàng hiện tại
+        const [orderInfo] = await connection.query(
+            'SELECT ma_nguoi_dung, trang_thai FROM don_hang WHERE ma_don_hang = ?',
             [orderId]
         );
 
-        await db.query(
+        if (orderInfo.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy đơn hàng'
+            });
+        }
+
+        const currentStatus = orderInfo[0].trang_thai;
+
+        // Nếu chuyển sang trạng thái cancelled và đơn hàng chưa bị hủy trước đó
+        // thì hoàn trả số lượng tồn kho
+        if (dbStatus === 'cancelled' && currentStatus !== 'cancelled') {
+            const [orderItems] = await connection.query(
+                'SELECT ma_mon, so_luong FROM chi_tiet_don_hang WHERE ma_don_hang = ?',
+                [orderId]
+            );
+
+            for (const item of orderItems) {
+                await connection.query(
+                    'UPDATE mon_an SET so_luong_ton = so_luong_ton + ? WHERE ma_mon = ?',
+                    [item.so_luong, item.ma_mon]
+                );
+            }
+            console.log(`📦 Đã hoàn trả kho cho đơn hàng #${orderId}`);
+        }
+
+        await connection.query(
             'UPDATE don_hang SET trang_thai = ? WHERE ma_don_hang = ?',
             [dbStatus, orderId]
         );
 
         // Gửi thông báo cho khách hàng về trạng thái đơn hàng
-        if (orderInfo.length > 0 && orderInfo[0].ma_nguoi_dung) {
+        if (orderInfo[0].ma_nguoi_dung) {
             const statusMessages = {
                 'pending': 'Đơn hàng đang chờ xác nhận',
                 'confirmed': 'Đơn hàng đã được xác nhận',
@@ -969,7 +1001,7 @@ router.put('/:orderId/status', requireAdmin, async (req, res) => {
             };
             
             try {
-                await db.query(`
+                await connection.query(`
                     INSERT INTO thong_bao (ma_nguoi_dung, loai, tieu_de, noi_dung, duong_dan, ma_lien_quan)
                     VALUES (?, 'order_status', ?, ?, ?, ?)
                 `, [
@@ -985,18 +1017,23 @@ router.put('/:orderId/status', requireAdmin, async (req, res) => {
             }
         }
 
+        await connection.commit();
+
         res.json({
             success: true,
             message: 'Cập nhật trạng thái thành công'
         });
 
     } catch (error) {
+        await connection.rollback();
         console.error('Lỗi cập nhật trạng thái:', error);
         res.status(500).json({
             success: false,
             message: 'Lỗi server',
             error: error.message
         });
+    } finally {
+        connection.release();
     }
 });
 

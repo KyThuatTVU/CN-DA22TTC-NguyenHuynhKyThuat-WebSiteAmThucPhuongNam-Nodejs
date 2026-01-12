@@ -215,18 +215,6 @@ router.post('/confirm-payment', authenticateToken, async (req, res) => {
 
         const payment = payments[0];
 
-        // Kiểm tra đã hết hạn chưa
-        const now = new Date();
-        const expiryTime = new Date(payment.thoi_gian_het_han);
-        
-        if (now > expiryTime) {
-            await connection.rollback();
-            return res.status(400).json({
-                success: false,
-                message: 'Mã QR đã hết hạn. Vui lòng tạo mã mới.'
-            });
-        }
-
         // Kiểm tra đã thanh toán chưa
         if (payment.trang_thai === 'paid') {
             await connection.rollback();
@@ -235,6 +223,9 @@ router.post('/confirm-payment', authenticateToken, async (req, res) => {
                 message: 'Đặt bàn này đã được thanh toán'
             });
         }
+
+        // Demo mode: Không kiểm tra hết hạn QR code
+        // Khi người dùng bấm "Đã thanh toán" thì ghi nhận ngay
 
         // Cập nhật trạng thái thanh toán
         await connection.query(
